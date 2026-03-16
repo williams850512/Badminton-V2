@@ -22,3 +22,36 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Tomcat (each developer installs independently)
+apache-tomcat-*/
+
+
+# === Mac 系統專屬 (解決組員的問題) ===
+.DS_Store
+**/.DS_Store
+._*
+
+# === Eclipse 專案設定 (不建議上傳，因為每個人路徑不同) ===
+.metadata/
+.recommenders/
+.settings/
+.project
+.classpath
+bin/
+*.launch
+
+# === Java Web / Servers ===
+# 如果你們有用 Servers 專案管理 Tomcat
+Servers/
+.externalToolBuilders/
+
+# === Java 編譯產物 ===
+build/
+bin/
+target/
+
+# === 排除開發工具產生的暫存檔 ===
+.cache/
+tmp/
+temp/
