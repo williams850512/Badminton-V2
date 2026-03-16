@@ -3,19 +3,19 @@ package com.badminton.PickupGames;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class PickupGameSignupsBean implements Serializable {
+public class PickupGameSignupBean implements Serializable {
     
     private static final long serialVersionUID = 1L;
     
-    // 1. 依照 SQL 欄位定義私有屬性
+    // 1. 私有屬性：對應 SQL 欄位
     private Integer signupId;     // signup_id (PK)
     private Integer gameId;       // game_id (FK)
     private Integer memberId;     // member_id (FK)
-    private String status;        // status
-    private Timestamp signedUpAt; // signed_up_at
+    private String status;        // status (預設 'joined')
+    private Timestamp signedUpAt; // signed_up_at (DATETIME)
 
-    // 2. 公共無參數建構子 
-    public PickupGameSignupsBean() {
+    // 2. 公共無參數建構子
+    public PickupGameSignupBean() {
     }
 
     // 3. 公共 Getter 與 Setter
@@ -59,4 +59,3 @@ public class PickupGameSignupsBean implements Serializable {
         this.signedUpAt = signedUpAt;
     }
 }
-
