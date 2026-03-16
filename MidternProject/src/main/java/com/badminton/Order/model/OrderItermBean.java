@@ -74,4 +74,11 @@ public class OrderItermBean {
 		this.subtotal = subtotal;
 	}
 
+	@Override
+	public String toString() {
+		return "OrderItermBean [itemId=" + itemId + ", orderId=" + orderId + ", productId=" + productId + ", quantity="
+				+ quantity + ", unitPrice=" + unitPrice + ", subtotal=" + subtotal + "]";
+	}
+	
+
 }
