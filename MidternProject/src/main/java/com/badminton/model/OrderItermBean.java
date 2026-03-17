@@ -1,4 +1,4 @@
-package com.badminton.Order.model;
+package com.badminton.model;
 
 public class OrderItermBean {
 	private Integer itemId;
