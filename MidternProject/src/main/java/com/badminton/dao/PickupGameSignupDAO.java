@@ -1,7 +1,8 @@
 package com.badminton.dao;
 
 import java.util.List;
-import com.badminton.PickupGames.PickupGameSignupBean;
+
+import com.badminton.model.PickupGameSignupBean;
 
 public interface PickupGameSignupDAO {
     

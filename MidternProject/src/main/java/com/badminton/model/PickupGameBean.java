@@ -1,4 +1,4 @@
-package com.badminton.PickupGames;
+package com.badminton.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
