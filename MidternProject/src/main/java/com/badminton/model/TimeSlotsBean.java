@@ -1,4 +1,4 @@
-package com.badminton.TimeSlots.model;
+package com.badminton.model;
 
 import java.sql.Time;
 
@@ -33,3 +33,4 @@ public class TimeSlotsBean implements java.io.Serializable {
 	
 
 }
+

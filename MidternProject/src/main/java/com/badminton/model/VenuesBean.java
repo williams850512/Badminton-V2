@@ -1,4 +1,4 @@
-package com.badminton.Venus.model;
+package com.badminton.model;
 
 public class VenuesBean implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
@@ -31,3 +31,4 @@ public class VenuesBean implements java.io.Serializable {
 	}
 
 }
+

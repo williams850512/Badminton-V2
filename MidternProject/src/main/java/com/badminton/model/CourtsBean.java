@@ -1,4 +1,4 @@
-package com.badminton.Courts.model;
+package com.badminton.model;
 
 public class CourtsBean implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
@@ -28,3 +28,4 @@ public class CourtsBean implements java.io.Serializable {
 	}
 	
 }
+

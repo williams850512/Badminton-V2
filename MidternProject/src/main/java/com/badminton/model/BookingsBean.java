@@ -1,4 +1,4 @@
-package com.badminton.Bookings.model;
+package com.badminton.model;
 
 import java.math.BigDecimal;
 import java.sql.Date;
