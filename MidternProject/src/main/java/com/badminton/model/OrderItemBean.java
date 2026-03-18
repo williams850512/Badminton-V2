@@ -1,6 +1,6 @@
 package com.badminton.model;
 
-public class OrderItermBean {
+public class OrderItemBean {
 	private Integer itemId;
 	private Integer orderId;
 	private Integer productId;
@@ -9,13 +9,13 @@ public class OrderItermBean {
 	private Integer subtotal;
 	
 	// 無參數建構子
-	public OrderItermBean() {
+	public OrderItemBean() {
 		
 	}
 	
 	// 全參數建構子
 	
-	public OrderItermBean(
+	public OrderItemBean(
 			Integer itemId, Integer orderId, Integer productId,
 			Integer quantity, Integer uniPrice, Integer subtotal) {
 		this.itemId = itemId;

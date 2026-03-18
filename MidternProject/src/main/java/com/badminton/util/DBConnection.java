@@ -5,13 +5,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-	        private static final String URL = "";
-			private static final String USERNAME = "";
-			private static final String PASSWORD = "";
+	        private static final String URL = "jdbc:sqlserver://localhost:1433;DatabaseName=BadmindonDBTest;encrypt=false";
+			private static final String USERNAME = "tony";
+			private static final String PASSWORD = "7410";
 			
 			static {
 	        	try {
-	        		Class.forName("com.mysql.cj.jdbc.Driver");
+	        		Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 	        	} catch (ClassNotFoundException e) {
 	        		e.printStackTrace();
 	        		throw new RuntimeException("無法載入資料庫驅動程式:" + e.getMessage());
