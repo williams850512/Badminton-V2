@@ -42,7 +42,15 @@
 </style>
 </head>
 <body>
-	<h2>隔壁老謙高級羽球館</h2>
+	<h2>🏸 隔壁老謙高級羽球館</h2>
+	
+	<!-- 加入「新增場館」的按鈕，連結到 Servlet 並帶上 action=addForm 參數 -->
+	<div style="margin-bottom: 15px;">
+		<a href="${pageContext.request.contextPath}/VenuesServlet?action=addForm" 
+		   style="background-color: #008CBA; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; display: inline-block;">
+		   ➕ 新增場館
+		</a>
+	</div>
 	
 	<table>
 		<tr>

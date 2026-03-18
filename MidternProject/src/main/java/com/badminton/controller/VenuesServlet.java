@@ -30,6 +30,14 @@ public class VenuesServlet extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("text/html; charset=UTF-8");
 		
+		String action = request.getParameter("action");
+		
+		// 判斷是否要前往「新增場館表單」
+		if ("addForm".equals(action)) {
+			request.getRequestDispatcher("/WEB-INF/views/venues_insert.jsp").forward(request, response);
+			return; // 提早結束，不往下跑撈全部資料的程式
+		}
+		
 		try  {// === 步驟 2：呼叫 DAO 幫忙做事 ===
 		// 建立 DAO 物件（這裡體現了 Interface 的好處，我們用介面型態去接實作類別）
 		VenuesDAO dao = new VenuesDAOImpl();
@@ -54,7 +62,38 @@ public class VenuesServlet extends HttpServlet {
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		doGet(request, response);
+		// === 步驟 1：處理中文亂碼問題 ===
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		
+		String action = request.getParameter("action");
+		
+		if ("insert".equals(action)) {
+			try {
+				// 1. 抓取表單傳過來的資料 (參數名稱必須跟 jsp 表單的 name 一樣)
+				String venueName = request.getParameter("venueName");
+				String address = request.getParameter("address");
+				String phone = request.getParameter("phone");
+				
+				// 2. 裝進 Bean 裡面
+				VenuesBean venue = new VenuesBean();
+				venue.setVenueName(venueName);
+				venue.setAddress(address);
+				venue.setPhone(phone);
+				
+				// 3. 呼叫 DAO 幫忙存進資料庫
+				VenuesDAO dao = new VenuesDAOImpl();
+				dao.insert(venue);
+				
+				// 4. 新增成功後，重新導向回 Servlet 的 Get 請求，讓它重新查出所有資料並顯示列表
+				response.sendRedirect(request.getContextPath() + "/VenuesServlet");
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			doGet(request, response);
+		}
 	}
 
 }
