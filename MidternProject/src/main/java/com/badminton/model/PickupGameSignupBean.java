@@ -8,11 +8,11 @@ public class PickupGameSignupBean implements Serializable {
     private static final long serialVersionUID = 1L;
     
     // 1. 私有屬性：對應 SQL 欄位
-    private Integer signupId;     // signup_id (PK)
-    private Integer gameId;       // game_id (FK)
-    private Integer memberId;     // member_id (FK)
-    private String status;        // status (預設 'joined')
-    private Timestamp signedUpAt; // signed_up_at (DATETIME)
+    private Integer signupId;     // 對應 signup_id
+    private Integer gameId;       // 對應 game_id
+    private Integer memberId;     // 改名了！對應 member_id
+    private String status;        // 對應 status (NVARCHAR)
+    private java.sql.Timestamp signedUpAt; //對應 signed_up_at
 
     // 2. 公共無參數建構子
     public PickupGameSignupBean() {
