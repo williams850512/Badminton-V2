@@ -12,33 +12,43 @@ import com.badminton.model.PickupGameSignupBean;
 import com.badminton.service.PickupGameSignupService;
 import com.badminton.service.PickupGameSignupServiceImpl;
 
-
 @WebServlet("/GetSignupListServlet")
 public class GetSignupListServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-       
-	// 1. 呼叫service
-	private PickupGameSignupService signupService=new PickupGameSignupServiceImpl();
-	
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-	        throws ServletException, IOException {
-	    
-	    // 2. 取得網頁傳來的「哪場球賽」的 ID (假設參數叫 gameId)
-	    String gameIdStr = request.getParameter("gameId");
-	    
-	    // 3. 邏輯判斷：如果沒傳 ID，就給個預設值或報錯
-	    if (gameIdStr != null && !gameIdStr.isEmpty()) {
-	        Integer gameId = Integer.parseInt(gameIdStr);
-	        
-	        // 4. 【核心修改】：原本找 DAO，現在找 Service
-            // 注意：isNewestFirst 設為 true，符合大師說的「最新、最先」
-	        List<PickupGameSignupBean> list = signupService.getSignupListByGame(gameId, true);
-	        
-	        // 5. 存入 Request：這叫「取經回報」，把資料交給下一個環節
-	        request.setAttribute("signupList", list);
-	    }
+    private static final long serialVersionUID = 1L;
+    private PickupGameSignupService signupService = new PickupGameSignupServiceImpl();
 
-	    // 6. 指路燈：導向您剛才截圖中建議的 WEB-INF 資料夾
-	    request.getRequestDispatcher("/WEB-INF/views/signup_list.jsp").forward(request, response);
-	}
+    // 支援 POST 請求，防止跳轉時發生 405 業障
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        doGet(request, response);
+    }
+    
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+    
+        String gameIdStr = request.getParameter("gameId");
+        Integer gameId = null;
+
+        // 1. 判定要顯示哪一場比賽的名單
+        if (gameIdStr != null && !gameIdStr.isEmpty()) {
+            // 如果網址有帶 gameId (例如 ?gameId=5)
+            gameId = Integer.parseInt(gameIdStr);
+        } else {
+            // 如果沒傳 ID (例如剛發起完)，自動抓最新的一場活動
+            gameId = signupService.getLatestGameId(); 
+        }
+
+        // 2. 如果有找到比賽 ID，就去撈報名清單
+        if (gameId != null) {
+            List<PickupGameSignupBean> list = signupService.getSignupListByGame(gameId, true);
+            // 將名單存入 Request 供 JSP 讀取
+            request.setAttribute("signupList", list);
+            request.setAttribute("currentGameId", gameId);
+        } else {
+            request.setAttribute("msg", "目前系統中尚無任何球賽活動。");
+        }
+
+        // 3. 指向 JSP 頁面
+        request.getRequestDispatcher("/WEB-INF/views/signup_list.jsp").forward(request, response);
+    }
 }

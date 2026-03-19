@@ -5,18 +5,16 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession; // 補上這個：感應 Session
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-import com.badminton.service.PickupGameSignupService; // 引用您剛剛修好的 Service 介面
-import com.badminton.service.PickupGameSignupServiceImpl; // 引用實作類別
+import com.badminton.service.PickupGameSignupService;
+import com.badminton.service.PickupGameSignupServiceImpl;
 
 @WebServlet("/CreateGameServlet")
 public class CreateGameServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    
-    // 使用您剛才重整好的 Service (包含 register, list, createAndJoin 三大功能)
-    private PickupGameSignupService gameService = new PickupGameSignupServiceImpl(); 
+    private PickupGameSignupService gameService = new PickupGameSignupServiceImpl();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
@@ -28,39 +26,40 @@ public class CreateGameServlet extends HttpServlet {
         
         HttpSession session = request.getSession();
         
-        // 1. 取得主揪身分 (模擬王小明 ID:2)
-        // 這裡就是您之後要接同學「登入模組」的地方
+        // 1. 取得主揪身分 (薩拉 ID:4)
         Integer hostId = (Integer) session.getAttribute("memberId");
         if (hostId == null) {
-            hostId = 2; 
+            hostId = 4; // 預設為薩拉，正式環境應由 Session 取得
         }
 
         try {
-            // 2. 接收前端表單資料
-            // 這些參數要跟您的 create_game.jsp 裡的 name 屬性對應
+            // 2. 接收參數 (對應 JSP 的 name 屬性)
             int courtId = Integer.parseInt(request.getParameter("courtId"));
             String gameDate = request.getParameter("gameDate");
             String startTime = request.getParameter("startTime");
             String endTime = request.getParameter("endTime"); 
-            int maxPlayers = Integer.parseInt(request.getParameter("maxPlayers")); 
+            int neededPlayers = Integer.parseInt(request.getParameter("neededPlayers"));
+            int totalMaxPlayers = neededPlayers + 1; // 總人數 = 徵求人數 + 1(主揪)
 
-            // 3. 呼叫 Service 執行「發起活動 + 自動幫主揪報名」
-            // 這是您要的「主揪感」：一鍵完成兩件事
-            boolean success = gameService.createAndJoin(hostId, courtId, gameDate, startTime, endTime, maxPlayers);
+            // 3. 執行發起 + 自動報名 (Service 內部應已處理好 insert)
+            boolean success = gameService.createAndJoin(hostId, courtId, gameDate, startTime, endTime, totalMaxPlayers);
 
             if (success) {
-                request.setAttribute("msg", "揪團發起成功！您已自動成為第 1 位成員。");
+                // 【關鍵重定向】：去找剛才創立的那場 ID
+                Integer latestGameId = gameService.getLatestGameId();
+                
+                // 重定向到名單 Servlet，並帶上 ID。這會讓網址列變成真正的 ID
+                response.sendRedirect(request.getContextPath() + "/GetSignupListServlet?gameId=" + latestGameId);
+                return; 
             } else {
-                request.setAttribute("msg", "發起失敗，該時段可能已有活動或資料庫連線中斷。");
+                request.setAttribute("msg", "發起失敗，該時段已有活動。");
+                request.getRequestDispatcher("/WEB-INF/views/create_game.jsp").forward(request, response);
             }
             
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("msg", "資料格式錯誤，請檢查輸入內容。");
+            request.setAttribute("msg", "格式錯誤：" + e.getMessage());
+            request.getRequestDispatcher("/WEB-INF/views/create_game.jsp").forward(request, response);
         }
-
-        // 4. 引導至名單頁面，讓主揪立刻看到自己出現在表格第一列
-        // 這裡跳轉到 GetSignupListServlet 會重新查詢資料庫，確保資料是真的有進去
-        request.getRequestDispatcher("/GetSignupListServlet").forward(request, response);
     }
 }

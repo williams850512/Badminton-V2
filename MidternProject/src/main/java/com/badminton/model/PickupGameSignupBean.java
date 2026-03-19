@@ -13,6 +13,7 @@ public class PickupGameSignupBean implements Serializable {
     private Integer memberId;     // 改名了！對應 member_id
     private String status;        // 對應 status (NVARCHAR)
     private java.sql.Timestamp signedUpAt; //對應 signed_up_at
+    private String memberName;
 
     // 2. 公共無參數建構子
     public PickupGameSignupBean() {
@@ -58,4 +59,7 @@ public class PickupGameSignupBean implements Serializable {
     public void setSignedUpAt(Timestamp signedUpAt) {
         this.signedUpAt = signedUpAt;
     }
+    public String getMemberName() { return memberName; }
+    public void setMemberName(String memberName) { this.memberName = memberName; }
+    
 }

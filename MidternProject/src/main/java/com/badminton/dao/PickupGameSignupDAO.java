@@ -1,23 +1,19 @@
 package com.badminton.dao;
 
 import java.util.List;
-
+import com.badminton.model.PickupGameBean;
 import com.badminton.model.PickupGameSignupBean;
 
 public interface PickupGameSignupDAO {
+    // 新增：取得所有開放場次
+    List<PickupGameBean> findAllOpenGames();
     
-    // 1. 建立報名紀錄：當使用者按下「我要報名」時呼叫
+    // 取得最新一場 ID
+    Integer getLatestGameId();
+
+    // 既有功能
+    int insertNewGame(int hostId, int courtId, String gameDate, String startTime, String endTime, int maxPlayers);
     boolean insert(PickupGameSignupBean signup);
-    
-    // 2. 查詢單場活動的所有報名者：讓主辦人看誰來參加了 
     List<PickupGameSignupBean> findByGameId(Integer gameId, boolean isNewestFirst);
-    // 3. 查詢某位會員的所有報名紀錄：讓會員在「我的活動」頁面查看
-    List<PickupGameSignupBean> findByMemberId(Integer memberId, boolean isNewestFirst);
-    
-    // 4. 更新報名狀態：例如從「已報名」改為「取消」或「已報到」
-    boolean updateStatus(Integer signupId, String status);
-    
-   
-    // 檢查某人是否已經報過這場球了 (對應 SQL 的 UNIQUE 約束)
     boolean isAlreadySignedUp(Integer gameId, Integer memberId);
 }
