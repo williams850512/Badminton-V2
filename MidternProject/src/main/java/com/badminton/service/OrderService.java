@@ -109,6 +109,42 @@ public class OrderService {
         } else {
             System.out.println("❌ 測試失敗，請查看上方的錯誤訊息。");
         }
-    }
+        
+     // ========== 查詢測試 (Read) ==========
+        System.out.println("\n--- 查詢所有訂單 ---");
+        OrderDAO dao = new OrderDAO();
 
+        java.util.List<OrderBean> allOrders = dao.findAll();
+        System.out.println("共查到 " + allOrders.size() + " 筆訂單：");
+        for (OrderBean o : allOrders) {
+            System.out.println("  訂單 #" + o.getOrderId()
+                + " | 會員:" + o.getMemberId()
+                + " | 金額:" + o.getTotalAmount()
+                + " | 狀態:" + o.getStatus()
+                + " | 時間:" + o.getCreatedAt());
+        }
+
+        // 查單筆（換成剛才新增的那筆 ID）
+        int testId = allOrders.get(0).getOrderId();  // 自動取第一筆的 ID
+        OrderBean single = dao.findById(testId);
+        System.out.println("\n查單筆 #" + testId + " => " + single);
+
+        // ========== 更新測試 (Update) ==========
+        System.out.println("\n--- 更新訂單狀態 ---");
+        boolean updated = dao.updateStatus(testId, "PAID");
+        System.out.println("更新狀態結果：" + (updated ? "✅ 成功 → PAID" : "❌ 失敗"));
+
+        // ========== 刪除測試 (Delete) ==========
+        // ⚠️ 先刪明細，再刪主訂單！
+        System.out.println("\n--- 刪除訂單 ---");
+        OrderItemDAO itemDao = new OrderItemDAO();
+        boolean itemsDeleted = itemDao.deleteByOrderId(testId);
+        boolean orderDeleted = dao.delete(testId);
+        System.out.println("刪明細：" + (itemsDeleted ? "✅ 成功" : "⚠️ 無明細或失敗"));
+        System.out.println("刪主訂單：" + (orderDeleted ? "✅ 成功" : "❌ 失敗"));
+
+
+    }
+    
+ 
 }

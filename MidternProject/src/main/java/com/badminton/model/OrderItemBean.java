@@ -4,6 +4,7 @@ public class OrderItemBean {
 	private Integer itemId;
 	private Integer orderId;
 	private Integer productId;
+	private String  productName;  // 從 Products 表 JOIN 取得，不存在 OrderItems
 	private Integer quantity;
 	private Integer unitPrice;
 	private Integer subtotal;
@@ -50,6 +51,14 @@ public class OrderItemBean {
 		this.productId = productId;
 	}
 
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+
 	public Integer getQuantity() {
 		return quantity;
 	}
@@ -76,8 +85,10 @@ public class OrderItemBean {
 
 	@Override
 	public String toString() {
-		return "OrderItermBean [itemId=" + itemId + ", orderId=" + orderId + ", productId=" + productId + ", quantity="
-				+ quantity + ", unitPrice=" + unitPrice + ", subtotal=" + subtotal + "]";
+		return "OrderItemBean [itemId=" + itemId + ", orderId=" + orderId
+				+ ", productId=" + productId + ", productName=" + productName
+				+ ", quantity=" + quantity + ", unitPrice=" + unitPrice
+				+ ", subtotal=" + subtotal + "]";
 	}
 	
 
