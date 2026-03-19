@@ -9,12 +9,9 @@ import com.badminton.model.PickupGameSignupBean;
 public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
 
     public Connection getConnection() throws Exception {
-        java.util.Properties props = new java.util.Properties();
-        try (java.io.InputStream in = getClass().getClassLoader().getResourceAsStream("db.properties")) {
-            props.load(in);
-        }
-        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        return DriverManager.getConnection(props.getProperty("db.url"), props.getProperty("db.user"), props.getProperty("db.password"));
+        javax.naming.Context ctx = new javax.naming.InitialContext();
+        javax.sql.DataSource ds = (javax.sql.DataSource) ctx.lookup("java:comp/env/jdbc/BadmintonDB");
+        return ds.getConnection();
     }
 
     // --- 1. 找所有開放中的「場次」 (這是在查 PickupGames 資料表) ---

@@ -1,11 +1,14 @@
 package com.badminton.dao;
 
+import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import com.badminton.model.PickupGameBean;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,26 +51,63 @@ public class PickupGameDAOImpl implements PickupGameDAO {
 	public List<PickupGameBean> getAll() {
 		List<PickupGameBean> list = new ArrayList<>();
 		String sql = "SELECT * FROM PickupGames ORDER BY game_date DESC";
-		try (Connection conn = getConnection();
-				PreparedStatement pstmt = conn.prepareStatement(sql);
-				ResultSet rs = pstmt.executeQuery()) {
-			while (rs.next()) {
-				PickupGameBean bean = new PickupGameBean();
-				bean.setGameId(rs.getInt("game_id"));
-				bean.setHostId(rs.getInt("host_id"));
-				bean.setCourtId(rs.getInt("court_id"));
-				bean.setGameDate(rs.getDate("game_date"));
-				bean.setStartTime(rs.getTime("start_time"));
-				bean.setEndTime(rs.getTime("end_time"));
-				bean.setMaxPlayers(rs.getInt("max_players"));
-				bean.setFeePerPerson(rs.getBigDecimal("fee_per_person"));
-				bean.setSkillLevel(rs.getString("skill_level"));
-				bean.setStatus(rs.getString("status"));
-				list.add(bean);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+				try {
+					Context context = new InitialContext();
+					DataSource ds= (DataSource)context.lookup("java:/comp/env/jdbc/BadmintonDB");
+					conn = ds.getConnection();
+					stmt = conn.prepareStatement(sql);
+					rs = stmt.executeQuery();
+					
+					while (rs.next()) {
+						PickupGameBean bean = new PickupGameBean();
+						bean.setGameId(rs.getInt("game_id"));
+						bean.setHostId(rs.getInt("host_id"));
+						bean.setCourtId(rs.getInt("court_id"));
+						bean.setGameDate(rs.getDate("game_date"));
+						bean.setStartTime(rs.getTime("start_time"));
+						bean.setEndTime(rs.getTime("end_time"));
+						bean.setMaxPlayers(rs.getInt("max_players"));
+						bean.setFeePerPerson(rs.getBigDecimal("fee_per_person"));
+						bean.setSkillLevel(rs.getString("skill_level"));
+						bean.setStatus(rs.getString("status"));
+						list.add(bean);
+					}
+					
+					
+				} catch (NamingException | SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}finally {
+					if(rs != null) {
+						try {
+							rs.close();
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}if(stmt != null) {
+					try {
+						stmt.close();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}if(conn != null) {
+					try {
+						conn.close();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			
+		
 		return list;
 	}
 
