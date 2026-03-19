@@ -17,5 +17,7 @@ public interface VenuesDAO {
 	
 	//4.查詢所有球館
 	List<VenuesBean> getAll();
+	
+	
 
 }

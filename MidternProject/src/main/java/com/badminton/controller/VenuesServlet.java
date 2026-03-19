@@ -36,6 +36,16 @@ public class VenuesServlet extends HttpServlet {
 		if ("addForm".equals(action)) {
 			request.getRequestDispatcher("/WEB-INF/views/venues_insert.jsp").forward(request, response);
 			return; // 提早結束，不往下跑撈全部資料的程式
+		// 判斷是否要前往「修改場館資料表單」
+		}else if("editForm".equals(action)){
+			String venueIdStr = request.getParameter("venueId");
+			int venueId = Integer.parseInt(venueIdStr);
+			VenuesDAO dao = new VenuesDAOImpl();
+			VenuesBean venue = dao.findById(venueId);
+			request.setAttribute("venue", venue);
+			request.getRequestDispatcher("/WEB-INF/views/venues_update.jsp").forward(request, response);
+			return;
+			
 		}
 		
 		try  {// === 步驟 2：呼叫 DAO 幫忙做事 ===
@@ -83,15 +93,91 @@ public class VenuesServlet extends HttpServlet {
 				
 				// 3. 呼叫 DAO 幫忙存進資料庫
 				VenuesDAO dao = new VenuesDAOImpl();
-				dao.insert(venue);
+				//用result接住insert方法回傳的0或1，用來判斷新增是否成功
+				int result = dao.insert(venue);
 				
-				// 4. 新增成功後，重新導向回 Servlet 的 Get 請求，讓它重新查出所有資料並顯示列表
-				response.sendRedirect(request.getContextPath() + "/VenuesServlet");
+				
+				// 4.判斷成功或失敗後，重新導向回 Servlet 的 Get 請求，讓它重新查出所有資料並顯示列表+
+				if(result > 0) {
+					response.sendRedirect(request.getContextPath() + "/VenuesServlet?message=insertSuccess");	
+				}else {
+					response.sendRedirect(request.getContextPath() + "/VenuesServlet?message=insertfail");
+				}
+				 
+				
+				
 				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} else {
+			
+		} else if("delete".equals(action)) {
+			
+			try {
+				String venueIdStr = request.getParameter("venueId");
+				int venueId = Integer.parseInt(venueIdStr);
+				VenuesDAO dao = new VenuesDAOImpl();
+				VenuesBean venue = dao.findById(venueId);
+				venue.setIsActive(false);
+				int result = dao.update(venue);
+				
+				
+				if(result > 0) {
+					response.sendRedirect(request.getContextPath() + "/VenuesServlet?message=deleteSuccess");	
+				}else {
+					response.sendRedirect(request.getContextPath() + "/VenuesServlet?message=deletefail");
+				}
+			} catch (NumberFormatException e) {
+				
+				e.printStackTrace();
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+			
+		}else if("update".equals(action)) {
+			// 1. 抓取表單傳過來的資料 (參數名稱必須跟 jsp 表單的 name 一樣)
+			
+			try {
+				String venueIdStr = request.getParameter("venueId");
+				String venueName = request.getParameter("venueName");
+				String address = request.getParameter("address");
+				String phone = request.getParameter("phone");
+				String isActiveStr = request.getParameter("isActive");
+				
+				int venueId = Integer.parseInt(venueIdStr);
+				Boolean isActive = Boolean.parseBoolean(isActiveStr);
+				
+				// 2. 裝進 Bean 裡面
+				VenuesBean venue = new VenuesBean();
+				venue.setVenueId(venueId);
+				venue.setVenueName(venueName);
+				venue.setAddress(address);
+				venue.setPhone(phone);
+				venue.setIsActive(isActive);
+				
+				// 3. 呼叫 DAO 幫忙存進資料庫
+				VenuesDAO dao = new VenuesDAOImpl();
+				int result = dao.update(venue);
+				
+				// 4. 判斷修改成功或失敗後，重新導向回 Servlet 的 Get 請求，讓它重新查出所有資料並顯示列表
+				if(result > 0) {
+					response.sendRedirect(request.getContextPath() + "/VenuesServlet?message=updateSuccess");	
+				}else {
+					response.sendRedirect(request.getContextPath() + "/VenuesServlet?message=updatefail");
+				}
+			} catch (NumberFormatException e) {
+				
+				e.printStackTrace();
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+			
+			
+		}
+		
+		else {
 			doGet(request, response);
 		}
 	}
