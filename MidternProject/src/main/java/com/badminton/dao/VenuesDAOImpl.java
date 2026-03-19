@@ -63,8 +63,7 @@ public class VenuesDAOImpl implements VenuesDAO {
 				if(stmt != null) {
 					try {
 						stmt.close();
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
+					} catch (SQLException e) {						
 						e.printStackTrace();
 					}
 				}
@@ -72,7 +71,6 @@ public class VenuesDAOImpl implements VenuesDAO {
 					try {
 						conn.close();
 					} catch (SQLException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -167,6 +165,7 @@ public class VenuesDAOImpl implements VenuesDAO {
 
 	@Override
 	public VenuesBean findById(Integer venuesId) {
+		//將VenuesBean venue = new VenuesBean();拆兩段寫，防止有人打了不存在的ID會傳送一個空venue箱子
 		VenuesBean venue = null;
 		
 		String sql = "SELECT * FROM Venues WHERE venue_id = ?";
@@ -188,15 +187,16 @@ public class VenuesDAOImpl implements VenuesDAO {
 			// 因為主鍵查詢最多只會有一筆，所以不用 while 迴圈，用 if 判斷即可
 			if(rs.next()) {
 				venue = new VenuesBean();
-				venue.setVenueId(rs.getInt("venue_id"));
-				 venue.setVenueName(rs.getString("venue_name")); // 修正：資料庫的欄位名稱有底線
+				
+				 venue.setVenueId(rs.getInt("venue_id"));
+				 venue.setVenueName(rs.getString("venue_name"));
 				 venue.setAddress(rs.getString("address"));
 				 venue.setPhone(rs.getString("phone"));
 				 venue.setIsActive(rs.getBoolean("is_active"));
 			}
 			
 		} catch (NamingException | SQLException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}finally {
 			if(rs != null) {
@@ -208,14 +208,14 @@ public class VenuesDAOImpl implements VenuesDAO {
 			try {
 				stmt.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 		}if(conn != null) {
 			try {
 				conn.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 		}
