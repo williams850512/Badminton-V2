@@ -5,10 +5,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>羽球預約管理系統 - 場館列表</title>
+<title>羽球預約管理系統 - 球場列表</title>
 <style>
-
-    body{
+body{
          font-family: "微軟正黑體", Arial, sans-serif;
          padding: 30px;
     }
@@ -38,7 +37,6 @@
     tr:hover { 
        background-color: #f1f1f1; 
     }
-    
 </style>
 </head>
 <body>
@@ -66,56 +64,47 @@
         ❌ 新增失敗，請稍後再試！
     </div>
 </c:if>
-	
-	<!-- 加入「新增場館」的按鈕，連結到 Servlet 並帶上 action=addForm 參數 -->
-	<div style="margin-bottom: 15px;">
-		<a href="${pageContext.request.contextPath}/VenuesServlet?action=addForm" 
-		   style="background-color: #008CBA; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; display: inline-block;">
-		   ➕ 新增場館
+	<!-- 加入「新增場地」的按鈕，連結到 Servlet 並帶上 action=addForm 參數 -->
+	<div style="margin-bottom:15px">
+		<a href="${pageContext.request.contextPath}/CourtsServlet?action=addForm&venueId=${venueId}" 
+		style="background-color: #008CBA; color: white; padding: 10px 15px; 
+		text-decoration: none; border-radius: 4px; display: inline-block;">
+		➕ 新增場地
+		</a>
+		
+		<a href="${pageContext.request.contextPath}/VenuesServlet" style="margin-left: 10px;">
+		 	⬅️ 返回場館列表
 		</a>
 	</div>
-	
-	<table>
+<table>
 		<tr>
-			<th>場館編號</th>
-			<th>球館名稱</th>
-			<th>場館地址</th>
-			<th>聯絡電話</th>
-			<th>目前狀態</th>
-			<th>操作</th>
+			<th>場地編號</th>
+			<th>場地名稱</th>
+			<th>營業狀態</th>
+			<th style="width: 180px; text-align: center;">操作</th>
 		</tr>
-		
 		<!-- 開始跑迴圈！ -->
-        <!-- items="\${AllVenues}": 因為你在 Servlet 裡寫了 request.setAttribute("AllVenues", venuesList) -->
-        <!-- var="v": 這是在迴圈裡我們給每一筆資料取的代號 (VenuesBean) -->
-        <c:forEach var="v" items="${AllVenues}" >
-        	<tr>
-        		<td>${v.venueId}</td>
-        		<td>
-        		  <a href="${pageContext.request.contextPath}/CourtsServlet?venueId=${v.venueId}">
-        		${v.venueName}
-        		  </a>
-        		</td> 
-        		     		
-        		<td>${v.address}</td>
-        		<td>${v.phone}</td>
-        		
-        		<!-- 這裡用了一個 EL 的小技巧 (三元運算子) 來把 true/false 轉換成中文 -->
-        		<td>${v.isActive ? '✅ 營業中' : '❌ 暫停營業'}</td>
-        		
-        		<td>
-        		<a href="${pageContext.request.contextPath}/VenuesServlet?action=editForm&venueId=${v.venueId}"><button>✏️編輯</button></a>
-        		<form action="${pageContext.request.contextPath}/VenuesServlet?action=delete" method="post" style="display:inline;">
-        		<input type="hidden" name="venueId" value="${v.venueId}">
-        		<button type="submit" onclick="return confirm('確定要停用這間場館嗎?')">🚫 停用</button>
+        <!-- items="\${AllCourts}": 因為你在 Servlet 裡寫了 request.setAttribute("AllCourts", courtsList) -->
+        <!-- var="v": 這是在迴圈裡我們給每一筆資料取的代號 (CourtsBean) -->
+        <c:forEach var="c" items="${AllCourts}" >
+        <tr>
+        	<td>${c.courtId}</td>
+        	<td>${c.courtName}</td>
+        	<td>${c.isActive ? '✅ 營業中' : '❌ 暫停營業'}</td>
+        	<td style="text-align: center;"> 
+        	<a href="${pageContext.request.contextPath}/CourtsServlet?action=editForm&courtId=${c.courtId}"><button>✏️編輯</button></a>
+        	<form action="${pageContext.request.contextPath}/CourtsServlet?action=delete" method="post" style="display:inline;">
+        		<input type="hidden" name="courtId" value="${c.courtId}">
+        		<button type="submit" onclick="return confirm('確定要停用這個場地嗎?')">🚫 停用</button>
         		</form>
-        		</td>
-        	</tr>
+        	</td>
+        	
+        
+        </tr>
+        
+        
         </c:forEach>
-        
-        
-        
-	</table>
+</table>
 
 </body>
 </html>

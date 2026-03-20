@@ -36,6 +36,7 @@ public class VenuesServlet extends HttpServlet {
 		if ("addForm".equals(action)) {
 			request.getRequestDispatcher("/WEB-INF/views/venues_insert.jsp").forward(request, response);
 			return; // 提早結束，不往下跑撈全部資料的程式
+			
 		// 判斷是否要前往「修改場館資料表單」
 		}else if("editForm".equals(action)){
 			String venueIdStr = request.getParameter("venueId");
@@ -173,7 +174,6 @@ public class VenuesServlet extends HttpServlet {
 				
 				e.printStackTrace();
 			}
-			
 			
 		}
 		
