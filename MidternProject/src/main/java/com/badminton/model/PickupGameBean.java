@@ -13,6 +13,7 @@ public class PickupGameBean implements Serializable {
     private Integer gameId;        // INT IDENTITY
     private Integer hostId;        // INT
     private Integer courtId;       // INT
+    private String courtName;      // 新增：場地名稱
     private Date gameDate;         // DATE
     private Time startTime;        // TIME
     private Time endTime;          // TIME
@@ -43,6 +44,12 @@ public class PickupGameBean implements Serializable {
 	}
 	public void setCourtId(Integer courtId) {
 		this.courtId = courtId;
+	}
+	public String getCourtName() {
+		return courtName;
+	}
+	public void setCourtName(String courtName) {
+		this.courtName = courtName;
 	}
 	public Date getGameDate() {
 		return gameDate;

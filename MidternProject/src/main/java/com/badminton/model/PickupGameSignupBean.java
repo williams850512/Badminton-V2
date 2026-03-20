@@ -61,5 +61,9 @@ public class PickupGameSignupBean implements Serializable {
     }
     public String getMemberName() { return memberName; }
     public void setMemberName(String memberName) { this.memberName = memberName; }
+
+    private String memberPhone;
+    public String getMemberPhone() { return memberPhone; }
+    public void setMemberPhone(String memberPhone) { this.memberPhone = memberPhone; }
     
 }

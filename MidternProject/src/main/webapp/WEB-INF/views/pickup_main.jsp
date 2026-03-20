@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -23,25 +24,22 @@
 </style>
 </head>
 <body>
-
 <div class="main-container">
     <h1>🏸 您今天想怎麼打球？</h1>
+
     <div class="btn-group">
-        
-        <a href="GoCreateGame" class="nav-card btn-create">
+        <a href="${pageContext.request.contextPath}/pickup?action=goCreateGame" class="nav-card btn-create">
             <span class="icon">📢</span>
             <h3>發起揪團</h3>
             <p>我是主揪，我要開場找球友</p>
         </a>
 
-        <a href="GetAllGamesServlet" class="nav-card btn-join">
+        <a href="${pageContext.request.contextPath}/pickup?action=getAllGames" class="nav-card btn-join">
             <span class="icon">🙋‍♂️</span>
             <h3>加入臨打</h3>
             <p>看看有哪些場次可以報名</p>
         </a>
-
     </div>
 </div>
-
 </body>
 </html>
