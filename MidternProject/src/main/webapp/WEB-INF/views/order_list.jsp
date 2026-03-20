@@ -318,7 +318,7 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
                     <option value="現金"    <%="現金".equals(order.getPaymentType())?"selected":""%>>💵 現金</option>
                     <option value="轉帳"    <%="轉帳".equals(order.getPaymentType())?"selected":""%>>🏦 銀行轉帳</option>
                     <option value="LinePay" <%="LinePay".equals(order.getPaymentType())?"selected":""%>>📱 LINE Pay</option>
-                    <option value="街口支付"<%="街口支付".equals(order.getPaymentType())?"selected":""%>>📱 街口支付</option>
+                    <option value="街口支付" <%="街口支付".equals(order.getPaymentType())?"selected":""%>>📱 街口支付</option>
                     <% if (order.getPaymentType()!=null &&
                            !"信用卡".equals(order.getPaymentType()) &&
                            !"現金".equals(order.getPaymentType()) &&
@@ -438,10 +438,11 @@ function showToast(msg, type='success') {
 
 /* ── Update Order Header ── */
 function updateOrder(orderId) {
+	console.log("🔥 updateOrder 被呼叫");
     const status      = document.getElementById('sel-status-' + orderId)?.value;
     const paymentType = document.getElementById('sel-pay-'    + orderId)?.value;
     const note        = document.getElementById('inp-note-'   + orderId)?.value;
-
+    console.log("🚀 有送出 request");
     const fd = new FormData();
     fd.append('action', 'updateOrder');
     fd.append('orderId', orderId);
@@ -449,7 +450,10 @@ function updateOrder(orderId) {
     fd.append('paymentType', paymentType);
     fd.append('note', note || '');
 
-    fetch('<%=request.getContextPath()%>/orderAction', {method:'POST', body:fd})
+    fetch('<%=request.getContextPath()%>/orderAction', {
+    	method:'POST', 
+    	body:fd
+    	})
     .then(() => {
         const now = new Date().toLocaleString('zh-TW', {hour12:false});
         const timeEl = document.getElementById('upd-time-' + orderId);

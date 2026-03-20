@@ -218,20 +218,34 @@ public class OrderDAO {
 	 * 同時更新訂單狀態 / 付款方式 / 備註，並記錄 updated_at
 	 * ───────────────────────────────────────────────────── */
 	public boolean updateOrder(int orderId, String status, String paymentType, String note) {
-		String sql = "UPDATE orders "
-				   + "SET status = ?, payment_type = ?, note = ?, updated_at = GETDATE() "
-				   + "WHERE order_id = ?";
-		try (Connection conn = DBConnection.getConnection();
-			 PreparedStatement ps = conn.prepareStatement(sql)) {
-			ps.setString(1, status);
-			ps.setString(2, paymentType);
-			ps.setString(3, note);
-			ps.setInt(4, orderId);
-			return ps.executeUpdate() > 0;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return false;
+
+	    // ✔ 完全對應你目前的資料表欄位
+	    String sql = "UPDATE Orders SET status = ?, payment_type = ?, note = ? WHERE order_id = ?";
+
+	    try (Connection conn = DBConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+	    	
+	    	System.out.println("orderId=" + orderId);
+	        System.out.println("status=" + status);
+	        System.out.println("paymentType=" + paymentType);
+	        System.out.println("note=" + note);
+
+	        ps.setString(1, status);
+	        ps.setString(2, paymentType);
+	        ps.setString(3, note);
+	        ps.setInt(4, orderId);
+
+	        int rows = ps.executeUpdate();
+
+	        // 🔥 建議加這行 debug（很重要）
+	        System.out.println("updateOrder rows = " + rows);
+
+	        return rows > 0;
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return false;
 	}
 
 	/* ResultSet 轉 OrderBean 的共用 helper */

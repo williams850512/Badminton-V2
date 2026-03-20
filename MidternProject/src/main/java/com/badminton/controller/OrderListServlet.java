@@ -92,4 +92,42 @@ public class OrderListServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/order_list.jsp")
                .forward(request, response);
     }
+ // ===== 更新 =====
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+    	
+    	// ✅ 就加在這裡（最上面）
+        System.out.println("🔥 有進到 doPost");
+        System.out.println("action=" + request.getParameter("action"));
+        System.out.println("orderId=" + request.getParameter("orderId"));
+        System.out.println("status=" + request.getParameter("status"));
+        System.out.println("paymentType=" + request.getParameter("paymentType"));
+
+        request.setCharacterEncoding("UTF-8");
+
+        String action = request.getParameter("action");
+
+        if ("updateStatus".equals(action)) {
+
+            int orderId = Integer.parseInt(request.getParameter("orderId"));
+            String status = request.getParameter("status");
+            String paymentType = request.getParameter("paymentType");
+            String note = request.getParameter("note");
+
+            System.out.println("更新訂單：" + orderId);
+            System.out.println("status=" + status);
+            System.out.println("paymentType=" + paymentType);
+            System.out.println("note=" + note);
+
+            boolean result = orderDAO.updateOrder(orderId, status, paymentType, note);
+
+            System.out.println("更新結果：" + result);
+
+            // ⚠️ 這裡很關鍵：AJAX 必須回 JSON，不可以 redirect
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"success\":" + result + "}");
+            return;
+        }
+    }
 }

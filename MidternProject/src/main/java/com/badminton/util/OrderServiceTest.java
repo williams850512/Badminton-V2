@@ -1,4 +1,4 @@
-package com.badminton.test;
+package com.badminton.util;
 
 import java.util.List;
 
