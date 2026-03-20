@@ -1,29 +1,33 @@
 package com.badminton.dao;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+// 加入 JNDI 需要的 import
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
 import com.badminton.model.AnnouncementBean;
 
 public class AnnouncementDao {
-	// 請注意連線資訊！
-    private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=BadmintonDB;encrypt=false;";
-    private static final String DB_USER = "yun";
-    private static final String DB_PASS = "0000";
 
-    // 取得資料庫連線的共用方法
+    // 取得資料庫連線的共用方法 (已改為 JNDI 模式)
     private Connection getConnection() throws SQLException {
         try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        } catch (ClassNotFoundException e) {
+            Context context = new InitialContext();
+            // 注意：這裡的 "jdbc/BadmintonDB" 必須跟你在 Tomcat 的 context.xml 中設定的名稱一致
+            DataSource ds = (DataSource) context.lookup("java:/comp/env/jdbc/BadmintonDB");
+            return ds.getConnection();
+        } catch (NamingException e) {
             e.printStackTrace();
+            throw new SQLException("JNDI 尋找資料來源失敗: " + e.getMessage());
         }
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
     }
 
     // 1. 新增公告 (Insert)
@@ -31,7 +35,6 @@ public class AnnouncementDao {
         String sql = "INSERT INTO Announcements (title, content, status, is_pinned, category, publish_at, expire_at) "
                    + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         
-        // try-with-resources 會關閉 conn 與 pstmt
         Connection conn = null;
         PreparedStatement pstmt = null;
         try {
@@ -53,23 +56,14 @@ public class AnnouncementDao {
             e.printStackTrace();
             return false;
         } finally {
-        	try {
-				pstmt.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-            try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+            if (pstmt != null) try { pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
         }
     }
     
-    // 查詢所有公告 -> 前台與後台列表會用到
+    // 查詢所有公告
     public List<AnnouncementBean> getAllAnnouncements() {
         List<AnnouncementBean> list = new ArrayList<>();
-        // 排序邏輯：置頂的放最前面，接著依照建立時間由新到舊排
         String sql = "SELECT * FROM Announcements ORDER BY is_pinned DESC, created_at DESC";
         
         Connection conn = null;
@@ -100,19 +94,14 @@ public class AnnouncementDao {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            try {
-				rs.close();
-				pstmt.close();
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-            
+            if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (pstmt != null) try { pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
         }
         return list;
     }
     
-    // ID查詢單筆 -> 用在編輯公告時把舊資料撈出來顯示
+    // ID查詢單筆
     public AnnouncementBean getAnnouncementById(int id) {
         AnnouncementBean bean = null;
         String sql = "SELECT * FROM Announcements WHERE announcement_id = ?";
@@ -151,10 +140,9 @@ public class AnnouncementDao {
         return bean;
     }
     
-    // 新增：模糊搜尋公告
+    // 模糊搜尋公告
     public List<AnnouncementBean> searchAnnouncements(String keyword) {
         List<AnnouncementBean> list = new ArrayList<>();
-        // 使用 LIKE 來比對標題或內容包含該關鍵字
         String sql = "SELECT * FROM Announcements WHERE title LIKE ? OR content LIKE ? ORDER BY is_pinned DESC, created_at DESC";
         
         Connection conn = null;
@@ -164,7 +152,6 @@ public class AnnouncementDao {
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
-            // 幫關鍵字前後加上 %，代表「只要有包含就算數」
             pstmt.setString(1, "%" + keyword + "%");
             pstmt.setString(2, "%" + keyword + "%");
             rs = pstmt.executeQuery();
@@ -196,7 +183,6 @@ public class AnnouncementDao {
 
     // 修改 Update
     public boolean updateAnnouncement(AnnouncementBean bean) {
-        // 注意：這裡我們順便更新了 updated_at 為當前時間 (GETDATE())
         String sql = "UPDATE Announcements SET title=?, content=?, status=?, is_pinned=?, category=?, "
                    + "publish_at=?, expire_at=?, updated_at=GETDATE() WHERE announcement_id=?";
         
@@ -214,7 +200,7 @@ public class AnnouncementDao {
             pstmt.setString(5, bean.getCategory());
             pstmt.setTimestamp(6, bean.getPublishAt());
             pstmt.setTimestamp(7, bean.getExpireAt());
-            pstmt.setInt(8, bean.getAnnouncementId()); // 指定要修改哪一筆
+            pstmt.setInt(8, bean.getAnnouncementId());
             
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -249,23 +235,6 @@ public class AnnouncementDao {
         } finally {
             if (pstmt != null) try { pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
             if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
-        }
-    }
-    
-    // 測試資料庫有沒有連線成功
-    public static void main(String[] args) {
-        AnnouncementDao dao = new AnnouncementDao();
-        try {
-            System.out.println("正在嘗試連線到 MSSQL...");
-            Connection conn = dao.getConnection(); // 呼叫你剛寫好的連線方法
-            
-            if (conn != null && !conn.isClosed()) {
-                System.out.println("資料庫連線成功！");
-                conn.close(); // 測試完把連線關掉
-            }
-        } catch (Exception e) {
-            System.out.println("連線失敗了！請看錯誤訊息：");
-            e.printStackTrace(); // 印出詳細錯誤原因
         }
     }
 }
