@@ -8,17 +8,18 @@ import com.badminton.model.PickupGameSignupBean;
 
 public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
 
+	//JNDI 連線池 (Connection Pool)
     public Connection getConnection() throws Exception {
         javax.naming.Context ctx = new javax.naming.InitialContext();
         javax.sql.DataSource ds = (javax.sql.DataSource) ctx.lookup("java:comp/env/jdbc/BadmintonDB");
         return ds.getConnection();
     }
 
-    // --- 1. 找所有開放中的「場次」 (這是在查 PickupGames 資料表) ---
+    //1. 找出所有開放中的揪團 (這是在查 PickupGames 資料表)
     @Override
     public List<PickupGameBean> findAllOpenGames() {
         List<PickupGameBean> list = new ArrayList<>();
-        // 修正 SQL：因為 Courts 沒有 display_name，所以我們直接 JOIN Venues 來串接完整場地名稱
+        
         String sql = "SELECT g.*, v.venue_name + ' - ' + c.court_name AS court_display " +
                      "FROM BadmintonDB.dbo.PickupGames g " +
                      "JOIN BadmintonDB.dbo.Courts c ON g.court_id = c.court_id " +
@@ -27,7 +28,8 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
         try (Connection conn = getConnection(); 
              PreparedStatement pstmt = conn.prepareStatement(sql); 
              ResultSet rs = pstmt.executeQuery()) {
-            while (rs.next()) {
+            
+        	while (rs.next()) {
                 PickupGameBean bean = new PickupGameBean();
                 bean.setGameId(rs.getInt("game_id"));
                 bean.setHostId(rs.getInt("host_id"));
@@ -45,7 +47,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
         return list;
     }
 
-    // --- 2. 找某一場球賽的「報名名單」 (JOIN 會員姓名+電話，用 host_id 判斷角色) ---
+    // 2. 查某個揪團的報名名單 (JOIN 會員姓名+電話，用 host_id 判斷角色) ---
     @Override
     public List<PickupGameSignupBean> findByGameId(Integer gameId, boolean isNewestFirst) {
         List<PickupGameSignupBean> list = new ArrayList<>();
@@ -70,7 +72,8 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
                     // 改用別名 game_host_id 確保能正確拿到值
                     int gameHostId = rs.getInt("game_host_id");
                     
-                    // 用 member_id == gameHostId 判斷是否為「主揪」
+                    
+                    // 比對活動擁有者 (host_id) 和報名者 (member_id) 是否完全吻合
                     if (rs.getInt("member_id") == gameHostId && gameHostId != 0) {
                         bean.setStatus("host");
                     } else {
@@ -86,7 +89,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return list;
     }
-
+    //找出目前資料庫中最新一筆揪團的 ID
     @Override
     public Integer getLatestGameId() {
         String sql = "SELECT MAX(game_id) FROM BadmintonDB.dbo.PickupGames";
@@ -95,11 +98,12 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return null;
     }
-
+    //新增-發起新的揪團 
     @Override
     public int insertNewGame(int hostId, int courtId, String gameDate, String startTime, String endTime, int maxPlayers) {
         String sql = "INSERT INTO BadmintonDB.dbo.PickupGames (host_id, court_id, game_date, start_time, end_time, max_players, current_players, status) VALUES (?, ?, ?, ?, ?, ?, 1, 'open')";
-        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = getConnection(); 
+        		PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setInt(1, hostId);
             pstmt.setInt(2, courtId);
             pstmt.setString(3, gameDate);
@@ -112,7 +116,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return -1;
     }
-
+    //新增- 一筆報名紀錄
     @Override
     public boolean insert(PickupGameSignupBean signup) {
         String sql = "INSERT INTO BadmintonDB.dbo.PickupGameSignups (game_id, member_id, status, signed_up_at) VALUES (?, ?, ?, ?)";
@@ -124,7 +128,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
             return pstmt.executeUpdate() > 0;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
-
+    //檢查是否重複報名
     @Override
     public boolean isAlreadySignedUp(Integer gameId, Integer memberId) {
         String sql = "SELECT 1 FROM BadmintonDB.dbo.PickupGameSignups WHERE game_id = ? AND member_id = ?";
@@ -135,7 +139,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    // --- 同場地同時段衝突檢查 ---
+    //同場地同時段衝突檢查
     @Override
     public boolean isCourtTimeConflict(int courtId, String gameDate, String startTime, String endTime) {
         // 使用 CAST 確保跨資料庫格式與時間處理都能正確進行比較（避免字串比較失敗）
@@ -166,7 +170,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
         }
     }
 
-    // --- 會員時間衝突檢查（加入團時）---
+    // 會員時間衝突檢查（加入團時）
     @Override
     public boolean hasMemberTimeConflict(int memberId, int gameId) {
         // 先查出目標場次的日期與時間，再查該會員是否在同日期有時間重疊的其他場次
@@ -186,7 +190,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    // --- 檢查會員在特定時段是否已有活動（發起揪團時使用）---
+    // 檢查會員在特定時段是否已有活動（發起揪團時使用）
     @Override
     public boolean hasTimeConflict(int memberId, String gameDate, String startTime, String endTime) {
         // 強化檢查：直接檢查 PickupGames 表的 host_id，或是 Signup 表中的 member_id
@@ -211,7 +215,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    // --- 移除報名（主揪踢人）---
+    // 更新-移除報名（主揪踢人）
     @Override
     public boolean removeSignup(int gameId, int memberId) {
         String sql = "DELETE FROM BadmintonDB.dbo.PickupGameSignups WHERE game_id = ? AND member_id = ? AND status != 'host'";
@@ -222,7 +226,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    // --- 主揪取消開團 ---
+    //更新-主揪取消開團 
     @Override
     public boolean cancelGame(int gameId) {
         String sql = "UPDATE BadmintonDB.dbo.PickupGames SET status = 'cancelled' WHERE game_id = ? AND status = 'open'";
@@ -232,7 +236,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    // --- 成員退出 ---
+    //更新-成員退出
     @Override
     public boolean withdrawSignup(int gameId, int memberId) {
         // 只能退出 status='joined' 的報名（主揪不能退出，只能取消）
