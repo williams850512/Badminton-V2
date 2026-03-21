@@ -7,50 +7,45 @@ import com.badminton.model.MembersBean;
 public class MembersService {
     private MembersDAO dao = new MembersDAO();
 
-    /**
-     * 註冊新會員
-     * 接收包含性別、生日的 Bean 並存入資料庫
-     */
-    public boolean register(MembersBean m) {
-        // 這裡可以加入邏輯，例如：檢查帳號是否重複、密碼長度等
-        return dao.register(m);
-    }
-
-    /**
-     * 登入驗證
-     * 登入成功後回傳的 Bean 會包含 gender 與 birthday 欄位
-     */
+    // 1. 會員登入
     public MembersBean login(String username, String password) {
         return dao.login(username, password);
     }
 
-    /**
-     * 修改個人資料或管理員修改會員等級
-     * 支援更新姓名、電話、信箱、性別、生日與角色
-     */
-    public boolean updateProfile(MembersBean m) {
-        // 未來若要加入「信箱格式檢查」或「防呆機制」可寫在這裡
-        return dao.updateProfile(m);
+    // 2. 會員註冊 (管理員新增會員也可共用此邏輯)
+    public boolean register(MembersBean m) {
+        return dao.register(m);
     }
 
-    /**
-     * 刪除會員（僅限管理員調用）
-     */
-    public boolean deleteMember(int id) {
-        return dao.deleteMember(id);
-    }
-
-    /**
-     * 取得單一會員資料（用於編輯頁面回填）
-     */
+    // 3. 取得單一會員資料 (用於 Profile 顯示或 Edit 回填)
     public MembersBean getMemberById(int id) {
         return dao.getMemberById(id);
     }
 
-    /**
-     * 取得所有會員清單（用於管理後台）
-     */
+    // 4. 取得所有會員清單 (管理員 Dashboard 用)
     public List<MembersBean> getAllMembers() {
         return dao.getAllMembers();
+    }
+
+    // 🔴 5. 搜尋會員 (新增：支援管理員關鍵字查詢)
+    public List<MembersBean> searchMembers(String keyword) {
+        return dao.searchMembers(keyword);
+    }
+
+    // 6. 修改個人資料 (專供 MembersServlet 呼叫)
+    public boolean updateProfile(MembersBean m) {
+        // 直接調用底層更新邏輯
+        return dao.updateMember(m);
+    }
+
+    // 7. 管理員修改會員 (專供 MembersAdminServlet 呼叫)
+    public boolean updateMember(MembersBean m) {
+        // 指向同一個 DAO 方法，確保兩邊 Servlet 都不會紅叉
+        return dao.updateMember(m);
+    }
+
+    // 8. 刪除會員
+    public boolean deleteMember(int id) {
+        return dao.deleteMember(id);
     }
 }
