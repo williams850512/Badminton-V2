@@ -6,7 +6,7 @@
     <ul class="sidebar-menu">
         <li><a href="#">會員管理</a></li>
         <li><a href="<%=request.getContextPath()%>/VenuesServlet?action=list">場館及場地管理</a></li>
-        <li><a href="#">預約管理</a></li>
+        <li><a href="<%=request.getContextPath()%>/BookingsServlet?action=list">預約管理</a></li>
         <li><a href="#">臨打管理</a></li>
         <li><a href="#">商品管理</a></li>
         <li><a href="#">訂單管理</a></li>

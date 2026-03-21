@@ -216,6 +216,56 @@ public class BookingsDAOImpl implements BookingsDAO {
 		
 		return list;
 	}
+
+	@Override
+	public List<BookingsBean> getAll() {
+		
+		List<BookingsBean> list = new ArrayList<>();
+		String sql = "SELECT * FROM Bookings";
+		
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			Context context = new InitialContext();
+			DataSource ds = (DataSource) context.lookup("java:/comp/env/jdbc/BadmintonDB");
+			conn = ds.getConnection();
+			stmt = conn.prepareStatement(sql);
+			rs = stmt.executeQuery();
+			
+			while(rs.next()) {
+				BookingsBean booking = new BookingsBean();
+				
+				booking.setBookingId(rs.getInt("booking_id"));
+				booking.setMemberId(rs.getInt("member_id"));
+				booking.setCourtId(rs.getInt("court_id"));
+				booking.setBookingDate(rs.getDate("booking_date"));
+				booking.setStartTime(rs.getTime("start_time"));
+				booking.setEndTime(rs.getTime("end_time"));
+				booking.setStatus(rs.getString("status"));
+				booking.setTotalAmount(rs.getBigDecimal("total_amount"));
+				booking.setNote(rs.getString("note"));
+				booking.setCreatedAt(rs.getTimestamp("created_at"));
+				
+				list.add(booking);
+			}
+			
+		} catch (NamingException | SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+			}
+			if(stmt != null) {
+				try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+			}
+			if(conn != null) {
+				try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+			}
+		}
+		return list;
+	}
 	
 
 }

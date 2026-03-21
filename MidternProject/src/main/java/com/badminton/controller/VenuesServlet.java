@@ -49,7 +49,8 @@ public class VenuesServlet extends HttpServlet {
 			
 		}
 		
-		try  {// === 步驟 2：呼叫 DAO 幫忙做事 ===
+		// === 步驟 2：呼叫 DAO 幫忙做事 ===
+		try  {
 		// 建立 DAO 物件（這裡體現了 Interface 的好處，我們用介面型態去接實作類別）
 		VenuesDAO dao = new VenuesDAOImpl();
 		
@@ -62,7 +63,6 @@ public class VenuesServlet extends HttpServlet {
 		
 		// === 步驟 4：轉交 (Forward) 畫面給 JSP ===
         // 告訴 Servlet：「請你把這些資料打包好，送到下面這個 JSP 網頁去負責顯示」
-        // 假設你照我之前建議的，把 JSP 放在 /WEB-INF/views/ 裡
 		request.getRequestDispatcher("/WEB-INF/views/venues_list.jsp").forward(request, response);
 		
 		} catch (Exception e) {

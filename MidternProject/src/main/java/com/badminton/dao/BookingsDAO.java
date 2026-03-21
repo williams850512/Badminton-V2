@@ -19,5 +19,7 @@ public interface BookingsDAO {
 	//4.依場地ID查詢哪天被誰預約
 	List<BookingsBean> findByCourtIdAndDate(int courtId , Date bookingDate);
 	
+	//5.查詢所有預約
+	List<BookingsBean> getAll();
 
 }
