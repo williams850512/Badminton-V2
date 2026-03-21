@@ -6,41 +6,19 @@
 <head>
 <meta charset="UTF-8">
 <title>羽球預約管理系統 - 球場列表</title>
-<style>
-body{
-         font-family: "微軟正黑體", Arial, sans-serif;
-         padding: 30px;
-    }
-    
-    table{
-    	  border-collapse:collapse;
-    	  width:60%;
-    	  margin-top:20px;
-    	  box-shadow:0 0 10px rgba(0,0,0,0.1);
-    }
-    
-    tr,td{
-          border: 1px solid #dddddd;
-          padding: 12px;
-          text-align: left;
-    }
-    
-    th{
-       background-color: #4CAF50;
-       color: white;
-    }
-    
-    tr:nth-child(even){
-        background-color: #f9f9f9;
-    }
-    
-    tr:hover { 
-       background-color: #f1f1f1; 
-    }
-</style>
+<jsp:include page="/WEB-INF/backendHead.jsp" />
 </head>
 <body>
-	<h2>🏸 隔壁老謙高級羽球館</h2>
+	<div class="app-container">
+        <jsp:include page="/WEB-INF/backendSidebar.jsp" />
+
+        <div class="main-content">
+            <jsp:include page="/WEB-INF/backendHeader.jsp" />
+
+            <div class="content-body">
+                <h2 style="margin-bottom: 20px; color: #333;">隔壁老謙高級羽球-場地列表</h2>
+                
+                <div class="card">
 	
 	<!-- 成功訊息提示 -->
 <c:if test="${param.message == 'insertSuccess'}">
@@ -66,36 +44,35 @@ body{
 </c:if>
 	<!-- 加入「新增場地」的按鈕，連結到 Servlet 並帶上 action=addForm 參數 -->
 	<div style="margin-bottom:15px">
-		<a href="${pageContext.request.contextPath}/CourtsServlet?action=addForm&venueId=${venueId}" 
-		style="background-color: #008CBA; color: white; padding: 10px 15px; 
-		text-decoration: none; border-radius: 4px; display: inline-block;">
+		<a href="${pageContext.request.contextPath}/CourtsServlet?action=addForm&venueId=${venueId}" class="btn btn-primary">
 		➕ 新增場地
 		</a>
 		
-		<a href="${pageContext.request.contextPath}/VenuesServlet" style="margin-left: 10px;">
+		<a href="${pageContext.request.contextPath}/VenuesServlet" class="btn btn-warning" style="margin-left: 10px;">
 		 	⬅️ 返回場館列表
 		</a>
 	</div>
-<table>
+<table class="table-custom">
 		<tr>
 			<th>場地編號</th>
 			<th>場地名稱</th>
 			<th>營業狀態</th>
-			<th style="width: 180px; text-align: center;">操作</th>
+			<th>操作</th>
 		</tr>
 		<!-- 開始跑迴圈！ -->
         <!-- items="\${AllCourts}": 因為你在 Servlet 裡寫了 request.setAttribute("AllCourts", courtsList) -->
         <!-- var="v": 這是在迴圈裡我們給每一筆資料取的代號 (CourtsBean) -->
+        
         <c:forEach var="c" items="${AllCourts}" >
         <tr>
         	<td>${c.courtId}</td>
         	<td>${c.courtName}</td>
         	<td>${c.isActive ? '✅ 營業中' : '❌ 暫停營業'}</td>
         	<td style="text-align: center;"> 
-        	<a href="${pageContext.request.contextPath}/CourtsServlet?action=editForm&courtId=${c.courtId}"><button>✏️編輯</button></a>
+        	<a href="${pageContext.request.contextPath}/CourtsServlet?action=editForm&courtId=${c.courtId}" class="btn btn-warning">✏️編輯</a>
         	<form action="${pageContext.request.contextPath}/CourtsServlet?action=delete" method="post" style="display:inline;">
         		<input type="hidden" name="courtId" value="${c.courtId}">
-        		<button type="submit" onclick="return confirm('確定要停用這個場地嗎?')">🚫 停用</button>
+        		<button type="submit" class="btn btn-danger" onclick="return confirm('確定要停用這個場地嗎?')">🚫 停用</button>
         		</form>
         	</td>
         	
@@ -105,6 +82,9 @@ body{
         
         </c:forEach>
 </table>
-
+			</div>
+			</div>
+        </div>
+    </div>
 </body>
 </html>

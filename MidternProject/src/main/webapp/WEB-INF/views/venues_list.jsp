@@ -4,45 +4,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>羽球預約管理系統 - 場館列表</title>
-<style>
-
-    body{
-         font-family: "微軟正黑體", Arial, sans-serif;
-         padding: 30px;
-    }
-    
-    table{
-    	  border-collapse:collapse;
-    	  width:60%;
-    	  margin-top:20px;
-    	  box-shadow:0 0 10px rgba(0,0,0,0.1);
-    }
-    
-    tr,td{
-          border: 1px solid #dddddd;
-          padding: 12px;
-          text-align: left;
-    }
-    
-    th{
-       background-color: #4CAF50;
-       color: white;
-    }
-    
-    tr:nth-child(even){
-        background-color: #f9f9f9;
-    }
-    
-    tr:hover { 
-       background-color: #f1f1f1; 
-    }
-    
-</style>
+    <meta charset="UTF-8">
+    <title>羽球場館列表</title>
+    <jsp:include page="/WEB-INF/backendHead.jsp" />
 </head>
 <body>
-	<h2>🏸 隔壁老謙高級羽球館</h2>
+    <div class="app-container">
+        <jsp:include page="/WEB-INF/backendSidebar.jsp" />
+
+        <div class="main-content">
+            <jsp:include page="/WEB-INF/backendHeader.jsp" />
+
+            <div class="content-body">
+                <h2 style="margin-bottom: 20px; color: #333;">隔壁老謙高級羽球-場館列表</h2>
+                
+                <div class="card">
+            
 	
 	<!-- 成功訊息提示 -->
 <c:if test="${param.message == 'insertSuccess'}">
@@ -69,20 +46,19 @@
 	
 	<!-- 加入「新增場館」的按鈕，連結到 Servlet 並帶上 action=addForm 參數 -->
 	<div style="margin-bottom: 15px;">
-		<a href="${pageContext.request.contextPath}/VenuesServlet?action=addForm" 
-		   style="background-color: #008CBA; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; display: inline-block;">
+		<a href="${pageContext.request.contextPath}/VenuesServlet?action=addForm" class="btn btn-primary">
 		   ➕ 新增場館
 		</a>
 	</div>
 	
-	<table>
+	<table class="table-custom">
 		<tr>
 			<th>場館編號</th>
 			<th>球館名稱</th>
 			<th>場館地址</th>
 			<th>聯絡電話</th>
 			<th>目前狀態</th>
-			<th>操作</th>
+			<th >操作</th>
 		</tr>
 		
 		<!-- 開始跑迴圈！ -->
@@ -104,18 +80,21 @@
         		<td>${v.isActive ? '✅ 營業中' : '❌ 暫停營業'}</td>
         		
         		<td>
-        		<a href="${pageContext.request.contextPath}/VenuesServlet?action=editForm&venueId=${v.venueId}"><button>✏️編輯</button></a>
+        		<a href="${pageContext.request.contextPath}/VenuesServlet?action=editForm&venueId=${v.venueId}" class="btn btn-warning">✏️編輯</a>
         		<form action="${pageContext.request.contextPath}/VenuesServlet?action=delete" method="post" style="display:inline;">
         		<input type="hidden" name="venueId" value="${v.venueId}">
-        		<button type="submit" onclick="return confirm('確定要停用這間場館嗎?')">🚫 停用</button>
+        		<button type="submit" class="btn btn-danger" onclick="return confirm('確定要停用這間場館嗎?')">🚫 停用</button>
         		</form>
         		</td>
         	</tr>
-        </c:forEach>
+       	 </c:forEach>
         
         
         
-	</table>
-
+		</table>
+				</div>
+			</div>
+        </div>
+    </div>
 </body>
 </html>
