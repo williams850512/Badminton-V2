@@ -45,53 +45,117 @@ public class MembersServlet extends HttpServlet {
         }
     }
 
+    /**
+     * 會員登入處理
+     * Service 已調用 DAO 執行強制大小寫檢查
+     */
     private void processLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        MembersBean user = service.login(request.getParameter("username"), request.getParameter("password"));
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        
+        MembersBean user = service.login(username, password);
+        
         if (user != null) {
             request.getSession().setAttribute("user", user);
             response.sendRedirect("MembersServlet?action=showProfile");
         } else {
+            // error=1 通常代表帳號密碼錯誤（包含大小寫不符）
             response.sendRedirect("MembersServlet?action=showLogin&error=1");
         }
     }
 
+    /**
+     * 會員註冊處理
+     * Service 內部會先呼叫 isUsernameExists 檢查帳號是否重複
+     */
     private void processRegister(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String username = request.getParameter("username");
+        
         MembersBean m = new MembersBean();
-        m.setUsername(request.getParameter("username"));
+        m.setUsername(username);
         m.setPassword(request.getParameter("password"));
-        m.setFullName(request.getParameter("fullName")); // 對齊 JSP 的 name="fullName"
+        m.setFullName(request.getParameter("fullName")); 
         m.setPhone(request.getParameter("phone"));
         m.setEmail(request.getParameter("email"));
         m.setGender(request.getParameter("gender"));
+        
         String bday = request.getParameter("birthday");
-        if (bday != null && !bday.isEmpty()) m.setBirthday(Date.valueOf(bday));
-        m.setMembershipLevel("Normal");
+        if (bday != null && !bday.isEmpty()) {
+            try {
+                m.setBirthday(Date.valueOf(bday));
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        m.setMembershipLevel("Regular");
         m.setStatus("Active");
-        if (service.register(m)) response.sendRedirect("MembersServlet?action=showLogin&status=ok");
-        else response.sendRedirect("MembersServlet?action=showRegister&error=1");
+        m.setNote(""); 
+
+        // 執行註冊
+        if (service.register(m)) {
+            // 成功註冊
+            response.sendRedirect("MembersServlet?action=showLogin&status=ok");
+        } else {
+            // 失敗原因可能是：帳號重複 或 資料庫錯誤
+            // 先檢查是否為帳號重複
+            if (service.isUsernameExists(username)) {
+                // error=2：提示帳號已存在（不論大小寫）
+                response.sendRedirect("MembersServlet?action=showRegister&error=2");
+            } else {
+                // error=1：一般的註冊失敗提示
+                response.sendRedirect("MembersServlet?action=showRegister&error=1");
+            }
+        }
     }
 
+    /**
+     * 修改個人資料處理
+     */
     private void processUpdate(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession();
         MembersBean currentUser = (MembersBean) session.getAttribute("user");
-        if (currentUser == null) { response.sendRedirect("MembersServlet?action=showLogin"); return; }
+        
+        if (currentUser == null) { 
+            response.sendRedirect("MembersServlet?action=showLogin"); 
+            return; 
+        }
+
         MembersBean updateBean = new MembersBean();
         updateBean.setMemberId(currentUser.getMemberId());
         updateBean.setFullName(request.getParameter("fullName"));
         updateBean.setPhone(request.getParameter("phone"));
         updateBean.setEmail(request.getParameter("email"));
         updateBean.setGender(request.getParameter("gender"));
+        
         String bday = request.getParameter("birthday");
-        if (bday != null && !bday.isEmpty()) updateBean.setBirthday(Date.valueOf(bday));
+        if (bday != null && !bday.isEmpty()) {
+            try {
+                updateBean.setBirthday(Date.valueOf(bday));
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        // ✨ 重要：保留不可被會員修改的後台資料，避免更新後遺失
         updateBean.setMembershipLevel(currentUser.getMembershipLevel());
+        updateBean.setStatus(currentUser.getStatus());
+        updateBean.setNote(currentUser.getNote()); 
+
         if (service.updateProfile(updateBean)) {
+            // 更新成功後，重新取得最新資料並同步 Session
             session.setAttribute("user", service.getMemberById(currentUser.getMemberId()));
             response.sendRedirect("MembersServlet?action=showProfile&msg=ok");
+        } else {
+            response.sendRedirect("MembersServlet?action=showProfile&msg=error");
         }
     }
 
     private void processLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        request.getSession().invalidate();
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
         response.sendRedirect("MembersServlet?action=showLogin");
     }
 }

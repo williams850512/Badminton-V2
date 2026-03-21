@@ -7,44 +7,90 @@ import com.badminton.model.MembersBean;
 public class MembersService {
     private MembersDAO dao = new MembersDAO();
 
-    // 1. 會員登入
+    /**
+     * 1. 會員登入
+     * DAO 已處理 COLLATE，登入時帳號密碼皆需完全符合大小寫
+     */
     public MembersBean login(String username, String password) {
+        if (username == null || password == null) return null;
         return dao.login(username, password);
     }
 
-    // 2. 會員註冊 (管理員新增會員也可共用此邏輯)
+    /**
+     * ✨ 2. 會員註冊 / 新增會員
+     * 🛡️ 加入安全檢查：若帳號已存在 (不分大小寫) 則拒絕新增
+     */
     public boolean register(MembersBean m) {
+        if (m == null || m.getUsername() == null) return false;
+
+        // 檢查帳號是否已經被使用 (不論大小寫組合)
+        if (isUsernameExists(m.getUsername())) {
+            System.err.println("註冊失敗：帳號 [" + m.getUsername() + "] 已被佔用。");
+            return false;
+        }
+
         return dao.register(m);
     }
 
-    // 3. 取得單一會員資料 (用於 Profile 顯示或 Edit 回填)
+    /**
+     * ✨ 新增：檢查會員帳號是否存在
+     */
+    public boolean isUsernameExists(String username) {
+        if (username == null || username.trim().isEmpty()) return false;
+        return dao.isUsernameExists(username.trim());
+    }
+
+    /**
+     * 3. 根據 ID 取得單一會員資料
+     */
     public MembersBean getMemberById(int id) {
         return dao.getMemberById(id);
     }
 
-    // 4. 取得所有會員清單 (管理員 Dashboard 用)
+    /**
+     * 4. 取得所有會員清單
+     */
     public List<MembersBean> getAllMembers() {
         return dao.getAllMembers();
     }
 
-    // 🔴 5. 搜尋會員 (新增：支援管理員關鍵字查詢)
+    /**
+     * 5. 搜尋會員 (支援關鍵字查詢)
+     */
     public List<MembersBean> searchMembers(String keyword) {
-        return dao.searchMembers(keyword);
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return dao.getAllMembers();
+        }
+        return dao.searchMembers(keyword.trim());
     }
 
-    // 6. 修改個人資料 (專供 MembersServlet 呼叫)
+    /**
+     * 6. 修改個人資料
+     */
     public boolean updateProfile(MembersBean m) {
-        // 直接調用底層更新邏輯
+        if (m == null) return false;
         return dao.updateMember(m);
     }
 
-    // 7. 管理員修改會員 (專供 MembersAdminServlet 呼叫)
+    /**
+     * 7. 管理員修改會員
+     */
     public boolean updateMember(MembersBean m) {
-        // 指向同一個 DAO 方法，確保兩邊 Servlet 都不會紅叉
+        if (m == null) return false;
         return dao.updateMember(m);
     }
 
-    // 8. 刪除會員
+    /**
+     * 8. 專門更新會員備註 (快速更新功能)
+     */
+    public boolean updateNote(int id, String note) {
+        String safeNote = (note == null) ? "" : note;
+        return dao.updateNote(id, safeNote);
+    }
+
+    /**
+     * 9. 刪除會員
+     */
     public boolean deleteMember(int id) {
         return dao.deleteMember(id);
     }

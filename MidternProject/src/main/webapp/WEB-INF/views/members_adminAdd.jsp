@@ -8,75 +8,220 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_green.css">
     
     <style>
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f0f2f5; margin: 0; padding: 40px 20px; }
-        .form-container { max-width: 600px; margin: auto; background: #ffffff; padding: 40px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 500; color: #64748b; font-size: 14px; }
-        input, select { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #e2e8f0; outline: none; box-sizing: border-box; transition: 0.3s; font-size: 15px; }
-        input:focus, select:focus { border-color: #4361ee; box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1); }
+        :root { 
+            --accent: #2ec4b6; /* 湖水綠 */
+            --accent-hover: #27ad9f;
+            --primary: #0f172a; 
+            --bg: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); 
+            --text-main: #334155;
+            --text-label: #64748b;
+        }
 
-        /* Radio 按鈕樣式 */
-        .radio-group { display: flex; gap: 25px; padding: 10px 0; }
-        .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #2b2d42; }
-        .radio-input { width: auto !important; margin: 0; }
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background: var(--bg); 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
 
-      /* 按鈕群組  */
-.btn-group { display: flex; gap: 15px; margin-top: 30px; }
-.btn-save { flex: 2; background: #2ec4b6; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 20px; font-weight: 700; letter-spacing: 2px; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(46, 196, 182, 0.2); }
-.btn-save:hover { background: #27ad9f; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(46, 196, 182, 0.3); }
-.btn-cancel { flex: 1; background: #f1f5f9; color: #64748b; text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 16px; border-radius: 12px; font-size: 19px; font-weight: 700; transition: 0.3s; }
-.btn-cancel:hover { background: #e2e8f0; color: #475569; }
+        .container { 
+            width: 100%;
+            max-width: 600px; 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 50px; 
+            border-radius: 32px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08); 
+            backdrop-filter: blur(10px);
+        }
 
-        /* 強制讓 Flatpickr 的年份和月份選單看起來更像下拉選單 */
-        .flatpickr-calendar .flatpickr-month { height: 40px; }
-        .flatpickr-current-month .numInputWrapper { width: 7ch; }
+        h2 { 
+            color: var(--primary); 
+            font-size: 28px;
+            margin-bottom: 35px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+            letter-spacing: -0.5px;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            font-weight: 700;
+            margin: 25px 0 15px 0;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 8px;
+        }
+
+        .form-group { margin-bottom: 24px; position: relative; }
+
+        label { 
+            display: block; 
+            margin-bottom: 10px; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            font-size: 16px; 
+        }
+
+        input, select, textarea { 
+            width: 100%; 
+            padding: 14px 18px; 
+            border-radius: 14px; 
+            border: 1px solid #cbd5e1; 
+            background-color: #f8fafc;
+            outline: none; 
+            box-sizing: border-box; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 15px;
+            color: var(--primary);
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--accent); 
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(46, 196, 182, 0.15); 
+            transform: translateY(-1px);
+        }
+
+        textarea { resize: none; }
+
+        .date-input-wrapper { position: relative; }
+        .date-input-wrapper::after {
+            content: "📅";
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            font-size: 18px;
+            opacity: 0.6;
+        }
+
+        .radio-group { 
+            display: flex; 
+            gap: 30px; 
+            padding: 12px 18px;
+            background: #f8fafc;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .radio-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            cursor: pointer; 
+            font-size: 16px;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .radio-item input[type="radio"] { 
+            width: 20px; 
+            height: 20px; 
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .btn-group { 
+            display: flex; 
+            gap: 16px; 
+            margin-top: 45px; 
+        }
+
+        .btn-base { 
+            flex: 1; 
+            padding: 16px; 
+            border-radius: 16px; 
+            font-size: 17px; 
+            font-weight: 700; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: all 0.3s ease; 
+            cursor: pointer; 
+            border: none; 
+            text-decoration: none; 
+            font-family: inherit;
+        }
+
+        .btn-save { 
+            background: var(--accent); 
+            color: white; 
+            box-shadow: 0 8px 20px rgba(46, 196, 182, 0.3);
+        }
+
+        .btn-save:hover { 
+            background: var(--accent-hover); 
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(46, 196, 182, 0.4); 
+        }
+
+        .btn-cancel { 
+            background: #fff; 
+            color: #64748b; 
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-cancel:hover { 
+            background: #f1f5f9; 
+            color: #475569;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 30px; border-radius: 0; }
+            .btn-group { flex-direction: column-reverse; }
+        }
     </style>
 </head>
 <body>
-
-<div class="form-container">
-    <h2 style="color: #1a237e; margin-bottom: 30px; display: flex; align-items: center; gap: 10px;">
-        🏸 <span>新增會員資料</span>
-    </h2>
-    
+<div class="container">
+    <h2>🏸 新增會員資料</h2>
     <form action="${pageContext.request.contextPath}/MembersAdminServlet" method="post">
         <input type="hidden" name="action" value="add">
         
+        <div class="section-title">帳號安全</div>
         <div class="form-group">
             <label>會員帳號 Username</label>
-            <input type="text" name="username" required placeholder="請輸入帳號">
+            <input type="text" name="username" required placeholder="請輸入帳號" autocapitalize="none">
         </div>
-
         <div class="form-group">
-            <label>初始密碼 Password</label>
-            <input type="password" name="password" required placeholder="請輸入預設密碼">
+            <label>密碼 Password</label>
+            <input type="password" name="password" required placeholder="請輸入密碼">
         </div>
 
+        <div class="section-title">個人資訊</div>
         <div class="form-group">
             <label>姓名 Name</label>
             <input type="text" name="fullName" required placeholder="例如：王小明">
         </div>
-
-        <div style="display: flex; gap: 20px;">
-            <div class="form-group" style="flex: 1;">
-                <label>性別 Gender</label>
-                <div class="radio-group">
-                    <label class="radio-label"><input type="radio" name="gender" value="男" checked class="radio-input"> 男</label>
-                    <label class="radio-label"><input type="radio" name="gender" value="女" class="radio-input"> 女</label>
-                </div>
-            </div>
-            <div class="form-group" style="flex: 1;">
-                <label>生日 Birthday</label>
-                <input type="text" name="birthday" id="birthdayPicker" placeholder="請選擇日期..." 
-                       style="background-color: #fff; cursor: pointer;" readonly>
+        
+        <div class="form-group">
+            <label>性別 Gender</label>
+            <div class="radio-group">
+                <label class="radio-item"><input type="radio" name="gender" value="男" checked> 男</label>
+                <label class="radio-item"><input type="radio" name="gender" value="女"> 女</label>
             </div>
         </div>
 
         <div class="form-group">
-            <label>電話 Phone</label>
-            <input type="tel" id="phoneInput" name="phone" placeholder="09xx-xxx-xxx" maxlength="12" required>
+            <label>生日 Birthday</label>
+            <div class="date-input-wrapper">
+                <input type="text" id="birthdayPicker" name="birthday" required placeholder="請選取日期" readonly>
+            </div>
         </div>
 
         <div class="form-group">
@@ -85,53 +230,52 @@
         </div>
 
         <div class="form-group">
-            <label>會員等級</label>
+            <label>電話 Phone</label>
+            <input type="tel" id="phoneInput" name="phone" placeholder="09xx-xxx-xxx" maxlength="12" required>
+        </div>
+
+        <div class="form-group">
+            <label>會員等級 Membership Level</label>
             <select name="membershipLevel">
-                <option value="Regular">一般會員</option>
-                <option value="VIP">VIP 會員</option>
+                <option value="Regular">👤 一般會員 (Regular)</option>
+                <option value="VIP">💎 VIP 會員 (VIP)</option>
             </select>
         </div>
 
+        <div class="form-group">
+            <label>備註 Note</label>
+            <textarea name="note" rows="3" placeholder="請輸入備註"></textarea>
+        </div>
+
         <div class="btn-group">
-            <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=dashboard" class="btn-cancel">取消</a>
-            <button type="submit" class="btn-save">新增會員</button>
+            <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=dashboard" class="btn-base btn-cancel">返回列表</a>
+            <button type="submit" class="btn-base btn-save">新增會員</button>
         </div>
     </form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
-
 <script>
-    // 🔴 初始化 Flatpickr 專業月曆
+    // 初始化 Flatpickr
     flatpickr("#birthdayPicker", {
-        locale: "zh_tw",       // 繁體中文
-        dateFormat: "Y-m-d",  // 資料庫標準格式
-        maxDate: "today",     // 不能選未來
-        // 核心設定：開啟下拉選單挑選模式
-        monthSelectorType: "dropdown", 
-        // 設定年份範圍：1930 到今年
-        showMonths: 1,
-        static: false,
-        onReady: function(selectedDates, dateStr, instance) {
-            // 強制設定年份輸入框為 1930-今年
-            const yearInput = instance.currentYearElement;
-            yearInput.setAttribute("min", "1930");
-        }
+        locale: "zh_tw",
+        dateFormat: "Y-m-d",
+        maxDate: "today",
+        disableMobile: "true"
     });
 
-    // 手機號碼自動帶入橫線邏輯
+    // 手機號碼格式化 (09xx-xxx-xxx)
     document.getElementById('phoneInput').addEventListener('input', function (e) {
         let value = e.target.value.replace(/\D/g, ''); 
         let formattedValue = '';
         if (value.length > 0) {
             formattedValue = value.substring(0, 4);
             if (value.length > 4) formattedValue += '-' + value.substring(4, 7);
-            if (value.length > 7) formattedValue += '-' + value.substring(7, 10);
+            if (value.length > 7) formattedValue += '-' + value.substring(7, 11);
         }
         e.target.value = formattedValue;
     });
 </script>
-
 </body>
 </html>

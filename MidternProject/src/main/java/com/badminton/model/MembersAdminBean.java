@@ -6,6 +6,7 @@ import java.sql.Date;
 
 /**
  * 對應資料庫 Admins 表的實體類 (Bean)
+ * 包含基本資訊、職位權限、狀態以及時間戳記
  */
 public class MembersAdminBean implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -27,7 +28,9 @@ public class MembersAdminBean implements Serializable {
     private Timestamp createdAt;    // created_at
     private Timestamp updatedAt;    // updated_at
 
-    // 無參數建構子 (Servlet/JSP 規範必須)
+    /**
+     * 無參數建構子 (Servlet/JSP 規範必須)
+     */
     public MembersAdminBean() {}
 
     // --- Getters and Setters ---

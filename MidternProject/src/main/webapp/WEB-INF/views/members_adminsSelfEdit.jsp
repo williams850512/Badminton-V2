@@ -4,18 +4,18 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>羽球館 | 編輯管理員</title>
+    <title>羽球館 | 管理員編輯</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_green.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/confetti.css">
     
     <style>
         :root { 
-            --accent: #2ec4b6; 
-            --accent-hover: #27ad9f;
+            --accent: #6366f1; /* 質感紫色 */
+            --accent-hover: #4f46e5;
             --primary: #0f172a; 
-            --bg: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); 
+            --bg: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); 
             --text-main: #334155;
             --text-label: #64748b;
         }
@@ -28,17 +28,18 @@
             align-items: center;
             justify-content: center;
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px;
         }
 
         .container { 
             width: 100%;
-            max-width: 600px; 
+            max-width: 650px; 
             background: rgba(255, 255, 255, 0.95); 
             padding: 50px; 
             border-radius: 32px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.08); 
+            box-shadow: 0 20px 50px rgba(99, 102, 241, 0.1); 
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         h2 { 
@@ -49,6 +50,8 @@
             align-items: center; 
             gap: 12px;
             letter-spacing: -0.5px;
+            justify-content: center;
+            text-align: center;
         }
 
         .section-title {
@@ -57,19 +60,19 @@
             letter-spacing: 1.5px;
             color: var(--accent);
             font-weight: 700;
-            margin: 25px 0 15px 0;
-            border-bottom: 1px solid #f1f5f9;
+            margin: 30px 0 15px 0;
+            border-bottom: 2px solid #f5f3ff;
             padding-bottom: 8px;
         }
 
-        .form-group { margin-bottom: 24px; }
+        .form-group { margin-bottom: 24px; position: relative; }
 
         label { 
             display: block; 
             margin-bottom: 10px; 
             font-weight: 600; 
             color: var(--text-main); 
-            font-size: 16px; 
+            font-size: 15px; 
         }
 
         input, select, textarea { 
@@ -89,15 +92,12 @@
         input:focus, select:focus, textarea:focus { 
             border-color: var(--accent); 
             background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(46, 196, 182, 0.15); 
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15); 
             transform: translateY(-1px);
         }
 
-        textarea {
-            resize: none;
-        }
+        textarea { resize: none; }
 
-        /* 唯讀輸入框樣式：帳號不給改，呈現灰色感 */
         input:disabled {
             background-color: #f1f5f9;
             color: #94a3b8;
@@ -105,7 +105,6 @@
             border-style: dashed;
         }
 
-        /* 日期欄位包裹器 */
         .date-input-wrapper { position: relative; }
         .date-input-wrapper::after {
             content: "📅";
@@ -132,16 +131,17 @@
             align-items: center; 
             gap: 10px; 
             cursor: pointer; 
-            font-size: 16px;
+            font-size: 15px;
             color: var(--text-main);
             font-weight: 500;
         }
 
         .radio-item input[type="radio"] { 
-            width: 20px; 
-            height: 20px; 
-            accent-color: var(--accent);
+            width: 18px; 
+            height: 18px; 
+            accent-color: var(--accent); 
             cursor: pointer;
+            margin: 0;
         }
 
         .btn-group { 
@@ -169,13 +169,13 @@
         .btn-save { 
             background: var(--accent); 
             color: white; 
-            box-shadow: 0 8px 20px rgba(46, 196, 182, 0.3);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
         }
 
         .btn-save:hover { 
             background: var(--accent-hover); 
             transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(46, 196, 182, 0.4); 
+            box-shadow: 0 12px 25px rgba(99, 102, 241, 0.4); 
         }
 
         .btn-cancel { 
@@ -191,28 +191,28 @@
         }
 
         @media (max-width: 480px) {
-            .container { padding: 30px; border-radius: 0; }
+            .container { padding: 30px 20px; border-radius: 0; }
             .btn-group { flex-direction: column-reverse; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>✍️ 編修管理員資料</h2>
+    <h2>🛡️ 編輯管理員資料</h2>
     <form action="${pageContext.request.contextPath}/MembersAdminServlet" method="post">
         <input type="hidden" name="action" value="adminUpdate">
         <input type="hidden" name="adminId" value="${a.adminId}">
         
         <div class="section-title">帳號資訊</div>
         <div class="form-group">
-            <label>帳號 Username </label>
+            <label>登入帳號 Username</label>
             <input type="text" value="${a.username}" disabled>
         </div>
 
-        <div class="section-title">個人基本資訊</div>
+        <div class="section-title">個人資訊</div>
         <div class="form-group">
-            <label>姓名 Name</label>
-            <input type="text" name="fullName" value="${a.fullName}" required placeholder="請輸入完整姓名">
+            <label>姓名 Full Name</label>
+            <input type="text" name="fullName" value="${a.fullName}" required placeholder="請輸入姓名">
         </div>
         
         <div class="form-group">
@@ -244,6 +244,7 @@
             <input type="tel" name="phone" value="${a.phone}" placeholder="例如：0912-345-678">
         </div>
 
+        <div class="section-title">管理與權限</div>
         <div class="form-group">
             <label>帳號狀態 Status</label>
             <select name="status">
@@ -253,34 +254,35 @@
         </div>
 
         <div class="form-group">
-            <label>系統職位權限 Role</label>
+            <label>職位權限 Role</label>
             <select name="role">
                 <option value="staff" ${a.role == 'staff' ? 'selected' : ''}>👤 一般職員 (Staff)</option>
-                <option value="manager" ${a.role == 'manager' ? 'selected' : ''}>👑 主管 (Manager)</option>
+                <option value="manager" ${a.role == 'manager' ? 'selected' : ''}>💼 系統主管 (Manager)</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label>管理員備註 Note (僅供後台查閱)</label>
-            <textarea name="note" rows="3" placeholder="請輸入內部備註...">${a.note}</textarea>
+            <label>備註 Note</label>
+            <textarea name="note" rows="3" placeholder="請輸入備註">${a.note}</textarea>
         </div>
 
         <div class="btn-group">
             <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=listAdmins" class="btn-base btn-cancel">返回列表</a>
-            <button type="submit" class="btn-base btn-save">更新</button>
+            <button type="submit" class="btn-base btn-save">儲存修改</button>
         </div>
     </form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://npmcdn.com/flatpickr/dist/l10n/zh-tw.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
 <script>
-    // 初始化 Flatpickr
-    flatpickr("#birthdayPicker", {
-        locale: "zh_tw",
-        dateFormat: "Y-m-d",
-        maxDate: "today",
-        disableMobile: "true"
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr("#birthdayPicker", {
+            locale: "zh_tw",
+            dateFormat: "Y-m-d",
+            maxDate: "today",
+            disableMobile: "true"
+        });
     });
 </script>
 </body>

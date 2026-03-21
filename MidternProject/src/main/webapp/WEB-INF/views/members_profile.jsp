@@ -7,18 +7,22 @@
 <meta charset="UTF-8">
 <title>羽球館 | 個人中心</title>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
     :root {
         --primary-color: #27ae60;
-        --admin-color: #4361ee;
-        --danger-color: #e74c3c;
         --text-dark: #2c3e50;
         --text-light: #7f8c8d;
         --bg-color: #f0f2f5;
+        --border-color: #e2e8f0;
     }
 
     body {
-        font-family: "Microsoft JhengHei", sans-serif;
+        font-family: 'Noto Sans TC', sans-serif;
         background-color: var(--bg-color);
         margin: 0;
         display: flex;
@@ -32,8 +36,8 @@
         background: white;
         width: 100%;
         max-width: 650px;
-        border-radius: 24px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        border-radius: 28px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
         overflow: hidden;
     }
 
@@ -44,8 +48,7 @@
         text-align: center;
     }
     
-    /* 這裡稍微調整，因為一般會員不再區分 admin 樣式，統一用 primary */
-    .profile-header h2 { margin: 0; font-size: 26px; letter-spacing: 1px; }
+    .profile-header h2 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: 1px; }
     .profile-header p { margin: 10px 0 0; opacity: 0.9; font-size: 14px; }
 
     .profile-body { padding: 35px; }
@@ -57,118 +60,78 @@
         margin-bottom: 35px;
         background: #f8f9fa;
         padding: 25px;
-        border-radius: 16px;
+        border-radius: 20px;
         border: 1px solid #edf2f7;
     }
 
     .info-item label {
-        display: block;
-        font-size: 11px;
-        color: var(--text-light);
-        margin-bottom: 4px;
-        text-transform: uppercase;
-        font-weight: 700;
+        display: block; font-size: 11px; color: var(--text-light);
+        margin-bottom: 4px; text-transform: uppercase; font-weight: 700;
     }
 
-    .info-item .value {
-        font-weight: 700;
-        color: var(--text-dark);
-        font-size: 15px;
-    }
+    .info-item .value { font-weight: 700; color: var(--text-dark); font-size: 15px; }
 
     .role-badge {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: bold;
+        display: inline-block; padding: 4px 12px; border-radius: 20px;
+        font-size: 12px; font-weight: bold;
     }
     .badge-user { background: #e1f5fe; color: #0288d1; }
     .badge-vip { background: #fef3c7; color: #d97706; }
 
     .update-section h3 {
-        font-size: 18px;
-        border-left: 5px solid var(--primary-color);
-        padding-left: 12px;
-        margin-bottom: 25px;
-        color: var(--text-dark);
+        font-size: 18px; border-left: 5px solid var(--primary-color);
+        padding-left: 12px; margin-bottom: 25px; color: var(--text-dark); font-weight: 700;
     }
     
     .form-group { margin-bottom: 22px; }
-    .form-group label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; color: #4a5568; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 14px; color: #4a5568; }
     
-    input[type="text"], input[type="email"], input[type="date"] {
-        width: 100%;
-        padding: 13px;
-        border: 1.5px solid #e2e8f0;
-        border-radius: 10px;
-        box-sizing: border-box;
-        font-size: 15px;
-        transition: 0.3s;
-        background-color: #fff;
+    input[type="text"], 
+    input[type="email"] {
+        width: 100%; padding: 13px 15px; border: 1.5px solid var(--border-color);
+        border-radius: 12px; box-sizing: border-box; font-size: 15px;
+        font-family: inherit; transition: all 0.3s ease; background-color: #fff;
     }
 
-    input:focus {
-        border-color: var(--primary-color);
-        outline: none;
-        box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.1);
+    /* 專門給 Flatpickr 使用的樣式 */
+    .datepicker-input {
+        width: 100%; padding: 13px 15px; border: 1.5px solid var(--border-color);
+        border-radius: 12px; box-sizing: border-box; font-size: 15px;
+        font-family: inherit; background-color: #fff; cursor: pointer;
+    }
+
+    input:focus, .datepicker-input:focus {
+        border-color: var(--primary-color); outline: none;
+        box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.1); background-color: #fafdfb;
     }
     
-    .radio-group {
-        display: flex;
-        gap: 30px;
-        padding: 10px 5px;
-    }
-
-    .radio-label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        font-weight: normal;
-        color: var(--text-dark);
-        font-size: 15px;
-    }
-
-    .radio-label input {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-        margin: 0;
-    }
+    .radio-group { display: flex; gap: 30px; padding: 10px 5px; }
+    .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; font-size: 15px; }
 
     .btn-update {
-        width: 100%;
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 16px;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
-        box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+        width: 100%; background: var(--primary-color); color: white; border: none;
+        padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700;
+        cursor: pointer; transition: 0.3s; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+        margin-top: 10px;
     }
     .btn-update:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(39, 174, 96, 0.3); }
 
     .nav-links {
-        text-align: center;
-        margin-top: 30px;
-        padding-top: 25px;
-        border-top: 1px solid #edf2f7;
+        text-align: center; margin-top: 30px; padding-top: 25px; border-top: 1px solid #edf2f7;
     }
     .nav-links a { color: var(--text-light); text-decoration: none; font-size: 14px; margin: 0 12px; font-weight: 500; }
     .nav-links a:hover { color: var(--primary-color); }
+
+    /* 客製化 Flatpickr 顏色 */
+    .flatpickr-day.selected { background: var(--primary-color) !important; border-color: var(--primary-color) !important; }
 </style>
 </head>
 <body>
 
     <div class="profile-card">
         <div class="profile-header">
-            <%-- 修正：使用 user.fullName --%>
             <h2>歡迎回來，${user.fullName}</h2>
-            <p>管理您的個人檔案與帳戶設定</p>
+            <p>管理您的個人帳戶資訊</p>
         </div>
 
         <div class="profile-body">
@@ -180,7 +143,6 @@
                 <div class="info-item">
                     <label>會員等級 Level</label>
                     <div class="value">
-                        <%-- 修正：判斷條件改為 membershipLevel --%>
                         <c:choose>
                             <c:when test="${user.membershipLevel == 'VIP'}">
                                 <span class="role-badge badge-vip">💎 VIP 會員</span>
@@ -212,12 +174,10 @@
             <div class="update-section">
                 <h3>修改個人資料</h3>
                 <form id="profileForm" action="MembersServlet" method="post">
-                    <%-- 修正：action 名稱改為 update 對齊 Servlet --%>
                     <input type="hidden" name="action" value="update">
                     
                     <div class="form-group">
                         <label>姓名 Name</label>
-                        <%-- 修正：name 屬性改為 fullName --%>
                         <input type="text" name="fullName" value="${user.fullName}" required>
                     </div>
 
@@ -225,17 +185,21 @@
                         <label>性別 Gender</label>
                         <div class="radio-group">
                             <label class="radio-label">
-                                <input type="radio" name="gender" value="男" ${user.gender == '男' ? 'checked' : ''} required> 男 (Male)
+                                <input type="radio" name="gender" value="男" ${user.gender == '男' ? 'checked' : ''} required> 男
                             </label>
                             <label class="radio-label">
-                                <input type="radio" name="gender" value="女" ${user.gender == '女' ? 'checked' : ''}> 女 (Female)
+                                <input type="radio" name="gender" value="女" ${user.gender == '女' ? 'checked' : ''}> 女
                             </label>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>生日 Birthday</label>
-                        <input type="date" name="birthday" value="${user.birthday}">
+                        <%-- 這裡改為 text 類型，由 Flatpickr 接手 --%>
+                        <input type="text" id="birthdayPicker" name="birthday" 
+                               class="datepicker-input" 
+                               value="${user.birthday}" 
+                               placeholder="請選取日期" readonly>
                     </div>
                     
                     <div class="form-group">
@@ -253,12 +217,23 @@
             </div>
 
             <div class="nav-links">
-                <a href="MembersServlet?action=logout" style="color: #e67e22;">登出 Logout</a>
+                <a href="MembersServlet?action=logout" style="color: #e67e22; font-weight: 700;">登出 Logout</a>
             </div>
         </div>
     </div>
 
 <script>
+// 1. 初始化 Flatpickr 月曆選取器
+flatpickr("#birthdayPicker", {
+    locale: "zh_tw",
+    dateFormat: "Y-m-d",
+    maxDate: "today", // 禁止選擇未來日期
+    disableMobile: "true", // 強制在手機上也使用這個精緻月曆，而非手機原生選取器
+    altInput: true,
+    altFormat: "Y-m-d", // 顯示給使用者看的格式
+});
+
+// 2. 電話格式自動加上 "-"
 const phoneInput = document.getElementById('phoneInput');
 if (phoneInput) {
     phoneInput.addEventListener('input', function (e) {
@@ -271,17 +246,16 @@ if (phoneInput) {
     });
 }
 
+// 3. 處理更新成功彈窗
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('msg') === 'ok') {
     Swal.fire({
         icon: 'success',
         title: '更新成功！',
         text: '您的個人資料已成功存檔。',
-        timer: 2000,
-        showConfirmButton: false,
-        borderRadius: '20px'
+        timer: 1500,
+        showConfirmButton: false
     });
-    // 清除網址參數防止重複彈窗
     window.history.replaceState({}, document.title, "MembersServlet?action=showProfile");
 }
 </script>

@@ -88,7 +88,6 @@
 
 <div class="admin-card">
     <h2>系統管理後台</h2>
-    <p>Admin Dashboard Login</p>
     
     <%-- 錯誤訊息處理 --%>
     <%-- 1 代表帳密錯誤 --%>
@@ -116,11 +115,11 @@
             <input type="password" name="password" placeholder="請輸入密碼" required autocomplete="current-password">
         </div>
         
-        <button type="submit">進入管理系統 ENTER ADMIN</button>
+        <button type="submit">進入管理系統</button>
     </form>
     
     <%-- 返回一般會員登入頁面 (同樣維持隱藏概念，讓管理員能隨時切回前台) --%>
-    <a href="MembersServlet?action=showLogin" class="back-link">← 返回一般會員入口</a>
+    <a href="MembersServlet?action=showLogin" class="back-link">一般會員入口</a>
 </div>
 
 </body>
