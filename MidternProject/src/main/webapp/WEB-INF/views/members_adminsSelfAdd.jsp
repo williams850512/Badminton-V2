@@ -182,7 +182,6 @@
             transform: translateY(-2px);
         }
 
-        /* 錯誤提示樣式 */
         .error-msg {
             background: #fef2f2;
             color: #dc2626;
@@ -204,7 +203,6 @@
 <div class="container">
     <h2>🛡️ 新增系統管理員</h2>
 
-    <%-- 顯示錯誤訊息 --%>
     <c:if test="${not empty param.error}">
         <div class="error-msg">❌ 新增失敗，請檢查帳號是否重複或格式有誤。</div>
     </c:if>
@@ -215,6 +213,7 @@
         <div class="section-title">帳號安全設定</div>
         <div class="form-group">
             <label>登入帳號 Username</label>
+            <%-- ✨ 加入禁止自動大寫屬性 --%>
             <input type="text" name="username" required 
                    placeholder="請輸入帳號"
                    autocapitalize="none"
@@ -255,7 +254,8 @@
 
         <div class="form-group">
             <label>電話 Phone</label>
-            <input type="tel" name="phone" placeholder="例如：0912-345-678">
+            <%-- ✨ 加入 ID 以便 JS 抓取處理格式 --%>
+            <input type="tel" name="phone" id="phoneInput" maxlength="12" placeholder="09xx-xxx-xxx">
         </div>
 
         <div class="form-group">
@@ -282,12 +282,33 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // 1. 初始化日曆
         flatpickr("#birthdayPicker", {
             locale: "zh_tw",
             dateFormat: "Y-m-d",
-            maxDate: "today", // 禁止選擇未來的日期
+            maxDate: "today", 
             disableMobile: "true"
         });
+
+        // 2. ✨ 自動處理手機號碼格式 (09xx-xxx-xxx)
+        const phoneInput = document.getElementById('phoneInput');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, ''); 
+                let formattedValue = '';
+
+                if (value.length > 0) {
+                    formattedValue = value.substring(0, 4); 
+                    if (value.length > 4) {
+                        formattedValue += '-' + value.substring(4, 7); 
+                    }
+                    if (value.length > 7) {
+                        formattedValue += '-' + value.substring(7, 12); 
+                    }
+                }
+                e.target.value = formattedValue;
+            });
+        }
     });
 </script>
 </body>

@@ -31,6 +31,7 @@
 
     .form-group { margin-bottom: 25px; }
     label { display: block; margin-bottom: 8px; font-weight: 700; color: #4b5563; font-size: 14px; padding-left: 2px; }
+    label span { font-size: 12px; color: #9ca3af; font-weight: 400; margin-left: 4px; }
     
     input { 
         width: 100%; padding: 14px; border: 2px solid #edf2f7; 
@@ -88,38 +89,38 @@
 
 <div class="admin-card">
     <h2>系統管理後台</h2>
+    <p>Administrator Login</p>
     
     <%-- 錯誤訊息處理 --%>
-    <%-- 1 代表帳密錯誤 --%>
     <% if("1".equals(request.getParameter("error"))) { %>
         <div class="msg-error">❌ 管理員帳號或密碼錯誤</div>
     <% } %>
     
-    <%-- no_auth 代表試圖闖入被 Filter 踢回來 --%>
     <% if("no_auth".equals(request.getParameter("error"))) { %>
         <div class="msg-error">🔒 權限不足，請先登入管理員</div>
     <% } %>
 
-    <%-- 修正：確保 Action 正確指向 MembersAdminServlet --%>
     <form action="MembersAdminServlet" method="post">
-        <%-- 修正：確保 action 參數為 login，對齊 Servlet 的 switch-case --%>
         <input type="hidden" name="action" value="login">
         
         <div class="form-group">
             <label>帳號 <span>(Username)</span></label>
-            <input type="text" name="username" placeholder="請輸入管理員帳號" required autocomplete="username">
+            <%-- ✅ 修正：加入 autocomplete="off" 與 spellcheck="false" 關閉自動完成 --%>
+            <input type="text" name="username" placeholder="請輸入管理員帳號" 
+                   required autocomplete="off" spellcheck="false">
         </div>
         
         <div class="form-group">
             <label>密碼 <span>(Password)</span></label>
-            <input type="password" name="password" placeholder="請輸入密碼" required autocomplete="current-password">
+            <%-- ✅ 修正：密碼欄位通常建議也加上，防止提示彈出 --%>
+            <input type="password" name="password" placeholder="請輸入密碼" 
+                   required autocomplete="new-password">
         </div>
         
         <button type="submit">進入管理系統</button>
     </form>
     
-    <%-- 返回一般會員登入頁面 (同樣維持隱藏概念，讓管理員能隨時切回前台) --%>
-    <a href="MembersServlet?action=showLogin" class="back-link">一般會員入口</a>
+    <a href="MembersServlet?action=showLogin" class="back-link">返回前台</a>
 </div>
 
 </body>

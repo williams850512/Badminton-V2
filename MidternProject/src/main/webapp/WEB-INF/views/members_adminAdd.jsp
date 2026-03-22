@@ -95,6 +95,14 @@
             transform: translateY(-1px);
         }
 
+        /* 唯讀選單樣式 */
+        .readonly-select {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+            border-color: #e2e8f0;
+        }
+
         textarea { resize: none; }
 
         .date-input-wrapper { position: relative; }
@@ -191,6 +199,7 @@
 <div class="container">
     <h2>🏸 新增會員資料</h2>
     <form action="${pageContext.request.contextPath}/MembersAdminServlet" method="post">
+        <%-- 注意：action 根據你 Dashboard 傳遞的參數應為 add 或 insert --%>
         <input type="hidden" name="action" value="add">
         
         <div class="section-title">帳號安全</div>
@@ -224,6 +233,7 @@
             </div>
         </div>
 
+        <div class="section-title">聯絡與權限</div>
         <div class="form-group">
             <label>電子信箱 Email</label>
             <input type="email" name="email" placeholder="example@mail.com">
@@ -236,10 +246,24 @@
 
         <div class="form-group">
             <label>會員等級 Membership Level</label>
-            <select name="membershipLevel">
-                <option value="Regular">👤 一般會員 (Regular)</option>
-                <option value="VIP">💎 VIP 會員 (VIP)</option>
-            </select>
+            <c:choose>
+                <%-- 主管權限：可選 --%>
+                <c:when test="${adminUser.role == 'manager'}">
+                    <select name="membershipLevel">
+                        <option value="Regular" selected>👤 一般會員 (Regular)</option>
+                        <option value="VIP">💎 VIP 會員 (VIP)</option>
+                    </select>
+                </c:when>
+                <%-- 一般管理員權限：不可選，預設 Regular --%>
+                <c:otherwise>
+                    <select class="readonly-select" disabled>
+                        <option value="Regular" selected>👤 一般會員 (Regular)</option>
+                    </select>
+                    <%-- 透過 Hidden 傳值給後端 --%>
+                    <input type="hidden" name="membershipLevel" value="Regular">
+                    <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">* 新會員預設為一般會員</p>
+                </c:otherwise>
+            </c:choose>
         </div>
 
         <div class="form-group">
@@ -249,7 +273,7 @@
 
         <div class="btn-group">
             <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=dashboard" class="btn-base btn-cancel">返回列表</a>
-            <button type="submit" class="btn-base btn-save">新增會員</button>
+            <button type="submit" class="btn-base btn-save">確認新增</button>
         </div>
     </form>
 </div>

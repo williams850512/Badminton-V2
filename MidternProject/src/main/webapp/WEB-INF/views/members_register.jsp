@@ -9,98 +9,101 @@
 
 <style>
     :root {
-        --primary-blue: #5c67f2;    /* 統一使用的深藍紫色 */
+        --primary-blue: #5c67f2; 
         --border-color: #e5eaf2;
-        --label-color: #4a5568;
-        --placeholder-color: #a0aec0;
-        --soft-gray: #f8f9fa;
+        --label-color: #4b5563;
+        --placeholder-color: #cbd5e0;
         --error-red: #ef4444;
+        --bg-color: #f8fafc;
     }
 
     body { 
         font-family: 'Noto Sans TC', sans-serif; 
-        background-color: #f0f2f5; 
+        background-color: var(--bg-color); 
         display: flex; justify-content: center; align-items: center; 
         min-height: 100vh; margin: 0; padding: 40px 0;
     }
 
     .reg-container { 
-        background: white; padding: 40px; border-radius: 24px; 
-        width: 100%; max-width: 420px; 
-        box-shadow: 0 20px 40px rgba(0,0,0,0.08); 
+        background: white; padding: 45px 40px; border-radius: 20px; 
+        width: 100%; max-width: 400px; 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05); 
+        border: 1px solid #f1f5f9;
     }
 
-    h2 { color: #2d3748; text-align: center; margin-bottom: 35px; font-size: 28px; font-weight: 700; line-height: 1.2; }
-    h2 span { display: block; font-size: 14px; color: #718096; font-weight: 500; text-transform: uppercase; margin-top: 8px; letter-spacing: 1px; }
+    h2 { color: #0f172a; text-align: center; margin-bottom: 30px; font-size: 24px; font-weight: 700; line-height: 1.2; }
+    h2 span { display: block; font-size: 12px; color: #94a3b8; font-weight: 500; text-transform: uppercase; margin-top: 6px; letter-spacing: 1px; }
 
-    .form-group { margin-bottom: 25px; }
+    .form-group { margin-bottom: 20px; }
+    
     .form-group label {
         display: block;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
         color: var(--label-color);
         font-weight: 700;
-        font-size: 18px;
+        font-size: 14px;
+        padding-left: 2px;
     }
     .form-group label span {
-        font-weight: 500;
-        color: #718096;
-        font-size: 15px;
-        margin-left: 5px;
+        font-weight: 400;
+        color: #94a3b8;
+        font-size: 12px;
+        margin-left: 4px;
     }
 
-    /* 輸入框樣式 */
     input[type="text"], input[type="password"], input[type="email"], #birthdayPicker { 
-        width: 100%; padding: 16px 20px; 
-        border: 2px solid var(--border-color); 
-        border-radius: 18px; 
-        box-sizing: border-box; font-size: 17px; 
-        transition: all 0.3s ease; 
+        width: 100%; padding: 12px 16px; 
+        border: 1.5px solid var(--border-color); 
+        border-radius: 12px; 
+        box-sizing: border-box; font-size: 15px; 
+        transition: all 0.2s ease; 
         background-color: white;
+        color: #334155;
     }
 
     input:focus, #birthdayPicker:focus {
         outline: none; 
         border-color: var(--primary-blue);
-        box-shadow: 0 0 0 4px rgba(92, 103, 242, 0.1);
+        box-shadow: 0 0 0 4px rgba(92, 103, 242, 0.08);
     }
 
-    input::placeholder { color: var(--placeholder-color); }
+    input::placeholder { color: var(--placeholder-color); font-size: 14px; }
 
-    .radio-group { display: flex; gap: 40px; padding: 10px 5px; }
-    .radio-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 500; color: var(--label-color); font-size: 17px; }
-    .radio-input { width: 20px !important; height: 20px !important; cursor: pointer; accent-color: var(--primary-blue); }
+    .radio-group { display: flex; gap: 30px; padding: 5px 2px; }
+    .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; color: #4b5563; font-size: 15px; }
+    .radio-input { width: 18px !important; height: 18px !important; cursor: pointer; accent-color: var(--primary-blue); }
 
-    /* ✨ 按鈕已改為與登入頁一致的藍色漸層 ✨ */
     button { 
-        width: 100%; padding: 18px; 
-        background: linear-gradient(135deg, var(--primary-blue), #4752e8);
-        color: white; border: none; border-radius: 18px; 
-        font-size: 20px; font-weight: 700; cursor: pointer; 
+        width: 100%; padding: 14px; 
+        background: var(--primary-blue);
+        color: white; border: none; border-radius: 12px; 
+        font-size: 16px; font-weight: 700; cursor: pointer; 
         transition: 0.3s; margin-top: 15px;
-        box-shadow: 0 10px 20px rgba(92, 103, 242, 0.2);
+        letter-spacing: 0.5px;
     }
     button:hover { 
-        transform: translateY(-2px); 
-        box-shadow: 0 12px 25px rgba(92, 103, 242, 0.3); 
+        background: #4752e8;
+        transform: translateY(-1px); 
+        box-shadow: 0 5px 15px rgba(92, 103, 242, 0.2); 
     }
 
     .msg-error { 
         background-color: #fef2f2; color: var(--error-red); 
-        border: 1px solid #fecaca; padding: 12px; border-radius: 12px; 
-        text-align: center; margin-bottom: 25px; font-size: 15px;
+        border: 1px solid #fee2e2; padding: 10px; border-radius: 10px; 
+        text-align: center; margin-bottom: 25px; font-size: 13px; font-weight: 500;
     }
 
     .footer-link { 
         text-align: center; 
-        margin-top: 50px; 
-        font-size: 18px; 
-        color: #909399;
-        display: flex; justify-content: center; align-items: center; gap: 8px;
+        margin-top: 30px; 
+        font-size: 14px; 
+        color: #64748b;
     }
     .footer-link a { 
-        color: var(--primary-blue); /* 連結也改回藍色以求統一 */
+        color: var(--primary-blue); 
         text-decoration: none; 
         font-weight: 700; 
+        margin-left: 5px;
     }
     .footer-link a:hover { text-decoration: underline; }
 </style>
@@ -120,17 +123,17 @@
         
         <div class="form-group">
             <label>帳號 <span>(Username)</span></label>
-            <input type="text" name="username" required placeholder="設定登入帳號" autofocus>
+            <input type="text" name="username" required placeholder="設定登入帳號" autofocus autocomplete="off">
         </div>
         
         <div class="form-group">
             <label>密碼 <span>(Password)</span></label>
-            <input type="password" name="password" required placeholder="設定登入密碼">
+            <input type="password" name="password" required placeholder="設定登入密碼" autocomplete="new-password">
         </div>
         
         <div class="form-group">
             <label>姓名 <span>(Full Name)</span></label>
-            <input type="text" name="fullName" placeholder="請輸入姓名" required>
+            <input type="text" name="fullName" placeholder="請輸入姓名" required autocomplete="off">
         </div>
         
         <div class="form-group">
@@ -148,12 +151,12 @@
         
         <div class="form-group">
             <label>電話 <span>(Phone)</span></label>
-            <input type="text" name="phone" id="phone" maxlength="12" placeholder="09xx-xxx-xxx" required>
+            <input type="text" name="phone" id="phone" maxlength="12" placeholder="09xx-xxx-xxx" required autocomplete="off">
         </div>
         
         <div class="form-group">
             <label>電子信箱 <span>(Email)</span></label>
-            <input type="email" name="email" placeholder="example@mail.com">
+            <input type="email" name="email" placeholder="example@mail.com" autocomplete="off">
         </div>
         
         <button type="submit">立即註冊 Register Now</button>

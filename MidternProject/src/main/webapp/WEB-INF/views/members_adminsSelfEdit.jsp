@@ -4,7 +4,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>羽球館 | 管理員編輯</title>
+    <title>羽球館 | 編輯個人資料</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -12,7 +12,7 @@
     
     <style>
         :root { 
-            --accent: #6366f1; /* 質感紫色 */
+            --accent: #6366f1;
             --accent-hover: #4f46e5;
             --primary: #0f172a; 
             --bg: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); 
@@ -98,7 +98,7 @@
 
         textarea { resize: none; }
 
-        input:disabled {
+        input:disabled, select:disabled {
             background-color: #f1f5f9;
             color: #94a3b8;
             cursor: not-allowed;
@@ -198,7 +198,20 @@
 </head>
 <body>
 <div class="container">
-    <h2>🛡️ 編輯管理員資料</h2>
+
+    <%-- 判斷是否為編輯「自己」的資料 --%>
+    <c:set var="isEditingSelf" value="${adminUser.adminId == a.adminId}" />
+    <%-- 判斷是否為職員在編輯自己 --%>
+    <c:set var="isSelfStaff" value="${adminUser.role == 'staff' && isEditingSelf}" />
+
+    <%-- 動態標題切換 --%>
+    <h2>
+        <c:choose>
+            <c:when test="${isEditingSelf}">👤 個人帳號設定</c:when>
+            <c:otherwise>⚙️ 編輯管理員資料</c:otherwise>
+        </c:choose>
+    </h2>
+
     <form action="${pageContext.request.contextPath}/MembersAdminServlet" method="post">
         <input type="hidden" name="action" value="adminUpdate">
         <input type="hidden" name="adminId" value="${a.adminId}">
@@ -241,24 +254,30 @@
 
         <div class="form-group">
             <label>電話 Phone</label>
-            <input type="tel" name="phone" value="${a.phone}" placeholder="例如：0912-345-678">
+            <input type="tel" name="phone" id="phoneInput" value="${a.phone}" maxlength="12" placeholder="09xx-xxx-xxx">
         </div>
 
         <div class="section-title">管理與權限</div>
         <div class="form-group">
             <label>帳號狀態 Status</label>
-            <select name="status">
+            <select name="status" ${isSelfStaff ? 'disabled' : ''}>
                 <option value="active" ${a.status == 'active' ? 'selected' : ''}>🟢 啟用中 (Active)</option>
                 <option value="inactive" ${a.status == 'inactive' ? 'selected' : ''}>🔴 停用 (Inactive)</option>
             </select>
+            <c:if test="${isSelfStaff}">
+                <input type="hidden" name="status" value="${a.status}">
+            </c:if>
         </div>
 
         <div class="form-group">
             <label>職位權限 Role</label>
-            <select name="role">
+            <select name="role" ${isSelfStaff ? 'disabled' : ''}>
                 <option value="staff" ${a.role == 'staff' ? 'selected' : ''}>👤 一般職員 (Staff)</option>
                 <option value="manager" ${a.role == 'manager' ? 'selected' : ''}>💼 系統主管 (Manager)</option>
             </select>
+            <c:if test="${isSelfStaff}">
+                <input type="hidden" name="role" value="${a.role}">
+            </c:if>
         </div>
 
         <div class="form-group">
@@ -267,7 +286,11 @@
         </div>
 
         <div class="btn-group">
-            <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=listAdmins" class="btn-base btn-cancel">返回列表</a>
+            <%-- 動態按鈕路徑與文字切換 --%>
+            <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=${isEditingSelf ? 'dashboard' : 'listAdmins'}" 
+               class="btn-base btn-cancel">
+               ${isEditingSelf ? '取消並返回' : '返回列表'}
+            </a>
             <button type="submit" class="btn-base btn-save">儲存修改</button>
         </div>
     </form>
@@ -283,6 +306,20 @@
             maxDate: "today",
             disableMobile: "true"
         });
+
+        const phoneInput = document.getElementById('phoneInput');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, ''); 
+                let formattedValue = '';
+                if (value.length > 0) {
+                    formattedValue = value.substring(0, 4); 
+                    if (value.length > 4) formattedValue += '-' + value.substring(4, 7); 
+                    if (value.length > 7) formattedValue += '-' + value.substring(7, 11); 
+                }
+                e.target.value = formattedValue;
+            });
+        }
     });
 </script>
 </body>

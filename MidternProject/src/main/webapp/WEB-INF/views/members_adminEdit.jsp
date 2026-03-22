@@ -97,15 +97,15 @@
 
         textarea { resize: none; }
 
-        /* 唯讀帳號樣式 */
-        input:disabled {
+        /* 禁用欄位樣式 */
+        input:disabled, select:disabled {
             background-color: #f1f5f9;
             color: #94a3b8;
             cursor: not-allowed;
             border-style: dashed;
+            opacity: 0.8;
         }
 
-        /* 日期欄位包裹器 */
         .date-input-wrapper { position: relative; }
         .date-input-wrapper::after {
             content: "📅";
@@ -203,6 +203,9 @@
         <input type="hidden" name="action" value="update">
         <input type="hidden" name="memberId" value="${m.memberId}">
         
+        <%-- ✨ 判斷當前登入者是否為主管 --%>
+        <c:set var="isManager" value="${adminUser.role == 'manager'}" />
+
         <div class="section-title">帳號資訊</div>
         <div class="form-group">
             <label>會員帳號 Username</label>
@@ -245,20 +248,31 @@
         </div>
 
         <div class="section-title">帳戶權限</div>
+        
+        <%-- 🛡️ 權限控制：帳號狀態 --%>
         <div class="form-group">
             <label>帳號狀態 Status</label>
-            <select name="status">
+            <select name="status" ${!isManager ? 'disabled' : ''}>
                 <option value="Active" ${m.status == 'Active' ? 'selected' : ''}>🟢 正常 (Active)</option>
                 <option value="Suspended" ${m.status == 'Suspended' ? 'selected' : ''}>🔴 停權 (Suspended)</option>
             </select>
+            <c:if test="${!isManager}">
+                <input type="hidden" name="status" value="${m.status}">
+                <div style="font-size: 12px; color: #94a3b8; margin-top: 5px;">* 僅主管權限可修改狀態</div>
+            </c:if>
         </div>
 
+        <%-- 🛡️ 權限控制：會員等級 --%>
         <div class="form-group">
             <label>會員等級 Membership Level</label>
-            <select name="membershipLevel">
+            <select name="membershipLevel" ${!isManager ? 'disabled' : ''}>
                 <option value="Regular" ${m.membershipLevel == 'Regular' ? 'selected' : ''}>👤 一般會員 (Regular)</option>
                 <option value="VIP" ${m.membershipLevel == 'VIP' ? 'selected' : ''}>💎 VIP 會員 (VIP)</option>
             </select>
+            <c:if test="${!isManager}">
+                <input type="hidden" name="membershipLevel" value="${m.membershipLevel}">
+                <div style="font-size: 12px; color: #94a3b8; margin-top: 5px;">* 僅主管權限可修改等級</div>
+            </c:if>
         </div>
 
         <div class="form-group">
@@ -276,7 +290,6 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://npmcdn.com/flatpickr/dist/l10n/zh-tw.js"></script>
 <script>
-    // 初始化日期選擇器
     flatpickr("#birthdayPicker", {
         locale: "zh_tw",
         dateFormat: "Y-m-d",
@@ -284,7 +297,6 @@
         disableMobile: "true"
     });
 
-    // 電話格式自動化
     const phoneInput = document.getElementById('phoneInput');
     if (phoneInput) {
         phoneInput.addEventListener('input', function (e) {

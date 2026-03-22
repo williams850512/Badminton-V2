@@ -14,11 +14,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
     :root {
-        --primary-color: #27ae60;
-        --text-dark: #2c3e50;
-        --text-light: #7f8c8d;
-        --bg-color: #f0f2f5;
+        --primary-blue: #5c67f2;
+        --text-dark: #334155;
+        --text-light: #94a3b8;
+        --bg-color: #f8fafc;
         --border-color: #e2e8f0;
+        --card-bg: #ffffff;
     }
 
     body {
@@ -30,100 +31,98 @@
         align-items: center;
         min-height: 100vh;
         padding: 40px 20px;
+        color: var(--text-dark);
     }
 
     .profile-card {
-        background: white;
+        background: var(--card-bg);
         width: 100%;
-        max-width: 650px;
-        border-radius: 28px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        max-width: 600px;
+        border-radius: 24px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.03);
         overflow: hidden;
+        border: 1px solid #f1f5f9;
     }
 
     .profile-header {
-        background: var(--primary-color);
+        background: var(--primary-blue);
         color: white;
         padding: 40px 30px;
         text-align: center;
     }
     
-    .profile-header h2 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: 1px; }
-    .profile-header p { margin: 10px 0 0; opacity: 0.9; font-size: 14px; }
+    .profile-header h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+    .profile-header p { margin: 8px 0 0; opacity: 0.85; font-size: 13px; font-weight: 400; }
 
-    .profile-body { padding: 35px; }
+    .profile-body { padding: 40px; }
+
 
     .info-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        margin-bottom: 35px;
-        background: #f8f9fa;
+        gap: 20px;
+        margin-bottom: 40px;
+        background: #fcfdfe;
         padding: 25px;
-        border-radius: 20px;
-        border: 1px solid #edf2f7;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
     }
 
     .info-item label {
         display: block; font-size: 11px; color: var(--text-light);
-        margin-bottom: 4px; text-transform: uppercase; font-weight: 700;
+        margin-bottom: 6px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;
     }
 
-    .info-item .value { font-weight: 700; color: var(--text-dark); font-size: 15px; }
+    .info-item .value { font-weight: 600; color: #1e293b; font-size: 14px; }
 
+    /* 會員等級標籤 */
     .role-badge {
-        display: inline-block; padding: 4px 12px; border-radius: 20px;
-        font-size: 12px; font-weight: bold;
+        display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 6px;
+        font-size: 11px; font-weight: 700;
     }
-    .badge-user { background: #e1f5fe; color: #0288d1; }
-    .badge-vip { background: #fef3c7; color: #d97706; }
+    .badge-user { background: #f1f5f9; color: #64748b; }
+    .badge-vip { background: #fffbeb; color: #d97706; border: 1px solid #fef3c7; }
 
     .update-section h3 {
-        font-size: 18px; border-left: 5px solid var(--primary-color);
-        padding-left: 12px; margin-bottom: 25px; color: var(--text-dark); font-weight: 700;
+        font-size: 16px; border-left: 4px solid var(--primary-blue);
+        padding-left: 12px; margin-bottom: 25px; color: #1e293b; font-weight: 700;
     }
     
-    .form-group { margin-bottom: 22px; }
-    .form-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 14px; color: #4a5568; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 13px; color: #475569; }
     
     input[type="text"], 
-    input[type="email"] {
-        width: 100%; padding: 13px 15px; border: 1.5px solid var(--border-color);
-        border-radius: 12px; box-sizing: border-box; font-size: 15px;
-        font-family: inherit; transition: all 0.3s ease; background-color: #fff;
-    }
-
-    /* 專門給 Flatpickr 使用的樣式 */
+    input[type="email"],
     .datepicker-input {
-        width: 100%; padding: 13px 15px; border: 1.5px solid var(--border-color);
-        border-radius: 12px; box-sizing: border-box; font-size: 15px;
-        font-family: inherit; background-color: #fff; cursor: pointer;
+        width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color);
+        border-radius: 10px; box-sizing: border-box; font-size: 14px;
+        font-family: inherit; transition: all 0.2s ease; background-color: #fff;
     }
 
     input:focus, .datepicker-input:focus {
-        border-color: var(--primary-color); outline: none;
-        box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.1); background-color: #fafdfb;
+        border-color: var(--primary-blue); outline: none;
+        box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.08);
     }
     
-    .radio-group { display: flex; gap: 30px; padding: 10px 5px; }
-    .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; font-size: 15px; }
+    .radio-group { display: flex; gap: 30px; padding: 5px 0; }
+    .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; font-size: 14px; }
+    .radio-label input { accent-color: var(--primary-blue); width: 16px; height: 16px; }
 
     .btn-update {
-        width: 100%; background: var(--primary-color); color: white; border: none;
-        padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700;
-        cursor: pointer; transition: 0.3s; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
-        margin-top: 10px;
+        width: 100%; background: var(--primary-blue); color: white; border: none;
+        padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 700;
+        cursor: pointer; transition: 0.3s; margin-top: 10px;
     }
-    .btn-update:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(39, 174, 96, 0.3); }
+    .btn-update:hover { background: #3651d4; transform: translateY(-1px); box-shadow: 0 5px 15px rgba(67, 97, 238, 0.15); }
 
     .nav-links {
-        text-align: center; margin-top: 30px; padding-top: 25px; border-top: 1px solid #edf2f7;
+        text-align: center; margin-top: 30px; padding-top: 25px; border-top: 1px solid #f1f5f9;
     }
-    .nav-links a { color: var(--text-light); text-decoration: none; font-size: 14px; margin: 0 12px; font-weight: 500; }
-    .nav-links a:hover { color: var(--primary-color); }
+    .nav-links a { color: var(--text-light); text-decoration: none; font-size: 13px; margin: 0 12px; font-weight: 500; }
+    .nav-links a:hover { color: var(--primary-blue); }
 
-    /* 客製化 Flatpickr 顏色 */
-    .flatpickr-day.selected { background: var(--primary-color) !important; border-color: var(--primary-color) !important; }
+    /*  Flatpickr 顏色 */
+    .flatpickr-day.selected { background: var(--primary-blue) !important; border-color: var(--primary-blue) !important; }
 </style>
 </head>
 <body>
@@ -178,7 +177,7 @@
                     
                     <div class="form-group">
                         <label>姓名 Name</label>
-                        <input type="text" name="fullName" value="${user.fullName}" required>
+                        <input type="text" name="fullName" value="${user.fullName}" required autocomplete="off">
                     </div>
 
                     <div class="form-group">
@@ -195,7 +194,6 @@
 
                     <div class="form-group">
                         <label>生日 Birthday</label>
-                        <%-- 這裡改為 text 類型，由 Flatpickr 接手 --%>
                         <input type="text" id="birthdayPicker" name="birthday" 
                                class="datepicker-input" 
                                value="${user.birthday}" 
@@ -204,12 +202,12 @@
                     
                     <div class="form-group">
                         <label>電話 Phone</label>
-                        <input type="text" id="phoneInput" name="phone" value="${user.phone}" maxlength="12" placeholder="0900-000-000">
+                        <input type="text" id="phoneInput" name="phone" value="${user.phone}" maxlength="12" placeholder="0900-000-000" autocomplete="off">
                     </div>
                     
                     <div class="form-group">
                         <label>信箱 Email</label>
-                        <input type="email" name="email" value="${user.email}">
+                        <input type="email" name="email" value="${user.email}" autocomplete="off">
                     </div>
 
                     <button type="submit" class="btn-update">儲存變更</button>
@@ -217,23 +215,23 @@
             </div>
 
             <div class="nav-links">
-                <a href="MembersServlet?action=logout" style="color: #e67e22; font-weight: 700;">登出 Logout</a>
+                <a href="MembersServlet?action=logout" style="color: #94a3b8;">登出 Logout</a>
             </div>
         </div>
     </div>
 
 <script>
-// 1. 初始化 Flatpickr 月曆選取器
+// 1. 初始化 Flatpickr
 flatpickr("#birthdayPicker", {
     locale: "zh_tw",
     dateFormat: "Y-m-d",
-    maxDate: "today", // 禁止選擇未來日期
-    disableMobile: "true", // 強制在手機上也使用這個精緻月曆，而非手機原生選取器
+    maxDate: "today", 
+    disableMobile: "true",
     altInput: true,
-    altFormat: "Y-m-d", // 顯示給使用者看的格式
+    altFormat: "Y-m-d",
 });
 
-// 2. 電話格式自動加上 "-"
+// 2. 電話格式
 const phoneInput = document.getElementById('phoneInput');
 if (phoneInput) {
     phoneInput.addEventListener('input', function (e) {
@@ -252,7 +250,7 @@ if (urlParams.get('msg') === 'ok') {
     Swal.fire({
         icon: 'success',
         title: '更新成功！',
-        text: '您的個人資料已成功存檔。',
+        confirmButtonColor: '#4361ee',
         timer: 1500,
         showConfirmButton: false
     });

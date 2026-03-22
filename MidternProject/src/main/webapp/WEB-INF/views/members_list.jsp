@@ -77,14 +77,21 @@
     </style>
 </head>
 <body>
-<%-- ✨ 強制設定整頁時間顯示時區為台灣 (GMT+8) --%>
 <fmt:setTimeZone value="GMT+8" />
 
 <div class="main-container">
     <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px;">
         <h2 class="page-title">🏸 <span>會員管理中心</span></h2>
         <div style="display: flex; align-items: center; gap: 25px;">
-            <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=listAdmins" class="nav-link">⚙️ 系統管理員設定</a>
+            <c:choose>
+                <c:when test="${adminUser.role == 'manager'}">
+                    <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=listAdmins" class="nav-link">⚙️ 系統管理員中心</a>
+                </c:when>
+                <c:otherwise>
+                    <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=showAdminEdit&id=${adminUser.adminId}" class="nav-link">⚙️ 個人帳號設定</a>
+                </c:otherwise>
+            </c:choose>
+            
             <span style="font-size: 14px; color: var(--text-light); border-left: 1px solid #e2e8f0; padding-left: 20px;">
                 管理員：<strong style="color: var(--primary);">${adminUser.fullName}</strong>
             </span>
@@ -95,12 +102,14 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
         <form action="${pageContext.request.contextPath}/MembersAdminServlet" method="get" class="search-group">
             <input type="hidden" name="action" value="search">
-            <input type="text" name="keyword" class="search-input" placeholder="搜尋 ID、帳號、姓名、備註..." value="${param.keyword}">
+            <input type="text" name="keyword" class="search-input" placeholder="搜尋 ID、帳號、姓名..." value="${param.keyword}">
             <button type="submit" class="btn-search">🔍 搜尋</button>
             <c:if test="${not empty param.keyword}">
                 <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=dashboard" class="btn-clear">✕ 清除</a>
             </c:if>
         </form>
+
+        <%-- ✅ 修正：移除 c:if，讓所有管理員都能看到新增按鈕 --%>
         <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=showAdd" class="btn-add">＋ 新增會員</a>
     </div>
 
@@ -141,21 +150,14 @@
                         <div class="sub-text">📧 ${m.email}</div>
                     </td>
                     <td class="time-text">
-                        <c:choose>
-                            <c:when test="${not empty m.createdAt}">
-                                <fmt:formatDate value="${m.createdAt}" pattern="yyyy/MM/dd HH:mm" />
-                            </c:when>
-                            <c:otherwise><span style="color: #cbd5e1;">無紀錄</span></c:otherwise>
-                        </c:choose>
+                        <fmt:formatDate value="${m.createdAt}" pattern="yyyy/MM/dd HH:mm" />
                     </td>
                     <td class="time-text">
                         <c:choose>
                             <c:when test="${not empty m.lastLogin}">
-                                <strong style="color: var(--text-main);">
-                                    <fmt:formatDate value="${m.lastLogin}" pattern="yyyy/MM/dd HH:mm" />
-                                </strong>
+                                <fmt:formatDate value="${m.lastLogin}" pattern="yyyy/MM/dd HH:mm" />
                             </c:when>
-                            <c:otherwise><span style="color: var(--text-light); font-weight: 500;">尚未登入</span></c:otherwise>
+                            <c:otherwise><span style="color: var(--text-light);">尚未登入</span></c:otherwise>
                         </c:choose>
                     </td>
                     <td style="text-align: center;">
@@ -167,8 +169,15 @@
                     <td style="padding: 20px 25px; border-radius: 0 15px 15px 0; min-width: 220px;">
                         <div class="action-container">
                             <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=showEdit&memberId=${m.memberId}" class="action-btn btn-edit">編輯</a>
-                            <button type="button" class="action-btn btn-note" onclick="showNote('${m.memberId}', '${m.fullName}', '${m.note}')">備註</button>
-                            <button type="button" class="action-btn btn-del" onclick="confirmDelete('${m.memberId}', '${m.username}')">刪除</button>
+                            
+                            <%-- ✅ 修正：備註按鈕使用 ES6 反引號包裹 m.note，防止換行或特殊符號出錯 --%>
+                            <button type="button" class="action-btn btn-note" 
+                                onclick="showNote('${m.memberId}', '${m.fullName}', `${m.note}`)">備註</button>
+                            
+                            <%-- 只有主管能刪除 --%>
+                            <c:if test="${adminUser.role == 'manager'}">
+                                <button type="button" class="action-btn btn-del" onclick="confirmDelete('${m.memberId}', '${m.username}')">刪除</button>
+                            </c:if>
                         </div>
                     </td>
                 </tr>
@@ -190,17 +199,21 @@ function confirmDelete(id, username) {
         cancelButtonText: '返回'
     }).then((result) => {
         if (result.isConfirmed) {
+            // ✅ 確保 Servlet 中的 action 參數名稱對應正確
             window.location.href = '${pageContext.request.contextPath}/MembersAdminServlet?action=delete&memberId=' + id;
         }
     })
 }
 
 function showNote(id, name, currentNote) {
+    // ✅ 處理傳入值
+    const displayNote = (currentNote === 'null' || !currentNote) ? '' : currentNote;
+
     Swal.fire({
         title: '<span style="font-size:20px; font-weight:700; color:var(--primary);">' + name + ' 的備註</span>',
         input: 'textarea',
-        inputValue: (currentNote && currentNote !== 'null') ? currentNote : '',
-        inputPlaceholder: '請輸入備註',
+        inputValue: displayNote,
+        inputPlaceholder: '請輸入備註內容...',
         showCancelButton: true,
         confirmButtonText: '儲存更新',
         cancelButtonText: '取消',
@@ -212,20 +225,16 @@ function showNote(id, name, currentNote) {
             form.method = 'POST';
             form.action = '${pageContext.request.contextPath}/MembersAdminServlet';
             
-            const params = {
-                'action': 'updateNote',
-                'memberId': id,
-                'note': result.value
-            };
-
+            // ✅ 這裡的 action 必須與 Servlet 的 case 一致
+            const params = { 'action': 'updateMemberNote', 'memberId': id, 'note': result.value };
+            
             for (const key in params) {
                 const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
+                input.type = 'hidden'; 
+                input.name = key; 
                 input.value = params[key];
                 form.appendChild(input);
             }
-
             document.body.appendChild(form);
             form.submit();
         }

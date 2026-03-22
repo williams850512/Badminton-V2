@@ -25,6 +25,8 @@ public class MembersAdminServlet extends HttpServlet {
         String action = request.getParameter("action");
         if (action == null || action.isEmpty()) action = "showLogin";
 
+        MembersAdminBean currentLogin = (MembersAdminBean) request.getSession().getAttribute("adminUser");
+
         switch (action) {
             case "showLogin":
                 request.getRequestDispatcher("/WEB-INF/views/members_adminLogin.jsp").forward(request, response);
@@ -45,19 +47,24 @@ public class MembersAdminServlet extends HttpServlet {
                 processDelete(request, response);
                 break;
             case "listAdmins": 
-                processListAdmins(request, response);
-                break;
-            case "searchAdmin": 
-                processAdminSearch(request, response);
-                break;
-            case "deleteAdmin": 
-                processAdminDelete(request, response);
+                if (currentLogin != null && "manager".equals(currentLogin.getRole())) {
+                    processListAdmins(request, response);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=no_permission");
+                }
                 break;
             case "showAdminAdd": 
-                request.getRequestDispatcher("/WEB-INF/views/members_adminsSelfAdd.jsp").forward(request, response);
+                if (currentLogin != null && "manager".equals(currentLogin.getRole())) {
+                    request.getRequestDispatcher("/WEB-INF/views/members_adminsSelfAdd.jsp").forward(request, response);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=no_permission");
+                }
                 break;
             case "showAdminEdit":
                 processShowAdminEdit(request, response);
+                break;
+            case "deleteAdmin": 
+                processAdminDelete(request, response);
                 break;
             case "logout":
                 processLogout(request, response);
@@ -79,10 +86,6 @@ public class MembersAdminServlet extends HttpServlet {
             processAdd(request, response);
         } else if ("update".equals(action)) {
             processUpdate(request, response);
-        } else if ("updateNote".equals(action)) { 
-            processUpdateNote(request, response); 
-        } else if ("updateAdminNote".equals(action)) { 
-            processUpdateAdminNote(request, response); 
         } else if ("adminUpdate".equals(action)) { 
             processAdminUpdate(request, response);
         } else if ("adminAdd".equals(action)) { 
@@ -100,112 +103,111 @@ public class MembersAdminServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/members_adminList.jsp").forward(request, response);
     }
 
-    private void processUpdateAdminNote(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            String idStr = request.getParameter("id");
-            String note = request.getParameter("note");
-            
-            if (idStr != null && !idStr.isEmpty()) {
-                int id = Integer.parseInt(idStr);
-                boolean success = adminService.updateAdminNote(id, note); 
-                
-                String status = success ? "note_ok" : "update_fail";
-                response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=" + status);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=error");
-        }
-    }
-
-    private void processAdminSearch(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String keyword = request.getParameter("keyword");
-        List<MembersAdminBean> adminList = (keyword != null && !keyword.trim().isEmpty()) 
-                                        ? adminService.searchAdmins(keyword) : adminService.getAllAdmins();
-        request.setAttribute("adminList", adminList);
-        request.getRequestDispatcher("/WEB-INF/views/members_adminList.jsp").forward(request, response);
-    }
-
     private void processAdminDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        MembersAdminBean currentLogin = (MembersAdminBean) request.getSession().getAttribute("adminUser");
         try {
             String idStr = request.getParameter("id");
-            if (idStr != null) {
-                adminService.deleteAdmin(Integer.parseInt(idStr));
+            if (idStr != null && currentLogin != null && "manager".equals(currentLogin.getRole())) {
+                int targetId = Integer.parseInt(idStr);
+                if (targetId != currentLogin.getAdminId()) {
+                    adminService.deleteAdmin(targetId);
+                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=del_ok");
+                    return;
+                }
             }
-            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=del_ok");
+            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=error");
         } catch (Exception e) {
             response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=error");
         }
     }
 
     private void processShowAdminEdit(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        MembersAdminBean currentLogin = (MembersAdminBean) request.getSession().getAttribute("adminUser");
         String idStr = request.getParameter("id");
-        if (idStr != null) {
-            MembersAdminBean admin = adminService.getAdminById(Integer.parseInt(idStr));
+        
+        if (idStr != null && currentLogin != null) {
+            int targetId = Integer.parseInt(idStr);
+            if (!"manager".equals(currentLogin.getRole()) && currentLogin.getAdminId() != targetId) {
+                response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=no_permission");
+                return;
+            }
+
+            MembersAdminBean admin = adminService.getAdminById(targetId);
             request.setAttribute("a", admin);
             request.getRequestDispatcher("/WEB-INF/views/members_adminsSelfEdit.jsp").forward(request, response);
         }
     }
 
-    /**
-     * ✨ 管理員新增另一個管理員
-     * 🛡️ 加入帳號重複判斷邏輯
-     */
+    private void processAdminUpdate(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        MembersAdminBean currentLogin = (MembersAdminBean) request.getSession().getAttribute("adminUser");
+        try {
+            String idStr = request.getParameter("adminId");
+            if (idStr != null && currentLogin != null) {
+                int targetId = Integer.parseInt(idStr);
+
+                if (!"manager".equals(currentLogin.getRole()) && currentLogin.getAdminId() != targetId) {
+                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard");
+                    return;
+                }
+
+                MembersAdminBean a = adminService.getAdminById(targetId);
+                if (a != null) {
+                    a.setFullName(request.getParameter("fullName"));
+                    a.setPhone(request.getParameter("phone"));
+                    a.setEmail(request.getParameter("email"));
+                    a.setGender(request.getParameter("gender"));
+                    
+                    // ✨ 權限防禦：只有「主管」可以改 Role 與 Status
+                    // 如果是一般職員，即便前端送來新值，後端也強制維持原狀
+                    if ("manager".equals(currentLogin.getRole())) {
+                        a.setRole(request.getParameter("role"));
+                        a.setStatus(request.getParameter("status"));
+                    }
+
+                    String newPwd = request.getParameter("newPassword");
+                    if (newPwd != null && !newPwd.trim().isEmpty()) {
+                        a.setPassword(newPwd); 
+                    }
+
+                    adminService.updateAdmin(a);
+                    
+                    if (currentLogin.getAdminId() == targetId) {
+                        request.getSession().setAttribute("adminUser", a);
+                    }
+
+                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=update_ok");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=error");
+        }
+    }
+
     private void processAdminAdd(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String username = request.getParameter("username");
+        MembersAdminBean currentLogin = (MembersAdminBean) request.getSession().getAttribute("adminUser");
+        if (currentLogin == null || !"manager".equals(currentLogin.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard");
+            return;
+        }
+
         try {
             MembersAdminBean a = new MembersAdminBean();
-            a.setUsername(username);
+            a.setUsername(request.getParameter("username"));
             a.setPassword(request.getParameter("password"));
             a.setFullName(request.getParameter("fullName"));
             a.setGender(request.getParameter("gender"));
             a.setRole(request.getParameter("role"));
             a.setPhone(request.getParameter("phone"));
             a.setEmail(request.getParameter("email"));
-            a.setNote(request.getParameter("note"));
-            
-            String bday = request.getParameter("birthday");
-            if (bday != null && !bday.isEmpty()) a.setBirthday(Date.valueOf(bday));
+            a.setStatus("active");
 
             if (adminService.addAdmin(a)) {
                 response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=add_ok");
             } else {
-                // 失敗判斷：檢查是否因為帳號重複
-                if (adminService.isAdminExists(username)) {
-                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=showAdminAdd&error=2");
-                } else {
-                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=showAdminAdd&error=1");
-                }
+                response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=showAdminAdd&error=duplicate");
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=error");
-        }
-    }
-
-    private void processAdminUpdate(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            String idStr = request.getParameter("adminId");
-            if (idStr != null) {
-                int id = Integer.parseInt(idStr);
-                MembersAdminBean a = adminService.getAdminById(id);
-                if (a != null) {
-                    a.setFullName(request.getParameter("fullName"));
-                    a.setGender(request.getParameter("gender"));
-                    a.setRole(request.getParameter("role"));
-                    a.setStatus(request.getParameter("status"));
-                    a.setPhone(request.getParameter("phone"));
-                    a.setEmail(request.getParameter("email"));
-                    a.setNote(request.getParameter("note"));
-                    String bday = request.getParameter("birthday");
-                    if (bday != null && !bday.isEmpty()) a.setBirthday(Date.valueOf(bday));
-
-                    adminService.updateAdmin(a);
-                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=update_ok");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=error");
         }
     }
@@ -226,15 +228,10 @@ public class MembersAdminServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/members_list.jsp").forward(request, response);
     }
 
-    /**
-     * ✨ 管理員新增會員
-     * 🛡️ 加入帳號重複判斷邏輯
-     */
     private void processAdd(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String username = request.getParameter("username");
         try {
             MembersBean m = new MembersBean();
-            m.setUsername(username);
+            m.setUsername(request.getParameter("username"));
             m.setPassword(request.getParameter("password"));
             m.setFullName(request.getParameter("fullName"));
             m.setGender(request.getParameter("gender"));
@@ -244,20 +241,13 @@ public class MembersAdminServlet extends HttpServlet {
             m.setEmail(request.getParameter("email"));
             m.setMembershipLevel(request.getParameter("membershipLevel"));
             m.setStatus("Active");
-            m.setNote(request.getParameter("note"));
 
             if (memberService.register(m)) {
                 response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=add_ok");
             } else {
-                // 失敗判斷：檢查是否因為帳號重複
-                if (memberService.isUsernameExists(username)) {
-                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=showAdd&error=2");
-                } else {
-                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=showAdd&error=1");
-                }
+                response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=showAdd&error=1");
             }
         } catch (Exception e) {
-            e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=error");
         }
     }
@@ -274,19 +264,27 @@ public class MembersAdminServlet extends HttpServlet {
     }
 
     private void processUpdate(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        MembersAdminBean currentLogin = (MembersAdminBean) request.getSession().getAttribute("adminUser");
         try {
             int id = Integer.parseInt(request.getParameter("memberId"));
             MembersBean member = memberService.getMemberById(id);
-            if (member != null) {
+            if (member != null && currentLogin != null) {
+                // 基本資料大家都能改
                 member.setFullName(request.getParameter("fullName"));
-                member.setMembershipLevel(request.getParameter("membershipLevel"));
-                member.setStatus(request.getParameter("status"));
                 member.setGender(request.getParameter("gender"));
                 String bday = request.getParameter("birthday");
                 if (bday != null && !bday.isEmpty()) member.setBirthday(Date.valueOf(bday));
                 member.setPhone(request.getParameter("phone"));
                 member.setEmail(request.getParameter("email"));
-                member.setNote(request.getParameter("note"));
+
+                // ✨ 權限防禦：修改一般會員時，只有主管能改 Level 與 Status
+                if ("manager".equals(currentLogin.getRole())) {
+                    member.setMembershipLevel(request.getParameter("membershipLevel"));
+                    member.setStatus(request.getParameter("status"));
+                } else {
+                    // 一般職員的話，這兩項維持不動 (不從 parameter 抓取)
+                    System.out.println("偵測到非主管企圖修改會員狀態，已略過該欄位更新。");
+                }
 
                 memberService.updateMember(member);
                 response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=update_ok");
@@ -297,37 +295,21 @@ public class MembersAdminServlet extends HttpServlet {
         }
     }
 
-    private void processUpdateNote(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            String idStr = request.getParameter("memberId");
-            String note = request.getParameter("note");
-            
-            if (idStr != null && !idStr.isEmpty()) {
-                int id = Integer.parseInt(idStr);
-                boolean success = memberService.updateNote(id, note);
-                
-                String status = success ? "note_ok" : "update_fail";
-                response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=" + status);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=error");
-        }
-    }
-
     private void processDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            String idStr = request.getParameter("memberId");
-            if (idStr != null) memberService.deleteMember(Integer.parseInt(idStr));
-            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=del_ok");
-        } catch (Exception e) {
-            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=error");
+        MembersAdminBean currentLogin = (MembersAdminBean) request.getSession().getAttribute("adminUser");
+        if (currentLogin != null && "manager".equals(currentLogin.getRole())) {
+            try {
+                String idStr = request.getParameter("memberId");
+                if (idStr != null) memberService.deleteMember(Integer.parseInt(idStr));
+                response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=del_ok");
+            } catch (Exception e) {
+                response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=error");
+            }
+        } else {
+            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=no_permission");
         }
     }
 
-    /**
-     * 管理員登入邏輯
-     */
     private void processLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String user = request.getParameter("username");
         String pass = request.getParameter("password");
@@ -335,14 +317,13 @@ public class MembersAdminServlet extends HttpServlet {
 
         if (admin != null) {
             if ("inactive".equalsIgnoreCase(admin.getStatus())) {
-                request.setAttribute("error", "您的帳號已被停用，請聯繫系統管理員。");
+                request.setAttribute("error", "您的帳號已被停用，請聯繫系統主管。");
                 request.getRequestDispatcher("/WEB-INF/views/members_adminLogin.jsp").forward(request, response);
                 return;
             }
             request.getSession().setAttribute("adminUser", admin);
             response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard");
         } else {
-            // 登入失敗（帳密錯或大小寫不對），帶 error=1
             response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=showLogin&error=1");
         }
     }
