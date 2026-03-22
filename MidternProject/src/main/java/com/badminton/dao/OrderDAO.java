@@ -16,10 +16,7 @@ public class OrderDAO {
 	 * 新增一筆訂單
 	 */
 	public boolean insertWithConnection(Connection conn, OrderBean order) {
-		//public boolean insert(OrderBean order) {
 		String sql = "INSERT INTO orders (member_id, total_amount, status, payment_type, note) VALUES (?,?,?,?,?)";
-		
-		
 		
 		try (
 			 PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -45,6 +42,7 @@ public class OrderDAO {
 		}
 		return false; // 新增失敗
 	}
+
 	/*
 	 * 查詢所有訂單
 	 */
@@ -57,30 +55,14 @@ public class OrderDAO {
 			 ResultSet rs = ps.executeQuery()) {
 			
 			while (rs.next()) {
-				OrderBean o = new OrderBean(); // 每找到一筆資料，就準備一個新的空便當盒 (Bean)
-				o.setOrderId(rs.getInt("order_id"));
-				o.setMemberId(rs.getInt("member_id"));
-				
-				if (rs.getTimestamp("order_date") != null) {
-					o.setOrderDate(rs.getTimestamp("order_date").toLocalDateTime());
-				}
-				
-				o.setTotalAmount(rs.getInt("total_amount"));
-				o.setStatus(rs.getString("status"));
-				o.setPaymentType(rs.getString("payment_type"));
-				o.setNote(rs.getString("note"));
-				
-				if (rs.getTimestamp("created_at") != null) {
-					o.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-				}
-				
-				list.add(o); // 把裝好菜的便當放進清單裡
+				list.add(mapRow(rs)); 
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return list; // 把整疊便當交出去
+		return list; 
 	}
+
 	/*
 	 * 依據 ID 查詢單筆訂單
 	 */
@@ -90,36 +72,21 @@ public class OrderDAO {
 		try (Connection conn = DBConnection.getConnection();
 			 PreparedStatement ps = conn.prepareStatement(sql)) {
 			
-			ps.setInt(1, orderId); // 把問號替換成我們要找的 ID
+			ps.setInt(1, orderId); 
 			
 			try (ResultSet rs = ps.executeQuery()) {
-				if (rs.next()) { // 如果有找到這筆資料
-					OrderBean o = new OrderBean();
-					o.setOrderId(rs.getInt("order_id"));
-					o.setMemberId(rs.getInt("member_id"));
-					
-					if (rs.getTimestamp("order_date") != null) {
-						o.setOrderDate(rs.getTimestamp("order_date").toLocalDateTime());
-					}
-					
-					o.setTotalAmount(rs.getInt("total_amount"));
-					o.setStatus(rs.getString("status"));
-					o.setPaymentType(rs.getString("payment_type"));
-					o.setNote(rs.getString("note"));
-					
-					if (rs.getTimestamp("created_at") != null) {
-						o.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-					}
-					return o; // 回傳這個找好的便當
+				if (rs.next()) { 
+					return mapRow(rs);
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return null; // 找不到就回傳空 (null)
+		return null; 
 	}
+
 	/*
-	 * 更新訂單狀態 (例如: 付款完成、取消訂單)
+	 * 更新訂單狀態 
 	 */
 	public boolean updateStatus(int orderId, String status) {
 		String sql = "UPDATE orders SET status = ? WHERE order_id = ?";
@@ -127,15 +94,16 @@ public class OrderDAO {
 		try (Connection conn = DBConnection.getConnection();
 			 PreparedStatement ps = conn.prepareStatement(sql)) {
 			
-			ps.setString(1, status); // 第一個問號
-			ps.setInt(2, orderId);   // 第二個問號
+			ps.setString(1, status); 
+			ps.setInt(2, orderId);   
 			
-			return ps.executeUpdate() > 0; // 如果有更新到資料(大於0行)，就代表成功(true)
+			return ps.executeUpdate() > 0; 
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return false;
 	}
+
 	/*
 	 * 刪除訂單
 	 */
@@ -146,7 +114,7 @@ public class OrderDAO {
 			 PreparedStatement ps = conn.prepareStatement(sql)) {
 			
 			ps.setInt(1, orderId);
-			return ps.executeUpdate() > 0; // 如果有刪掉資料(大於0行)，就代表成功(true)
+			return ps.executeUpdate() > 0; 
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -154,12 +122,7 @@ public class OrderDAO {
 	}
 	
 	/* ─────────────────────────────────────────────────────
-	 * 模糊搜尋 / 精準搜尋
-	 * searchField: "all"         → 模糊搜尋 note + payment_type
-	 *              "memberId"    → 精準 member_id
-	 *              "status"      → 精準 status
-	 *              "paymentType" → 精準 payment_type
-	 *              "note"        → 模糊 note
+	 * 舊版：模糊搜尋 / 精準搜尋 (保留以防萬一)
 	 * ───────────────────────────────────────────────────── */
 	public List<OrderBean> findByKeyword(String keyword, String searchField) {
 		List<OrderBean> list = new ArrayList<>();
@@ -215,31 +178,98 @@ public class OrderDAO {
 	}
 
 	/* ─────────────────────────────────────────────────────
+	 * 🔥 終極全能搜尋 (支援 #訂單搜尋 + 智慧數字判斷 + 金額)
+	 * ───────────────────────────────────────────────────── */
+	public List<OrderBean> findByAdvancedSearch(String keyword, Integer minPrice, Integer maxPrice) {
+		List<OrderBean> list = new ArrayList<>();
+		StringBuilder sql = new StringBuilder(
+			"SELECT DISTINCT o.order_id, o.member_id, o.order_date, o.total_amount, " +
+			"o.status, o.payment_type, o.note, o.created_at " +
+			"FROM Orders o " +
+			"LEFT JOIN OrderItems oi ON o.order_id = oi.order_id " +
+			"LEFT JOIN Products p ON oi.product_id = p.product_id " +
+			"WHERE 1=1 "
+		);
+
+		boolean hasKeyword = (keyword != null && !keyword.trim().isEmpty());
+		String kw = hasKeyword ? keyword.trim() : "";
+
+		// 🌟 神級判斷 1：是不是明確使用 # 來找訂單 (例如輸入 #16)
+		boolean isHashOrder = kw.startsWith("#") && kw.substring(1).matches("\\d+");
+		// 🌟 神級判斷 2：是不是純數字 (例如輸入 16)
+		boolean isNumeric = kw.matches("\\d+");
+
+		if (hasKeyword) {
+			if (isHashOrder) {
+				// 如果有加 #，我們認定他「只」想找該筆訂單 ID
+				sql.append("AND o.order_id = ? ");
+			} else if (isNumeric) {
+				// 如果是純數字，精準找 ID，同時也去文字欄位模糊搜尋 (防呆)
+				sql.append("AND (o.order_id = ? OR o.member_id = ? OR o.note LIKE ? OR o.payment_type LIKE ? OR o.status LIKE ? OR p.product_name LIKE ?) ");
+			} else {
+				// 純文字模糊搜尋
+				sql.append("AND (o.note LIKE ? OR o.payment_type LIKE ? OR o.status LIKE ? OR p.product_name LIKE ?) ");
+			}
+		}
+		
+		if (minPrice != null) sql.append("AND o.total_amount >= ? ");
+		if (maxPrice != null) sql.append("AND o.total_amount <= ? ");
+		
+		sql.append("ORDER BY o.created_at DESC");
+
+		try (Connection conn = DBConnection.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+			int paramIndex = 1;
+			if (hasKeyword) {
+				if (isHashOrder) {
+					// 把 "#16" 的 "#" 拔掉，只留 "16" 轉成數字去查
+					ps.setInt(paramIndex++, Integer.parseInt(kw.substring(1))); 
+				} else if (isNumeric) {
+					int numKw = Integer.parseInt(kw);
+					String likeKw = "%" + kw + "%";
+					ps.setInt(paramIndex++, numKw);
+					ps.setInt(paramIndex++, numKw);
+					ps.setString(paramIndex++, likeKw);
+					ps.setString(paramIndex++, likeKw);
+					ps.setString(paramIndex++, likeKw);
+					ps.setString(paramIndex++, likeKw);
+				} else {
+					String likeKw = "%" + kw + "%";
+					ps.setString(paramIndex++, likeKw);
+					ps.setString(paramIndex++, likeKw);
+					ps.setString(paramIndex++, likeKw);
+					ps.setString(paramIndex++, likeKw);
+				}
+			}
+			if (minPrice != null) ps.setInt(paramIndex++, minPrice);
+			if (maxPrice != null) ps.setInt(paramIndex++, maxPrice);
+
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					list.add(mapRow(rs));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	/* ─────────────────────────────────────────────────────
 	 * 同時更新訂單狀態 / 付款方式 / 備註，並記錄 updated_at
 	 * ───────────────────────────────────────────────────── */
 	public boolean updateOrder(int orderId, String status, String paymentType, String note) {
-
-	    // ✔ 完全對應你目前的資料表欄位
 	    String sql = "UPDATE Orders SET status = ?, payment_type = ?, note = ? WHERE order_id = ?";
 
 	    try (Connection conn = DBConnection.getConnection();
 	         PreparedStatement ps = conn.prepareStatement(sql)) {
 	    	
-	    	System.out.println("orderId=" + orderId);
-	        System.out.println("status=" + status);
-	        System.out.println("paymentType=" + paymentType);
-	        System.out.println("note=" + note);
-
 	        ps.setString(1, status);
 	        ps.setString(2, paymentType);
 	        ps.setString(3, note);
 	        ps.setInt(4, orderId);
 
 	        int rows = ps.executeUpdate();
-
-	        // 🔥 建議加這行 debug（很重要）
-	        System.out.println("updateOrder rows = " + rows);
-
 	        return rows > 0;
 
 	    } catch (SQLException e) {
@@ -264,10 +294,3 @@ public class OrderDAO {
 		return o;
 	}
 }
-
-			
-			
-		
-	
-
-

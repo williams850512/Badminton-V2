@@ -193,29 +193,53 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
 </div>
 
 <%-- ── Toolbar ── --%>
+<%-- ── Toolbar (全能搜尋升級版) ── --%>
 <div class="toolbar">
     <form action="<%=base%>" method="get" id="searchForm">
         <input type="hidden" name="status" value="<%=curStatus%>">
-        <div class="toolbar-row">
-            <div>
-                <label>搜尋欄位</label>
-                <select name="searchField" class="field-select" id="fieldSel">
-                    <option value="all"         <%="all".equals(curField)?"selected":""%>>🔍 模糊搜尋（全欄）</option>
-                    <option value="memberId"    <%="memberId".equals(curField)?"selected":""%>>👤 精準：會員 ID</option>
-                    <option value="status"      <%="status".equals(curField)?"selected":""%>>🏷 精準：訂單狀態</option>
-                    <option value="paymentType" <%="paymentType".equals(curField)?"selected":""%>>💳 精準：付款方式</option>
-                    <option value="note"        <%="note".equals(curField)?"selected":""%>>📝 模糊：備註</option>
-                </select>
-            </div>
-            <div style="flex:1">
-                <label>關鍵字 / 值</label>
+        <div class="toolbar-row" style="align-items: center;">
+            <div style="flex: 2; min-width: 250px;">
+                <label>🔍 全能搜尋 (訂單#ID / 會員ID / 商品名稱 / 備註)</label>
                 <input type="text" name="keyword" class="kw-input" id="kwInput"
-                       placeholder="輸入搜尋內容..." value="<%=curKeyword%>">
+                       placeholder="輸入任何關鍵字 (例如: YONEX, #16)..." value="<%=curKeyword%>" style="width: 100%;">
             </div>
-            <button type="submit" class="search-btn">🔍 搜尋</button>
-            <% if (!curKeyword.isEmpty()||!curStatus.isEmpty()) { %>
-            <a href="<%=base%>" class="clear-btn">✕ 清除</a>
+            <div style="display: flex; gap: 8px; align-items: flex-end;">
+                <div>
+                    <label>💰 最低金額</label>
+                    <input type="number" name="minPrice" class="kw-input" value="${minPrice}" placeholder="0" style="width: 90px;">
+                </div>
+                <span style="color:#a0c4d8; padding-bottom: 8px;">～</span>
+                <div>
+                    <label>最高金額</label>
+                    <input type="number" name="maxPrice" class="kw-input" value="${maxPrice}" placeholder="無上限" style="width: 90px;">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; padding-bottom: 2px;">
+                <button type="submit" class="search-btn">🔍 搜尋</button>
+                <% if (!curKeyword.isEmpty() || !curStatus.isEmpty() || request.getAttribute("minPrice")!="" || request.getAttribute("maxPrice")!="") { %>
+                <a href="<%=base%>" class="clear-btn">✕ 清除</a>
+                <% } %>
+            </div>
+        </div>
+        
+        <%-- 搜尋歷史 --%>
+        <% if (searchHistory != null && !searchHistory.isEmpty()) { %>
+        <div class="history-bar">
+            <span class="history-label">📌 搜尋記錄：</span>
+            <% for (int hi=0; hi<searchHistory.size(); hi++) {
+                String histEntry = searchHistory.get(hi);
+            %>
+            <span class="hist-chip" id="chip-<%=hi%>"
+                  onclick="applyHistory('<%=histEntry.replace("'","\\'")%>')">
+                <%=histEntry%>
+                <span class="hist-del" onclick="deleteHistory(<%=hi%>, event)">✕</span>
+            </span>
             <% } %>
+        </div>
+        <% } %>
+    </form>
+</div>
+            
         </div>
         <%-- 搜尋歷史 --%>
         <% if (searchHistory != null && !searchHistory.isEmpty()) { %>
@@ -586,8 +610,7 @@ function deleteItem(itemId, orderId) {
 }
 
 /* ✨ 進階三：無縫刪除歷史紀錄 */
-function applyHistory(field, kw) {
-    document.getElementById('fieldSel').value = field;
+function applyHistory(kw) {
     document.getElementById('kwInput').value  = kw;
     document.getElementById('searchForm').submit();
 }
