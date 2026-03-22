@@ -14,14 +14,15 @@ body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#1a1a2e
 
 /* ── HEADER ── */
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px}
-h1{color:#53d8fb;font-size:1.6rem;letter-spacing:2px}
+h1{color:#53d8fb;font-size:1.6rem;letter-spacing:1px; display:flex; align-items:center; gap: 10px;}
+.admin-badge{font-size:0.75rem; background:linear-gradient(135deg, #e74c3c, #c0392b); color:white; padding:4px 10px; border-radius:8px; font-weight:bold; letter-spacing:1px; box-shadow: 0 2px 8px rgba(231,76,60,0.4);}
 .btn-primary{background:linear-gradient(90deg,#53d8fb,#0f3460);color:#fff;text-decoration:none;padding:9px 20px;border-radius:8px;font-weight:bold;font-size:.85rem;white-space:nowrap;transition:opacity .2s}
 .btn-primary:hover{opacity:.85}
 
 /* ── STATS ── */
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}
 .stat-card{background:rgba(255,255,255,.07);border:1px solid rgba(83,216,251,.2);border-radius:12px;padding:14px;text-align:center}
-.stat-card .num{font-size:1.7rem;font-weight:bold;color:#53d8fb}
+.stat-card .num{font-size:1.5rem;font-weight:bold;color:#53d8fb}
 .stat-card .label{font-size:.72rem;color:#a0c4d8;margin-top:3px}
 
 /* ── TOOLBAR ── */
@@ -40,38 +41,40 @@ h1{color:#53d8fb;font-size:1.6rem;letter-spacing:2px}
 /* ── SEARCH HISTORY ── */
 .history-bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
 .history-label{font-size:.75rem;color:#666}
-.hist-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:rgba(83,216,251,.08);border:1px solid rgba(83,216,251,.2);border-radius:16px;font-size:.75rem;color:#a0c4d8;cursor:pointer;transition:background .2s}
+.hist-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:rgba(83,216,251,.08);border:1px solid rgba(83,216,251,.2);border-radius:16px;font-size:.75rem;color:#a0c4d8;cursor:pointer;transition:all .3s}
 .hist-chip:hover{background:rgba(83,216,251,.2);color:#53d8fb}
 .hist-del{color:#e74c3c;font-size:.7rem;margin-left:2px;cursor:pointer;font-weight:bold}
 .hist-del:hover{color:#ff6b6b}
 
-/* ── TABS ── */
+/* ── TABS (實體情境) ── */
 .tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .tab{padding:6px 15px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#a0c4d8;cursor:pointer;font-size:.8rem;text-decoration:none;transition:all .2s}
 .tab:hover{background:rgba(83,216,251,.1);color:#53d8fb}
 .tab.active{background:rgba(83,216,251,.18);color:#53d8fb;border-color:#53d8fb;font-weight:bold}
-.tab.tp.active{background:rgba(241,196,15,.15);color:#f1c40f;border-color:#f1c40f}
-.tab.tpaid.active{background:rgba(46,213,115,.15);color:#2ed573;border-color:#2ed573}
-.tab.tship.active{background:rgba(83,216,251,.15);color:#53d8fb;border-color:#53d8fb}
-.tab.tcanc.active{background:rgba(231,76,60,.15);color:#e74c3c;border-color:#e74c3c}
+.tab.tp.active{background:rgba(241,196,15,.15);color:#f1c40f;border-color:#f1c40f}     /* 待處理 */
+.tab.tpr.active{background:rgba(155,89,182,.15);color:#9b59b6;border-color:#9b59b6}  /* 理貨中 */
+.tab.trd.active{background:rgba(52,152,219,.15);color:#3498db;border-color:#3498db}   /* 待取貨 */
+.tab.tcpl.active{background:rgba(46,213,115,.15);color:#2ed573;border-color:#2ed573} /* 已完成 */
+.tab.tcanc.active{background:rgba(231,76,60,.15);color:#e74c3c;border-color:#e74c3c} /* 已取消 */
 
 /* ── TABLE ── */
 .table-wrap{background:rgba(255,255,255,.06);border:1px solid rgba(83,216,251,.15);border-radius:16px;overflow:hidden}
 table{width:100%;border-collapse:collapse}
 thead tr{background:rgba(83,216,251,.1)}
 th{padding:12px 13px;text-align:left;font-size:.78rem;font-weight:600;color:#53d8fb;white-space:nowrap}
-tbody tr.main-row{border-top:1px solid rgba(255,255,255,.05);transition:background .15s;cursor:pointer}
+tbody tr.main-row{border-top:1px solid rgba(255,255,255,.05);transition:background .15s, opacity 0.4s, transform 0.4s;cursor:pointer}
 tbody tr.main-row:hover{background:rgba(83,216,251,.04)}
 td{padding:11px 13px;font-size:.85rem;vertical-align:middle}
 .expand-arrow{display:inline-block;transition:transform .2s;color:#53d8fb;font-size:.72rem;margin-right:3px}
 .expanded .expand-arrow{transform:rotate(90deg)}
 
-/* ── BADGE ── */
-.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.74rem;font-weight:bold}
-.bg-P{background:rgba(241,196,15,.15);color:#f1c40f;border:1px solid #f1c40f}
-.bg-D{background:rgba(46,213,115,.15);color:#2ed573;border:1px solid #2ed573}
-.bg-S{background:rgba(83,216,251,.15);color:#53d8fb;border:1px solid #53d8fb}
-.bg-C{background:rgba(231,76,60,.15);color:#e74c3c;border:1px solid #e74c3c}
+/* ── BADGE (實體情境) ── */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.74rem;font-weight:bold; transition:all 0.3s}
+.bg-P{background:rgba(241,196,15,.15);color:#f1c40f;border:1px solid #f1c40f}      /* 待處理 */
+.bg-PR{background:rgba(155,89,182,.15);color:#9b59b6;border:1px solid #9b59b6}   /* 理貨中 */
+.bg-R{background:rgba(52,152,219,.15);color:#3498db;border:1px solid #3498db}      /* 待取貨 */
+.bg-CPL{background:rgba(46,213,115,.15);color:#2ed573;border:1px solid #2ed573}  /* 已完成 */
+.bg-C{background:rgba(231,76,60,.15);color:#e74c3c;border:1px solid #e74c3c}       /* 已取消 */
 
 /* ── DETAIL ROW ── */
 tr.detail-row{display:none}
@@ -145,16 +148,17 @@ if (curStatus  == null) curStatus  = "";
 if (curKeyword == null) curKeyword = "";
 if (curField   == null) curField   = "all";
 
-int total=0, pending=0, paid=0, shipped=0, cancelled=0; long revenue=0;
+int total=0, pending=0, processing=0, ready=0, completed=0, cancelled=0; long revenue=0;
 if (orderList != null) {
     total = orderList.size();
     for (OrderBean o : orderList) {
         String s = o.getStatus();
         if ("PENDING".equals(s)) pending++;
-        else if ("PAID".equals(s)) paid++;
-        else if ("SHIPPED".equals(s)) shipped++;
+        else if ("PROCESSING".equals(s)) processing++;
+        else if ("READY".equals(s)) ready++;
+        else if ("COMPLETED".equals(s)) completed++;
         else if ("CANCELLED".equals(s)) cancelled++;
-        if (o.getTotalAmount()!=null&&!"CANCELLED".equals(s)) revenue+=o.getTotalAmount();
+        if (o.getTotalAmount()!=null && !"CANCELLED".equals(s)) revenue+=o.getTotalAmount();
     }
 }
 String base = request.getContextPath() + "/orderList";
@@ -174,16 +178,17 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
 
 <%-- ── Header ── --%>
 <div class="header">
-    <h1>📋 訂單管理中心</h1>
+    <h1>📋 訂單管理中心 <span class="admin-badge">後台管理員專用</span></h1>
     <a href="<%=request.getContextPath()%>/admin_order_new.jsp" class="btn-primary">👤 管理員新增訂單</a>
 </div>
 
 <%-- ── Stats ── --%>
 <div class="stats">
     <div class="stat-card"><div class="num"><%=total%></div><div class="label">篩選結果</div></div>
-    <div class="stat-card"><div class="num" style="color:#f1c40f"><%=pending%></div><div class="label">⏳ 待付款</div></div>
-    <div class="stat-card"><div class="num" style="color:#2ed573"><%=paid%></div><div class="label">✅ 已付款</div></div>
-    <div class="stat-card"><div class="num" style="color:#53d8fb"><%=shipped%></div><div class="label">🚚 已出貨</div></div>
+    <div class="stat-card"><div class="num" style="color:#f1c40f"><%=pending%></div><div class="label">⏳ 待處理</div></div>
+    <div class="stat-card"><div class="num" style="color:#9b59b6"><%=processing%></div><div class="label">📦 理貨中</div></div>
+    <div class="stat-card"><div class="num" style="color:#3498db"><%=ready%></div><div class="label">🏪 待取貨</div></div>
+    <div class="stat-card"><div class="num" style="color:#2ed573"><%=completed%></div><div class="label">✅ 已完成</div></div>
     <div class="stat-card"><div class="num">$<%=String.format("%,d",revenue)%></div><div class="label">有效總金額</div></div>
 </div>
 
@@ -218,17 +223,16 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
             <span class="history-label">📌 搜尋記錄：</span>
             <% for (int hi=0; hi<searchHistory.size(); hi++) {
                 String histEntry = searchHistory.get(hi);
-                // parse: [field] keyword
                 String hField = "all", hKw = histEntry;
                 if (histEntry.startsWith("[")) {
                     int br = histEntry.indexOf("] ");
                     if (br>0) { hField=histEntry.substring(1,br); hKw=histEntry.substring(br+2); }
                 }
             %>
-            <span class="hist-chip"
+            <span class="hist-chip" id="chip-<%=hi%>"
                   onclick="applyHistory('<%=hField%>','<%=hKw.replace("'","\\'")%>')">
                 <%=histEntry%>
-                <span class="hist-del" onclick="event.stopPropagation();deleteHistory(<%=hi%>)">✕</span>
+                <span class="hist-del" onclick="deleteHistory(<%=hi%>, event)">✕</span>
             </span>
             <% } %>
         </div>
@@ -236,13 +240,14 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
     </form>
 </div>
 
-<%-- ── Status Tabs ── --%>
+<%-- ── Status Tabs (實體情境) ── --%>
 <div class="tabs">
     <a href="<%=base+(kwParam.isEmpty()?"":"?"+kwParam.substring(1))%>"
        class="tab <%=curStatus.isEmpty()?"active":""%>">全部</a>
-    <a href="<%=base+"?status=PENDING"+kwParam%>" class="tab tp <%="PENDING".equals(curStatus)?"active":""%>">⏳ 待付款</a>
-    <a href="<%=base+"?status=PAID"+kwParam%>"    class="tab tpaid <%="PAID".equals(curStatus)?"active":""%>">✅ 已付款</a>
-    <a href="<%=base+"?status=SHIPPED"+kwParam%>" class="tab tship <%="SHIPPED".equals(curStatus)?"active":""%>">🚚 已出貨</a>
+    <a href="<%=base+"?status=PENDING"+kwParam%>" class="tab tp <%="PENDING".equals(curStatus)?"active":""%>">⏳ 待處理</a>
+    <a href="<%=base+"?status=PROCESSING"+kwParam%>" class="tab tpr <%="PROCESSING".equals(curStatus)?"active":""%>">📦 理貨中</a>
+    <a href="<%=base+"?status=READY"+kwParam%>" class="tab trd <%="READY".equals(curStatus)?"active":""%>">🏪 待取貨</a>
+    <a href="<%=base+"?status=COMPLETED"+kwParam%>" class="tab tcpl <%="COMPLETED".equals(curStatus)?"active":""%>">✅ 已完成</a>
     <a href="<%=base+"?status=CANCELLED"+kwParam%>" class="tab tcanc <%="CANCELLED".equals(curStatus)?"active":""%>">❌ 已取消</a>
 </div>
 
@@ -266,13 +271,13 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
 <tbody>
 <% for (OrderBean order : orderList) {
     String st = order.getStatus()!=null ? order.getStatus() : "PENDING";
-    String badgeCls = "PENDING".equals(st)?"bg-P":"PAID".equals(st)?"bg-D":"SHIPPED".equals(st)?"bg-S":"bg-C";
-    String stLabel = "PENDING".equals(st)?"⏳ 待付款":"PAID".equals(st)?"✅ 已付款":"SHIPPED".equals(st)?"🚚 已出貨":"❌ 已取消";
+    String badgeCls = "PENDING".equals(st)?"bg-P":"PROCESSING".equals(st)?"bg-PR":"READY".equals(st)?"bg-R":"COMPLETED".equals(st)?"bg-CPL":"bg-C";
+    String stLabel = "PENDING".equals(st)?"⏳ 待處理":"PROCESSING".equals(st)?"📦 理貨中":"READY".equals(st)?"🏪 待取貨":"COMPLETED".equals(st)?"✅ 已完成":"❌ 已取消";
     List<OrderItemBean> items = itemMap!=null ? itemMap.get(order.getOrderId()) : null;
     int itemCount = items!=null ? items.size() : 0;
     String did = "d" + order.getOrderId();
 %>
-<tr class="main-row" onclick="toggleDetail('<%=did%>',this)">
+<tr class="main-row" id="row-<%=order.getOrderId()%>" onclick="toggleDetail('<%=did%>',this)">
     <td>
         <span class="expand-arrow" id="arr-<%=order.getOrderId()%>">▶</span>
         <span style="color:#666;font-size:.73rem">(<%=itemCount%>)</span>
@@ -282,8 +287,8 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
     <td style="color:#2ed573;font-weight:bold">
         $<%=order.getTotalAmount()!=null?String.format("%,d",order.getTotalAmount()):"0"%>
     </td>
-    <td><%=order.getPaymentType()!=null?order.getPaymentType():"-"%></td>
-    <td><span class="badge <%=badgeCls%>"><%=stLabel%></span></td>
+    <td id="td-pay-<%=order.getOrderId()%>"><%=order.getPaymentType()!=null?order.getPaymentType():"-"%></td>
+    <td><span class="badge <%=badgeCls%>" id="badge-<%=order.getOrderId()%>"><%=stLabel%></span></td>
     <td style="color:#a0c4d8;font-size:.78rem">
         <%=order.getCreatedAt()!=null?order.getCreatedAt().toString().replace("T"," ").substring(0,16):"-"%>
     </td>
@@ -305,10 +310,11 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
             <div>
                 <label>訂單狀態</label>
                 <select class="edit-select" id="sel-status-<%=order.getOrderId()%>">
-                    <option value="PENDING"   <%="PENDING".equals(st)?"selected":""%>>⏳ 待付款</option>
-                    <option value="PAID"      <%="PAID".equals(st)?"selected":""%>>✅ 已付款</option>
-                    <option value="SHIPPED"   <%="SHIPPED".equals(st)?"selected":""%>>🚚 已出貨</option>
-                    <option value="CANCELLED" <%="CANCELLED".equals(st)?"selected":""%>>❌ 已取消</option>
+                    <option value="PENDING"    <%="PENDING".equals(st)?"selected":""%>>⏳ 待處理</option>
+                    <option value="PROCESSING" <%="PROCESSING".equals(st)?"selected":""%>>📦 理貨中</option>
+                    <option value="READY"      <%="READY".equals(st)?"selected":""%>>🏪 待取貨</option>
+                    <option value="COMPLETED"  <%="COMPLETED".equals(st)?"selected":""%>>✅ 已完成</option>
+                    <option value="CANCELLED"  <%="CANCELLED".equals(st)?"selected":""%>>❌ 已取消</option>
                 </select>
             </div>
             <div>
@@ -342,13 +348,8 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
                 <%=order.getCreatedAt()!=null?"更新於 "+order.getCreatedAt().toString().replace("T"," ").substring(0,16):""%>
             </span>
             <div style="flex:1"></div>
-            <form action="<%=request.getContextPath()%>/orderAction" method="post"
-                  onsubmit="return confirm('❗ 確定刪除訂單 #<%=order.getOrderId()%>？\n此操作不可復原！')"
-                  onclick="event.stopPropagation()">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="orderId" value="<%=order.getOrderId()%>">
-                <button type="submit" class="btn-del-order">🗑 刪除訂單</button>
-            </form>
+            <%-- ✨ 無縫刪除按鈕 (取代原本的 Form) --%>
+            <button type="button" class="btn-del-order" onclick="deleteOrder(<%=order.getOrderId()%>, event)">🗑 刪除訂單</button>
         </div>
     </div>
 
@@ -436,13 +437,12 @@ function showToast(msg, type='success') {
     setTimeout(() => { t.style.opacity='0'; setTimeout(()=>{t.style.display='none';t.style.opacity='1';},300); }, 2800);
 }
 
-/* ── Update Order Header ── */
+/* ✨ 進階二：無縫更新訂單狀態 (拔除 Reload) */
 function updateOrder(orderId) {
-	console.log("🔥 updateOrder 被呼叫");
     const status      = document.getElementById('sel-status-' + orderId)?.value;
     const paymentType = document.getElementById('sel-pay-'    + orderId)?.value;
     const note        = document.getElementById('inp-note-'   + orderId)?.value;
-    console.log("🚀 有送出 request");
+    
     const fd = new FormData();
     fd.append('action', 'updateOrder');
     fd.append('orderId', orderId);
@@ -450,27 +450,73 @@ function updateOrder(orderId) {
     fd.append('paymentType', paymentType);
     fd.append('note', note || '');
 
-    fetch('<%=request.getContextPath()%>/orderAction', {
-    	method:'POST', 
-    	body:fd
-    	})
+    fetch('<%=request.getContextPath()%>/orderAction', { method:'POST', body:fd })
     .then(() => {
+        // 更新時間戳
         const now = new Date().toLocaleString('zh-TW', {hour12:false});
         const timeEl = document.getElementById('upd-time-' + orderId);
         if (timeEl) timeEl.textContent = '更新於 ' + now;
+
+        // ✨ 瞬間更換外層 Badge 狀態 (不重新整理)
+        const badgeMap = {
+            'PENDING':    { cls: 'bg-P',   txt: '⏳ 待處理' },
+            'PROCESSING': { cls: 'bg-PR',  txt: '📦 理貨中' },
+            'READY':      { cls: 'bg-R',   txt: '🏪 待取貨' },
+            'COMPLETED':  { cls: 'bg-CPL', txt: '✅ 已完成' },
+            'CANCELLED':  { cls: 'bg-C',   txt: '❌ 已取消' }
+        };
+        const badgeEl = document.getElementById('badge-' + orderId);
+        if (badgeEl && badgeMap[status]) {
+            badgeEl.className = 'badge ' + badgeMap[status].cls;
+            badgeEl.textContent = badgeMap[status].txt;
+            // 讓列閃爍一下提示更新成功
+            const rowEl = document.getElementById('row-' + orderId);
+            if(rowEl) {
+                rowEl.style.background = 'rgba(46,213,115,0.15)';
+                setTimeout(() => rowEl.style.background = '', 500);
+            }
+        }
+        // ✨ 同步更新畫面上的付款方式與備註
+        const payEl = document.getElementById('td-pay-' +　orderId);
+        if (payEl) payEl.textContent = paymentType;
         showToast('✅ 訂單 #' + orderId + ' 已更新', 'success');
-        // Update badge in main row — find and update
-        setTimeout(() => location.reload(), 1800);
     })
     .catch(err => showToast('❌ 更新失敗：' + err, 'info'));
 }
 
+/* ✨ 進階一：無縫刪除訂單 (搭配淡出動畫) */
+function deleteOrder(orderId, event) {
+    event.stopPropagation(); // 防止觸發列的展開
+    if (!confirm('❗ 確定刪除訂單 #' + orderId + '？\n此操作不可復原！')) return;
+
+    const fd = new FormData();
+    fd.append('action', 'delete');
+    fd.append('orderId', orderId);
+
+    fetch('<%=request.getContextPath()%>/orderAction', { method:'POST', body:fd })
+    .then(() => {
+        // 抓取主列與明細列
+        const mainRow = document.getElementById('row-' + orderId);
+        const detailRow = document.getElementById('d' + orderId);
+        
+        // ✨ 動畫淡出後移除 DOM
+        if (mainRow) {
+            mainRow.style.opacity = '0';
+            mainRow.style.transform = 'translateX(30px)';
+            setTimeout(() => mainRow.remove(), 400);
+        }
+        if (detailRow) detailRow.remove();
+        
+        showToast('🗑 訂單 #' + orderId + ' 已徹底刪除', 'success');
+    })
+    .catch(err => showToast('❌ 刪除失敗：' + err, 'info'));
+}
+
 /* ── Item Edit ── */
 function startEdit(itemId) {
-    alert('💡 提示：可直接在商品 ID、數量、單價欄位內修改，完成後按「💾 儲存」確認更新。');
     ['pid','qty','price'].forEach(field => {
-        const span = document.getElementById('td-'  + (field==='pid'?'pid':field==='qty'?'qty':'price') + '-' + itemId);
-        const inp  = document.getElementById('inp-' + (field==='pid'?'pid':field==='qty'?'qty':'price') + '-' + itemId);
+        const span = document.getElementById('td-'  + field + '-' + itemId);
+        const inp  = document.getElementById('inp-' + field + '-' + itemId);
         if (span) span.style.display = 'none';
         if (inp)  inp.style.display  = 'inline-block';
     });
@@ -494,7 +540,6 @@ function saveItem(itemId, orderId) {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            // Update display spans
             ['pid','qty','price'].forEach(field => {
                 const inp  = document.getElementById('inp-'+field+'-'+itemId);
                 const span = document.getElementById('td-' +field+'-'+itemId);
@@ -508,7 +553,7 @@ function saveItem(itemId, orderId) {
             if (subEl) subEl.textContent = '$' + data.subtotal.toLocaleString();
             document.getElementById('btn-edit-' + itemId).style.display = '';
             document.getElementById('btn-save-' + itemId).style.display = 'none';
-            showToast('✅ 明細 #' + itemId + ' 已更新，小計 $' + data.subtotal.toLocaleString(), 'success');
+            showToast('✅ 明細 #' + itemId + ' 已更新', 'success');
         } else {
             showToast('❌ ' + data.message, 'info');
         }
@@ -527,7 +572,11 @@ function deleteItem(itemId, orderId) {
     .then(data => {
         if (data.success) {
             const row = document.getElementById('irow-' + itemId);
-            if (row) row.remove();
+            if (row) {
+                row.style.transition = 'opacity 0.3s';
+                row.style.opacity = '0';
+                setTimeout(() => row.remove(), 300);
+            }
             showToast('🗑 明細 #' + itemId + ' 已刪除', 'success');
         } else {
             showToast('❌ ' + data.message, 'info');
@@ -536,22 +585,24 @@ function deleteItem(itemId, orderId) {
     .catch(err => showToast('❌ 發生錯誤：' + err, 'info'));
 }
 
-/* ── Search History ── */
+/* ✨ 進階三：無縫刪除歷史紀錄 */
 function applyHistory(field, kw) {
     document.getElementById('fieldSel').value = field;
     document.getElementById('kwInput').value  = kw;
     document.getElementById('searchForm').submit();
 }
-function deleteHistory(idx) {
-    fetch('<%=request.getContextPath()%>/orderList?_delHist=' + idx)  // no-op, handled below
+function deleteHistory(idx, event) {
+    event.stopPropagation(); // 防止觸發套用搜尋
+    fetch('<%=request.getContextPath()%>/orderList?_delHist=' + idx)
     .catch(() => {});
-    // Client-side remove the chip immediately
-    const chips = document.querySelectorAll('.hist-chip');
-    if (chips[idx]) chips[idx].remove();
-    // Proper way: POST to a history-clear endpoint; for now reload with special param
-    const url = new URL(location.href);
-    url.searchParams.set('_delHist', idx);
-    location.href = url.toString();
+    
+    // ✨ 讓標籤縮小淡出
+    const chip = document.getElementById('chip-' + idx);
+    if (chip) {
+        chip.style.transform = 'scale(0.8)';
+        chip.style.opacity = '0';
+        setTimeout(() => chip.remove(), 300);
+    }
 }
 </script>
 </body>

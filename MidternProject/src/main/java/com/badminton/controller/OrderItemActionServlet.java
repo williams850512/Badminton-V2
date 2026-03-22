@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 
 import com.badminton.dao.OrderItemDAO;
 
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * 回應格式：JSON（供前端 fetch 接收）
  */
 @WebServlet("/orderItemAction")
+@MultipartConfig // 🔥 魔法核心：補上這個，Servlet 才能聽懂前端 FormData 傳來的話！
 public class OrderItemActionServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -33,6 +35,7 @@ public class OrderItemActionServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         String action = request.getParameter("action");
+        System.out.println("🔥 OrderItemAction 收到指令: " + action); // Debug 用
 
         if ("updateItem".equals(action)) {
             handleUpdateItem(request, out);
@@ -55,6 +58,7 @@ public class OrderItemActionServlet extends HttpServlet {
 
             boolean ok = orderItemDAO.updateItem(itemId, productId, quantity, unitPrice);
             if (ok) {
+                System.out.println("✅ 資料庫已更新: 明細 #" + itemId);
                 out.print("{\"success\":true,\"subtotal\":" + subtotal
                         + ",\"message\":\"明細 #" + itemId + " 已更新\"}");
             } else {
@@ -71,9 +75,13 @@ public class OrderItemActionServlet extends HttpServlet {
         try {
             int itemId = Integer.parseInt(request.getParameter("itemId"));
             boolean ok = orderItemDAO.deleteByItemId(itemId);
-            out.print(ok
-                ? "{\"success\":true,\"message\":\"明細 #" + itemId + " 已刪除\"}"
-                : "{\"success\":false,\"message\":\"刪除失敗，明細可能不存在\"}");
+            
+            if (ok) {
+                System.out.println("🗑 資料庫已刪除: 明細 #" + itemId);
+                out.print("{\"success\":true,\"message\":\"明細 #" + itemId + " 已刪除\"}");
+            } else {
+                out.print("{\"success\":false,\"message\":\"刪除失敗，明細可能不存在\"}");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             out.print("{\"success\":false,\"message\":\"" + e.getMessage() + "\"}");

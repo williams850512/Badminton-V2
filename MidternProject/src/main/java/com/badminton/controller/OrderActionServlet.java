@@ -6,19 +6,17 @@ import com.badminton.dao.OrderDAO;
 import com.badminton.dao.OrderItemDAO;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * OrderActionServlet（加強版）
- *
- * POST /orderAction?action=updateStatus  → 只更新狀態（保留相容性）
- * POST /orderAction?action=updateOrder   → 同時更新狀態 / 付款方式 / 備註 / updated_at
- * POST /orderAction?action=delete        → 刪除訂單（先刪明細）
+ * OrderActionServlet（AJAX 無縫升級版）
  */
 @WebServlet("/orderAction")
+@MultipartConfig // 🔥 魔法一：加上這個，Servlet 才能解析 JavaScript fetch 傳來的 FormData！
 public class OrderActionServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -30,9 +28,11 @@ public class OrderActionServlet extends HttpServlet {
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=UTF-8");
+        // 設定回傳格式為 JSON 或是純文字，不要回傳 HTML
+        response.setContentType("application/json;charset=UTF-8"); 
 
         String action = request.getParameter("action");
+        System.out.println("🔥 後端收到 Action: " + action); // Debug 追蹤
 
         if ("updateStatus".equals(action)) {
             handleUpdateStatus(request, response);
@@ -41,7 +41,8 @@ public class OrderActionServlet extends HttpServlet {
         } else if ("delete".equals(action)) {
             handleDelete(request, response);
         } else {
-            response.sendRedirect(request.getContextPath() + "/orderList");
+            // 如果遇到不認識的指令，回傳錯誤代碼
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
@@ -58,7 +59,7 @@ public class OrderActionServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/orderList");
     }
 
-    /** 同時更新狀態 / 付款方式 / 備註（管理者詳情編輯用） */
+    /** 同時更新狀態 / 付款方式 / 備註（搭配 AJAX） */
     private void handleUpdateOrder(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         try {
@@ -69,34 +70,37 @@ public class OrderActionServlet extends HttpServlet {
 
             boolean ok = orderDAO.updateOrder(orderId, status, paymentType, note);
             System.out.println(ok
-                ? "✅ 訂單 #" + orderId + " 已更新（狀態/付款/備註）"
-                : "❌ 訂單 #" + orderId + " 更新失敗");
+                ? "✅ 資料庫已更新: 訂單 #" + orderId 
+                : "❌ 資料庫更新失敗: 訂單 #" + orderId);
+
+            // 🔥 魔法二：因為前端是用 fetch，我們只要回傳成功代碼 (200 OK)，不用 sendRedirect
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write("{\"success\": true}");
 
         } catch (Exception e) {
             e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-        // 導回列表（保留篩選條件）
-        String ref = request.getHeader("Referer");
-        response.sendRedirect(ref != null ? ref : request.getContextPath() + "/orderList");
     }
 
-    /** 刪除訂單（先刪明細，再刪主訂單） */
+    /** 刪除訂單（搭配 AJAX） */
     private void handleDelete(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         try {
             int orderId = Integer.parseInt(request.getParameter("orderId"));
+            // 先刪除明細，再刪除主訂單 (避免 Foreign Key 衝突)
             orderItemDAO.deleteByOrderId(orderId);
             orderDAO.delete(orderId);
-            System.out.println("✅ 訂單 #" + orderId + " 已刪除");
+            
+            System.out.println("🗑 資料庫已刪除: 訂單 #" + orderId);
+
+            // 一樣只回傳成功訊號，不重載頁面
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write("{\"success\": true}");
+
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        String ref = request.getHeader("Referer");
-        if (ref != null && ref.contains("/orderList")) {
-            // 去掉可能帶著的 orderId 參數，直接保留 status/keyword 等
-            response.sendRedirect(ref.replaceAll("[&?]orderId=[^&]*", ""));
-        } else {
-            response.sendRedirect(request.getContextPath() + "/orderList");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 }
