@@ -57,6 +57,26 @@ h1{color:#53d8fb;font-size:1.6rem;letter-spacing:1px; display:flex; align-items:
 .tab.tcpl.active{background:rgba(46,213,115,.15);color:#2ed573;border-color:#2ed573} /* 已完成 */
 .tab.tcanc.active{background:rgba(231,76,60,.15);color:#e74c3c;border-color:#e74c3c} /* 已取消 */
 
+/* ── 批次操作區 ── */
+.table-actions {
+    display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px;
+}
+.btn-bulk-del {
+    padding: 8px 16px;
+    background: rgba(231, 76, 60, 0.1); /* 微透明的紅色背景 */
+    border: 1px solid #e74c3c;          /* 銳利的紅框 */
+    color: #e74c3c;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+.btn-bulk-del:hover {
+    background: rgba(231, 76, 60, 0.25);
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.3); /* 滑過發光效果 */
+}
+
 /* ── TABLE ── */
 .table-wrap{background:rgba(255,255,255,.06);border:1px solid rgba(83,216,251,.15);border-radius:16px;overflow:hidden}
 table{width:100%;border-collapse:collapse}
@@ -80,11 +100,11 @@ td{padding:11px 13px;font-size:.85rem;vertical-align:middle}
 tr.detail-row{display:none}
 tr.detail-row.open{display:table-row}
 .detail-cell{background:rgba(0,0,0,.25);padding:0!important}
-.detail-inner{padding:18px 24px}
+.detail-inner{padding:30px 20px 30px 50px; background:rgba(0,0,0,.4)} /* 修正對齊與內距 */
 
 /* ── ORDER EDIT PANEL ── */
-.order-edit-panel{background:rgba(83,216,251,.05);border:1px solid rgba(83,216,251,.15);border-radius:10px;padding:16px 20px;margin-bottom:16px}
-.order-edit-panel h4{color:#53d8fb;font-size:.85rem;margin-bottom:12px}
+.order-edit-panel{background:rgba(83,216,251,.08);border:1px solid rgba(83,216,251,.2);border-radius:12px;padding:24px;margin-bottom:25px;width:100%;box-sizing:border-box} /* 強制撐滿100% */
+.order-edit-panel h4{color:#53d8fb;font-size:.9rem;margin-bottom:15px}
 .edit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
 .edit-grid label{font-size:.78rem;color:#a0c4d8;display:block;margin-bottom:4px}
 .edit-select,.edit-input{width:100%;padding:7px 10px;background:rgba(255,255,255,.08);border:1px solid rgba(83,216,251,.25);border-radius:7px;color:#e0e0e0;font-size:.85rem}
@@ -98,9 +118,9 @@ tr.detail-row.open{display:table-row}
 
 /* ── ITEMS TABLE ── */
 .items-section h4{color:#53d8fb;font-size:.82rem;margin-bottom:10px;padding-top:4px}
-.items-tbl{width:100%;border-collapse:collapse;font-size:.82rem}
-.items-tbl th{color:#a0c4d8;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left}
-.items-tbl td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)}
+.items-tbl{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:15px;border:1px solid rgba(83,216,251,.15)} /* 強制撐滿100% */
+.items-tbl th{background-color:rgba(0,0,0,.3);color:#53d8fb;padding:12px 10px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;font-weight:600}
+.items-tbl td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08)}
 .items-tbl tr:hover td{background:rgba(83,216,251,.03)}
 
 /* inline edit mode */
@@ -179,7 +199,7 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
 <%-- ── Header ── --%>
 <div class="header">
     <h1>📋 訂單管理中心 <span class="admin-badge">後台管理員專用</span></h1>
-    <a href="<%=request.getContextPath()%>/admin_order_new.jsp" class="btn-primary">👤 管理員新增訂單</a>
+    <a href="<%=request.getContextPath()%>/admin_order_bulk.jsp" class="btn-primary">⚡ 管理員新增訂單 (支援批次)</a>
 </div>
 
 <%-- ── Stats ── --%>
@@ -254,14 +274,12 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
                 }
             %>
             <span class="hist-chip" id="chip-<%=hi%>"
-                  onclick="applyHistory('<%=hField%>','<%=hKw.replace("'","\\'")%>')">
+                  onclick="applyHistory('<%=histEntry.replace("'","\\'")%>')">
                 <%=histEntry%>
                 <span class="hist-del" onclick="deleteHistory(<%=hi%>, event)">✕</span>
             </span>
-            <% } %>
-        </div>
-        <% } %>
-    </form>
+            <% } %> </div>
+        <% } %> </form>
 </div>
 
 <%-- ── Status Tabs (實體情境) ── --%>
@@ -275,7 +293,25 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
     <a href="<%=base+"?status=CANCELLED"+kwParam%>" class="tab tcanc <%="CANCELLED".equals(curStatus)?"active":""%>">❌ 已取消</a>
 </div>
 
+<%-- ── 表格上方的批次操作區 ── --%>
+<div class="table-actions" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px;">
+    <div style="display: flex; gap: 8px; align-items: center;">
+        <select id="bulkStatusSelect" style="padding: 7px 10px; border-radius: 8px; background: rgba(83,216,251,0.1); border: 1px solid #53d8fb; color: #53d8fb; font-weight: bold; outline: none;">
+            <option value="" disabled selected>-- 選擇目標狀態 --</option>
+            <option value="PENDING" style="color: black;">⏳ 待處理</option>
+            <option value="PROCESSING" style="color: black;">📦 理貨中</option>
+            <option value="READY" style="color: black;">🏪 待取貨</option>
+            <option value="COMPLETED" style="color: black;">✅ 已完成</option>
+        </select>
+        <button type="button" class="btn-primary" onclick="executeBulkUpdateStatus()">✨ 批次更改狀態</button>
+        <span style="font-size: 0.75rem; color: #a0c4d8; margin-left: 10px;">💡 請勾選下方訂單進行操作</span>
+    </div>
+    
+    <button type="button" class="btn-bulk-del" onclick="executeBulkDelete()">🗑 批次刪除所選</button>
+</div>
+
 <%-- ── Table ── --%>
+
 <div class="table-wrap">
 <% if (orderList==null||orderList.isEmpty()) { %>
 <div class="empty-state">
@@ -288,6 +324,7 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
 <% } else { %>
 <table>
 <thead><tr>
+    <th width="40"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
     <th>▶</th><th>訂單 ID</th><th>會員 ID</th>
     <th>金額（元）</th><th>付款方式</th><th>狀態</th>
     <th>建立時間</th><th>備註</th>
@@ -302,6 +339,11 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
     String did = "d" + order.getOrderId();
 %>
 <tr class="main-row" id="row-<%=order.getOrderId()%>" onclick="toggleDetail('<%=did%>',this)">
+    <%-- ✨ 這裡才是 Checkbox 真正的家！(加上 stopPropagation 避免點擊時誤觸列的展開) --%>
+    <td style="text-align: center;" onclick="event.stopPropagation();">
+        <input type="checkbox" class="order-checkbox" value="<%=order.getOrderId()%>">
+    </td>
+
     <td>
         <span class="expand-arrow" id="arr-<%=order.getOrderId()%>">▶</span>
         <span style="color:#666;font-size:.73rem">(<%=itemCount%>)</span>
@@ -324,14 +366,14 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
 
 <%-- ── Detail Row ── --%>
 <tr class="detail-row" id="<%=did%>">
-<td class="detail-cell" colspan="8">
-<div class="detail-inner">
+<td class="detail-cell" colspan="9">   <div class="detail-inner">
 
-    <%-- Order Edit Panel --%>
+   <%-- Order Edit Panel --%>
     <div class="order-edit-panel">
         <h4>✏️ 編輯訂單 #<%=order.getOrderId()%> 主資訊</h4>
-        <div class="edit-grid">
-            <div>
+        
+        <div style="display: flex; gap: 20px; align-items: flex-start; width: 100%; margin-bottom: 15px;">
+            <div style="flex: 1;">
                 <label>訂單狀態</label>
                 <select class="edit-select" id="sel-status-<%=order.getOrderId()%>">
                     <option value="PENDING"    <%="PENDING".equals(st)?"selected":""%>>⏳ 待處理</option>
@@ -341,7 +383,7 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
                     <option value="CANCELLED"  <%="CANCELLED".equals(st)?"selected":""%>>❌ 已取消</option>
                 </select>
             </div>
-            <div>
+            <div style="flex: 1;">
                 <label>付款方式</label>
                 <select class="edit-select" id="sel-pay-<%=order.getOrderId()%>">
                     <option value="信用卡"  <%="信用卡".equals(order.getPaymentType())?"selected":""%>>💳 信用卡</option>
@@ -349,42 +391,32 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
                     <option value="轉帳"    <%="轉帳".equals(order.getPaymentType())?"selected":""%>>🏦 銀行轉帳</option>
                     <option value="LinePay" <%="LinePay".equals(order.getPaymentType())?"selected":""%>>📱 LINE Pay</option>
                     <option value="街口支付" <%="街口支付".equals(order.getPaymentType())?"selected":""%>>📱 街口支付</option>
-                    <% if (order.getPaymentType()!=null &&
-                           !"信用卡".equals(order.getPaymentType()) &&
-                           !"現金".equals(order.getPaymentType()) &&
-                           !"轉帳".equals(order.getPaymentType()) &&
-                           !"LinePay".equals(order.getPaymentType()) &&
-                           !"街口支付".equals(order.getPaymentType())) { %>
+                    <% if (order.getPaymentType()!=null && !"信用卡".equals(order.getPaymentType()) && !"現金".equals(order.getPaymentType()) && !"轉帳".equals(order.getPaymentType()) && !"LinePay".equals(order.getPaymentType()) && !"街口支付".equals(order.getPaymentType())) { %>
                     <option value="<%=order.getPaymentType()%>" selected><%=order.getPaymentType()%></option>
                     <% } %>
                 </select>
             </div>
-            <div>
+            <div style="flex: 2;">
                 <label>備註</label>
                 <input type="text" class="edit-input" id="inp-note-<%=order.getOrderId()%>"
                        value="<%=order.getNote()!=null?order.getNote():""%>" placeholder="備註（選填）">
+                <div class="updated-time" id="upd-time-<%=order.getOrderId()%>" style="margin-top: 8px; margin-left: 0;">
+                    <%=order.getCreatedAt()!=null?"更新於 "+order.getCreatedAt().toString().replace("T"," ").substring(0,16):""%>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                <button class="btn-confirm-order" onclick="updateOrder(<%=order.getOrderId()%>)">✅ 確認更新</button>
+                <button type="button" class="btn-del-order" onclick="deleteOrder(<%=order.getOrderId()%>, event)">🗑 刪除訂單</button>
             </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <button class="btn-confirm-order"
-                    onclick="updateOrder(<%=order.getOrderId()%>)">✅ 確認更新</button>
-            <span class="updated-time" id="upd-time-<%=order.getOrderId()%>">
-                <%=order.getCreatedAt()!=null?"更新於 "+order.getCreatedAt().toString().replace("T"," ").substring(0,16):""%>
-            </span>
-            <div style="flex:1"></div>
-            <%-- ✨ 無縫刪除按鈕 (取代原本的 Form) --%>
-            <button type="button" class="btn-del-order" onclick="deleteOrder(<%=order.getOrderId()%>, event)">🗑 刪除訂單</button>
-        </div>
     </div>
-
-    <%-- Items Section --%>
-    <div class="items-section">
         <h4>📦 商品明細</h4>
         <% if (items==null||items.isEmpty()) { %>
         <p style="color:#666;font-size:.82rem;font-style:italic">此訂單目前沒有商品明細</p>
         <% } else { %>
         <table class="items-tbl" id="items-<%=order.getOrderId()%>">
-        <thead><tr>
+        <thead>
+        <tr>
             <th>#</th><th>商品名稱</th><th>商品 ID</th>
             <th>數量</th><th>單價（元）</th><th>小計（元）</th><th>操作</th>
         </tr></thead>
@@ -442,6 +474,89 @@ String kwParam = curKeyword.isEmpty() ? "" : "&keyword="+ java.net.URLEncoder.en
 </div><%-- /container --%>
 
 <script>
+
+//執行批次修改狀態
+function executeBulkUpdateStatus() {
+    const checkedBoxes = document.querySelectorAll('.order-checkbox:checked');
+    const targetStatus = document.getElementById('bulkStatusSelect').value;
+
+    if (checkedBoxes.length === 0) {
+        alert("⚠️ 請至少選擇一筆要修改的訂單！");
+        return;
+    }
+    if (!targetStatus) {
+        alert("⚠️ 請從下拉選單選擇要變更的『目標狀態』！");
+        return;
+    }
+
+    if (!confirm("✨ 確定要將這 " + checkedBoxes.length + " 筆訂單的狀態改為設定值嗎？")) return;
+
+    const formData = new URLSearchParams();
+    checkedBoxes.forEach(cb => formData.append('orderIds', cb.value));
+    formData.append('status', targetStatus); // 多塞一個狀態參數給後端
+
+    fetch('<%=request.getContextPath()%>/api/bulkUpdateStatus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("✅ " + data.message);
+            location.reload(); 
+        } else {
+            alert("❌ 錯誤：" + data.message);
+        }
+    })
+    .catch(err => alert("❌ 系統發生錯誤，無法執行批次更新。"));
+}
+//全選 / 取消全選
+function toggleAll(source) {
+    const checkboxes = document.querySelectorAll('.order-checkbox');
+    checkboxes.forEach(cb => cb.checked = source.checked);
+}
+
+// 執行批次刪除
+function executeBulkDelete() {
+    // 找出所有被打勾的方塊
+    const checkedBoxes = document.querySelectorAll('.order-checkbox:checked');
+    if (checkedBoxes.length === 0) {
+        alert("⚠️ 請至少選擇一筆要刪除的訂單！");
+        return;
+    }
+
+    // CQT 防呆確認
+    if (!confirm("🚨 警告：確定要永久刪除這 " + checkedBoxes.length + " 筆訂單嗎？\n此動作無法復原！")) {
+        return;
+    }
+
+    // 收集所有被勾選的 ID
+    const formData = new URLSearchParams();
+    checkedBoxes.forEach(cb => {
+        formData.append('orderIds', cb.value); // append 可以塞入多筆同名的陣列資料
+    });
+
+    // 呼叫我們剛剛寫的 Servlet
+    fetch('<%=request.getContextPath()%>/api/bulkDeleteOrders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("✅ " + data.message);
+            location.reload(); // 成功後重新整理畫面
+        } else {
+            alert("❌ 錯誤：" + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ 系統發生錯誤，無法執行批次刪除。");
+    });
+}
 /* ── Toggle Detail Row ── */
 function toggleDetail(did, row) {
     const tr  = document.getElementById(did);

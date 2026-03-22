@@ -120,6 +120,96 @@ public class OrderDAO {
 		}
 		return false;
 	}
+	/*
+	 * 批次刪除多筆訂單 (Bulk Delete - 支援連鎖刪除明細)
+	 */
+	public boolean deleteMultiple(String[] orderIds) {
+		if (orderIds == null || orderIds.length == 0) return false;
+
+		// 準備 SQL：依照陣列長度動態產生問號 (例如： ?, ?, ? )
+		StringBuilder placeholders = new StringBuilder();
+		for (int i = 0; i < orderIds.length; i++) {
+			placeholders.append("?");
+			if (i < orderIds.length - 1) placeholders.append(",");
+		}
+		String inClause = placeholders.toString();
+
+		// ⚔️ 雙刀流 SQL 語法：先砍明細，再砍主訂單
+		String sqlDeleteItems = "DELETE FROM OrderItems WHERE order_id IN (" + inClause + ")";
+		String sqlDeleteOrders = "DELETE FROM Orders WHERE order_id IN (" + inClause + ")";
+
+		try (Connection conn = DBConnection.getConnection()) {
+			
+			// 🔥 啟動交易防護罩：不成功，便成仁
+			conn.setAutoCommit(false); 
+
+			try (PreparedStatement psItems = conn.prepareStatement(sqlDeleteItems);
+				 PreparedStatement psOrders = conn.prepareStatement(sqlDeleteOrders)) {
+
+				// 步驟 1：把陣列裡的 ID 塞進「明細表」的問號裡，先把底下的小兵全砍了
+				for (int i = 0; i < orderIds.length; i++) {
+					psItems.setInt(i + 1, Integer.parseInt(orderIds[i].trim()));
+				}
+				psItems.executeUpdate(); // 砍掉明細 (即使這張單沒明細也沒關係，不會報錯)
+
+				// 步驟 2：把陣列裡的 ID 塞進「主訂單表」的問號裡，現在可以安心砍主帥了
+				for (int i = 0; i < orderIds.length; i++) {
+					psOrders.setInt(i + 1, Integer.parseInt(orderIds[i].trim()));
+				}
+				int deletedOrders = psOrders.executeUpdate();
+
+				// 步驟 3：雙殺成功，蓋章確認！
+				conn.commit(); 
+				return deletedOrders > 0;
+
+			} catch (SQLException e) {
+				// ❌ 萬一發生意外，資料庫時光倒流，什麼都不刪除
+				conn.rollback();
+				e.printStackTrace(); // 把真正的死因印在 Eclipse 裡
+			} finally {
+				conn.setAutoCommit(true); // 恢復預設設定
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/*
+	 * 批次修改多筆訂單狀態 (Bulk Update Status)
+	 */
+	public boolean updateStatusMultiple(String[] orderIds, String status) {
+		if (orderIds == null || orderIds.length == 0) return false;
+
+		// 準備 SQL：依照陣列長度動態產生問號
+		StringBuilder placeholders = new StringBuilder();
+		for (int i = 0; i < orderIds.length; i++) {
+			placeholders.append("?");
+			if (i < orderIds.length - 1) placeholders.append(",");
+		}
+
+		// 語法：UPDATE Orders SET status = ? WHERE order_id IN (?, ?, ?)
+		String sql = "UPDATE Orders SET status = ? WHERE order_id IN (" + placeholders.toString() + ")";
+
+		try (Connection conn = DBConnection.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setString(1, status); // 第一個問號是目標狀態
+
+			// 後面的問號是陣列裡的訂單 ID
+			for (int i = 0; i < orderIds.length; i++) {
+				ps.setInt(i + 2, Integer.parseInt(orderIds[i].trim()));
+			}
+
+			int updatedRows = ps.executeUpdate();
+			return updatedRows > 0;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 	
 	/* ─────────────────────────────────────────────────────
 	 * 舊版：模糊搜尋 / 精準搜尋 (保留以防萬一)
@@ -178,7 +268,7 @@ public class OrderDAO {
 	}
 
 	/* ─────────────────────────────────────────────────────
-	 * 🔥 終極全能搜尋 (支援 #訂單搜尋 + 智慧數字判斷 + 金額)
+	 * 🔥 終極全能搜尋 (支援 #訂單、多筆逗號查詢、金額範圍)
 	 * ───────────────────────────────────────────────────── */
 	public List<OrderBean> findByAdvancedSearch(String keyword, Integer minPrice, Integer maxPrice) {
 		List<OrderBean> list = new ArrayList<>();
@@ -194,20 +284,35 @@ public class OrderDAO {
 		boolean hasKeyword = (keyword != null && !keyword.trim().isEmpty());
 		String kw = hasKeyword ? keyword.trim() : "";
 
-		// 🌟 神級判斷 1：是不是明確使用 # 來找訂單 (例如輸入 #16)
+		// 🌟 神級判斷 3：是否有逗號？而且去掉逗號、#、空白後，是不是純數字？ (例如: "1, 3, #5")
+		boolean isBulkIdSearch = kw.contains(",") && kw.replaceAll("[#, ]", "").matches("\\d+");
+		
 		boolean isHashOrder = kw.startsWith("#") && kw.substring(1).matches("\\d+");
-		// 🌟 神級判斷 2：是不是純數字 (例如輸入 16)
 		boolean isNumeric = kw.matches("\\d+");
 
+		List<Integer> bulkIds = new ArrayList<>();
+
 		if (hasKeyword) {
-			if (isHashOrder) {
-				// 如果有加 #，我們認定他「只」想找該筆訂單 ID
+			if (isBulkIdSearch) {
+				// 處理逗號分隔字串
+				String[] parts = kw.split(",");
+				StringBuilder placeholders = new StringBuilder();
+				for (String p : parts) {
+					String cleanId = p.replaceAll("[# ]", ""); // 清除 # 和空白
+					if (!cleanId.isEmpty()) {
+						bulkIds.add(Integer.parseInt(cleanId));
+						placeholders.append("?,");
+					}
+				}
+				if (!bulkIds.isEmpty()) {
+					placeholders.deleteCharAt(placeholders.length() - 1); // 刪掉最後一個逗號
+					sql.append("AND o.order_id IN (" + placeholders.toString() + ") ");
+				}
+			} else if (isHashOrder) {
 				sql.append("AND o.order_id = ? ");
 			} else if (isNumeric) {
-				// 如果是純數字，精準找 ID，同時也去文字欄位模糊搜尋 (防呆)
 				sql.append("AND (o.order_id = ? OR o.member_id = ? OR o.note LIKE ? OR o.payment_type LIKE ? OR o.status LIKE ? OR p.product_name LIKE ?) ");
 			} else {
-				// 純文字模糊搜尋
 				sql.append("AND (o.note LIKE ? OR o.payment_type LIKE ? OR o.status LIKE ? OR p.product_name LIKE ?) ");
 			}
 		}
@@ -222,8 +327,12 @@ public class OrderDAO {
 
 			int paramIndex = 1;
 			if (hasKeyword) {
-				if (isHashOrder) {
-					// 把 "#16" 的 "#" 拔掉，只留 "16" 轉成數字去查
+				if (isBulkIdSearch && !bulkIds.isEmpty()) {
+					// 塞入陣列裡的 ID
+					for (Integer id : bulkIds) {
+						ps.setInt(paramIndex++, id);
+					}
+				} else if (isHashOrder) {
 					ps.setInt(paramIndex++, Integer.parseInt(kw.substring(1))); 
 				} else if (isNumeric) {
 					int numKw = Integer.parseInt(kw);
