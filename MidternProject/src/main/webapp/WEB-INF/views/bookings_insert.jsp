@@ -25,13 +25,13 @@
         <form action="${pageContext.request.contextPath}/BookingsServlet?action=insert" method="post">
         
             <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: inline-block; width: 100px;">會員手機號碼：</label>
+                <label style="display: inline-block; width: 120px;">會員手機號碼：</label>
                 <!-- 這裡的 name 屬性非常重要！Servlet 就是靠這個 name 來抓資料的 -->
                 <input type="text" name="memberPhone" class="form-control" style="width: 300px;" placeholder="請輸入會員手機號碼" required>
             </div>
             
             <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: inline-block; width: 100px;">選擇場地：</label>
+                <label style="display: inline-block; width: 120px;">選擇場地：</label>
                 <select name="courtId" class="form-control" style="width: 300px;" required>
                     <option value="">-- 請選擇想預約的場地 --</option>
                     <c:forEach var="c" items="${AllCourts}">
@@ -41,29 +41,38 @@
             </div>
             
             <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: inline-block; width: 100px;">預約日期：</label>
+                <label style="display: inline-block; width: 120px;">預約日期：</label>
                 <!-- 強烈推薦：使用 HTML5 內建的 type="date" 就能直接獲得一個很生動的日曆選擇器！ -->
                 <input type="date" name="bookingDate" class="form-control" style="width: 300px;" required>
             </div>
             
             <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: inline-block; width: 100px;">開始時間：</label>
-                <!-- 同理：使用 type="time" 就能直接獲得時間選擇滑輪！ -->
-                <input type="time" name="startTime" class="form-control" style="width: 300px;" required>
+                <label style="display: inline-block; width: 120px;">開始時間：</label>
+                <select name="startTime" class="form-control" style="width: 300px;" required>
+                    <option value="">-- 請選擇開始時間 --</option>
+                    <c:forEach var="slot" items="${AllTimeSlots}">
+                        <option value="${slot.startTime}"> ${slot.startTime} </option>
+                    </c:forEach>
+                </select>
             </div>
             
             <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: inline-block; width: 100px;">結束時間：</label>
-                <input type="time" name="endTime" class="form-control" style="width: 300px;" required>
+                <label style="display: inline-block; width: 120px;">結束時間：</label>
+                <select name="endTime" class="form-control" style="width: 300px;" required>
+                    <option value="">-- 請選擇結束時間 --</option>
+                    <c:forEach var="slot" items="${AllTimeSlots}">
+                        <option value="${slot.endTime}"> ${slot.endTime} </option>
+                    </c:forEach>
+                </select>
             </div>
             
             <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: inline-block; width: 100px;">訂單總額：</label>
+                <label style="display: inline-block; width: 120px;">訂單總額：</label>
                 <input type="number" name="totalAmount" class="form-control" style="width: 300px;" min="0" required>
             </div>
             
             <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: inline-block; width: 100px; vertical-align: top;">備註：</label>
+                <label style="display: inline-block; width: 120px; vertical-align: top;">備註：</label>
                 <textarea name="note" class="form-control" style="width: 300px; height: 80px;" placeholder="如有需要請填寫備註"></textarea>
             </div>
             
@@ -77,5 +86,49 @@
         </div>
     </div>
 </div>
+
+<script>
+    // 監聽網頁載入完成
+    document.addEventListener("DOMContentLoaded", function() {
+        const startTimeSelect = document.querySelector('select[name="startTime"]');
+        const endTimeSelect = document.querySelector('select[name="endTime"]');
+        const amountInput = document.querySelector('input[name="totalAmount"]');
+        const HOURLY_RATE = 400; // 設定每小時的費率為 400 元
+
+        // 建立一個共用的計算函數
+        function calculateAmount() {
+            const startVal = startTimeSelect.value;
+            const endVal = endTimeSelect.value;
+            
+            // 如果還沒選齊，就清空金額
+            if (!startVal || !endVal) {
+                amountInput.value = '';
+                return;
+            }
+            
+            // 抓出開頭的小時並轉為數字 (例如 "08:00:00" -> 8)
+            const startHour = parseInt(startVal.split(':')[0], 10);
+            const endHour = parseInt(endVal.split(':')[0], 10);
+            
+            // 防呆處理：結束時間必須大於開始時間
+            if (endHour <= startHour) {
+                alert("錯誤：結束時間必須晚於開始時間！");
+                endTimeSelect.value = ''; // 清除錯誤選項
+                amountInput.value = '';
+                return;
+            }
+            
+            // 計算總時數
+            const duration = endHour - startHour;
+            
+            // 自動將結果寫入到總金額輸入框
+            amountInput.value = duration * HOURLY_RATE;
+        }
+
+        // 兩個下拉選單有改變時，都會觸發重新計算
+        startTimeSelect.addEventListener('change', calculateAmount);
+        endTimeSelect.addEventListener('change', calculateAmount);
+    });
+</script>
 </body>
 </html>

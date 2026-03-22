@@ -29,8 +29,11 @@ public class BookingsServlet extends HttpServlet {
 			try {
 				com.badminton.dao.VenuesDAO vDao = new com.badminton.dao.VenuesDAOImpl();
 				com.badminton.dao.CourtsDAO cDao = new com.badminton.dao.CourtsDAOImpl();
+				com.badminton.dao.TimeSlotsDAO tDao = new com.badminton.dao.TimeSlotsDAOImpl();
+				
 				request.setAttribute("AllVenues", vDao.getAll());
 				request.setAttribute("AllCourts", cDao.getAll());
+				request.setAttribute("AllTimeSlots", tDao.getAll());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -75,9 +78,10 @@ public class BookingsServlet extends HttpServlet {
 				int courtId = Integer.parseInt(courtIdStr);
 				java.sql.Date bookingDate = java.sql.Date.valueOf(bookingDateStr);
 				
-				// HTML5 的 type="time" 若沒有秒，回傳 HH:mm，但 SQL 的 Time.valueOf 需要 HH:mm:ss
-				java.sql.Time startTime = java.sql.Time.valueOf(startTimeStr + (startTimeStr.length() == 5 ? ":00" : ""));
-				java.sql.Time endTime = java.sql.Time.valueOf(endTimeStr + (endTimeStr.length() == 5 ? ":00" : ""));
+				// 直接轉換前台傳來的 "HH:MM:SS" 字串
+				java.sql.Time startTime = java.sql.Time.valueOf(startTimeStr);
+				java.sql.Time endTime = java.sql.Time.valueOf(endTimeStr);
+				
 				java.math.BigDecimal totalAmount = new java.math.BigDecimal(totalAmountStr);
 
 				// 3. 裝進 Bean
