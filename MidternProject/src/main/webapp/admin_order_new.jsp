@@ -124,15 +124,17 @@
 
         .admin-badge {
             display: inline-block;
-            background: rgba(241,196,15,.15);
-            border: 1px solid #f1c40f;
-            color: #f1c40f;
-            border-radius: 20px;
-            padding: 3px 12px;
-            font-size: .75rem;
-            font-weight: bold;
+            font-size: 0.75rem; 
+            background: linear-gradient(135deg, #e74c3c, #c0392b); 
+            color: white; 
+            padding: 4px 10px; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            letter-spacing: 1px; 
+            box-shadow: 0 2px 8px rgba(231,76,60,0.4);
             margin-left: 10px;
             vertical-align: middle;
+            border: none;
         }
 
         @media (max-width: 640px) {
@@ -144,9 +146,9 @@
 <body>
 <div class="container">
     <a href="<%=request.getContextPath()%>/orderList" class="back-btn">◀ 返回訂單管理中心</a>
-    <h1>🛒 新增訂單 <span class="admin-badge">👤 管理員模式</span></h1>
+    <h1>🛒 新增訂單 <span class="admin-badge">後台管理員專用</span></h1>
 
-    <form action="<%=request.getContextPath()%>/checkout" method="post" id="adminOrderForm">
+    <form action="<%=request.getContextPath()%>/adminCheckout" method="post" id="adminOrderForm"> 
 
         <!-- ── 訂單基本資訊 ── -->
         <div class="card">
@@ -331,6 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // 送出前驗證
+// 送出前驗證與成功提示
 document.getElementById('adminOrderForm').addEventListener('submit', function(e) {
     const rows = document.querySelectorAll('input[name="productId"]');
     let hasEmptyId = false;
@@ -350,7 +353,12 @@ document.getElementById('adminOrderForm').addEventListener('submit', function(e)
     if (total <= 0) {
         e.preventDefault();
         alert('⚠️ 訂單總金額必須大於 0，請檢查商品數量與單價。');
+        return; // 這裡補上 return 防止繼續執行
     }
+    
+    // ✨ 驗證全數通過，準備送出前跳出提醒視窗！
+    alert('✅ 管理員新增一筆訂單，準備送出！');
+    // 按下確定後，表單就會自然把資料送到 Servlet 囉！
 });
 </script>
 </body>

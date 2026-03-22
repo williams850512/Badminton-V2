@@ -43,13 +43,13 @@ public class ProductQueryServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         
         if (product != null) {
-            // 實務上建議用 Gson 函式庫來轉 JSON，這裡示範手動組裝 JSON 字串
-            String jsonResponse = String.format(
-                "{\"success\": true, \"product\": {\"id\": %d, \"name\": \"%s\", \"price\": %.2f}}",
-                product.getProductId(),
-                product.getProductName(),
-                product.getPrice()
-            );
+        	// 確保價格輸出正確，並處理商品名稱中可能出現的引號問題
+        	String jsonResponse = String.format(
+        	    "{\"success\": true, \"product\": {\"id\": %d, \"name\": \"%s\", \"price\": %d}}",
+        	    product.getProductId(),
+        	    product.getProductName().replace("\"", "\\\""), // 防呆：避免名稱裡的雙引號搞壞 JSON
+        	    (int) product.getPrice() // 強制轉型確保安全
+        	);
             out.print(jsonResponse);
         } else {
             // 找不到該商品或商品已下架
