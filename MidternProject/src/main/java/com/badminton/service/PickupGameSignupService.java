@@ -8,6 +8,7 @@ import com.badminton.model.TimeSlotBean;
 
 public interface PickupGameSignupService {
     List<PickupGameBean> getAllOpenGames();
+    List<PickupGameBean> getAllGames();
     Integer getLatestGameId();
     String registerString(Integer gameId, Integer memberId);
     List<PickupGameSignupBean> getSignupListByGame(Integer gameId, boolean isNewestFirst);

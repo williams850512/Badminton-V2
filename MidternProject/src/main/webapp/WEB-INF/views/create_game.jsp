@@ -41,7 +41,7 @@
 
         <div class="form-group">
             <label>活動日期：</label>
-            <input type="date" name="gameDate" required value="${not empty param.gameDate ? param.gameDate : '2026-03-20'}">
+            <input type="date" name="gameDate" id="gameDate" required value="${param.gameDate}">
         </div>
 
         <div class="form-group">
@@ -79,11 +79,26 @@
         </div>
 
         <button type="submit" class="btn-submit">確認發起，立馬開團！</button>
+        <div style="text-align: center; margin-top: 15px;">
+            <a href="${pageContext.request.contextPath}/pickup" style="color: #6c757d; text-decoration: none; font-weight: bold;">← 返回首頁</a>
+        </div>
     </form>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+    // 處理日期：限制不能選過去的日期，並預設為今天
+    const dateInput = document.getElementById('gameDate');
+    const today = new Date();
+    // 調整時區以取得正確的本地 YYYY-MM-DD
+    const localToday = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+    
+    dateInput.setAttribute('min', localToday); // 讓過去的日期反灰
+    if (!dateInput.value) {
+        dateInput.value = localToday; // 預設填入今天
+    }
+
+    // 處理開始/結束時間連動
     const startTimeSelect = document.querySelector('select[name="startTime"]');
     const endTimeSelect = document.querySelector('select[name="endTime"]');
 

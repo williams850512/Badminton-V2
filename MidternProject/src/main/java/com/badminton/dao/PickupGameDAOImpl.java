@@ -43,13 +43,17 @@ public class PickupGameDAOImpl implements PickupGameDAO {
 		}
 	}
 
-	// 2. 查詢全部 打包成一個清單 (List) 傳給網頁顯示
+	// 2. 查詢全部 (含場地名稱，供後台管理使用)
 	@Override
 	public List<PickupGameBean> getAll() {
 		List<PickupGameBean> list = new ArrayList<>();
-		String sql = "SELECT * FROM PickupGames ORDER BY game_date DESC";
+		String sql = "SELECT g.*, v.venue_name + ' - ' + c.court_name AS court_display, " +
+		             "(SELECT COUNT(*) FROM BadmintonDB.dbo.PickupGameSignups s WHERE s.game_id = g.game_id) AS actual_players " +
+		             "FROM BadmintonDB.dbo.PickupGames g " +
+		             "JOIN BadmintonDB.dbo.Courts c ON g.court_id = c.court_id " +
+		             "JOIN BadmintonDB.dbo.Venues v ON c.venue_id = v.venue_id " +
+		             "ORDER BY g.game_date DESC";
 		
-		// 使用 try-with-resources 自動關閉連線，並直接呼叫寫好的 getConnection()
 		try (Connection conn = getConnection(); 
 			 PreparedStatement pstmt = conn.prepareStatement(sql);
 			 ResultSet rs = pstmt.executeQuery()) {
@@ -59,13 +63,16 @@ public class PickupGameDAOImpl implements PickupGameDAO {
 				bean.setGameId(rs.getInt("game_id"));
 				bean.setHostId(rs.getInt("host_id"));
 				bean.setCourtId(rs.getInt("court_id"));
+				bean.setCourtName(rs.getString("court_display"));
 				bean.setGameDate(rs.getDate("game_date"));
 				bean.setStartTime(rs.getTime("start_time"));
 				bean.setEndTime(rs.getTime("end_time"));
 				bean.setMaxPlayers(rs.getInt("max_players"));
+				bean.setCurrentPlayers(rs.getInt("actual_players"));
 				bean.setFeePerPerson(rs.getBigDecimal("fee_per_person"));
 				bean.setSkillLevel(rs.getString("skill_level"));
 				bean.setStatus(rs.getString("status"));
+				bean.setCreatedAt(rs.getTimestamp("created_at"));
 				list.add(bean);
 			}
 		} catch (Exception e) {

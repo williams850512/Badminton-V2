@@ -20,7 +20,8 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
     public List<PickupGameBean> findAllOpenGames() {
         List<PickupGameBean> list = new ArrayList<>();
         
-        String sql = "SELECT g.*, v.venue_name + ' - ' + c.court_name AS court_display " +
+        String sql = "SELECT g.*, v.venue_name + ' - ' + c.court_name AS court_display, " +
+                     "(SELECT COUNT(*) FROM BadmintonDB.dbo.PickupGameSignups s WHERE s.game_id = g.game_id) AS actual_players " +
                      "FROM BadmintonDB.dbo.PickupGames g " +
                      "JOIN BadmintonDB.dbo.Courts c ON g.court_id = c.court_id " +
                      "JOIN BadmintonDB.dbo.Venues v ON c.venue_id = v.venue_id " +
@@ -39,7 +40,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
                 bean.setStartTime(rs.getTime("start_time"));
                 bean.setEndTime(rs.getTime("end_time"));
                 bean.setMaxPlayers(rs.getInt("max_players"));
-                bean.setCurrentPlayers(rs.getInt("current_players"));
+                bean.setCurrentPlayers(rs.getInt("actual_players"));
                 bean.setStatus(rs.getString("status"));
                 list.add(bean);
             }

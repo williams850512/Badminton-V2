@@ -49,12 +49,25 @@
 
 <div class="container">
 
-    <!-- ===== 主揪視圖 ===== -->
-    <c:if test="${sessionMemberId == hostMemberId}">
-        <h2>👑 我的揪團管理 (場次 ID: ${currentGameId})</h2>
+    <!-- 判斷是否為管理員 (假設 memberId=4 是管理員，或是從 session 取出特定屬性) -->
+    <c:set var="isAdmin" value="${sessionMemberId == 4}" />
+    <!-- 是主揪或管理員 -->
+    <c:set var="isHostOrAdmin" value="${sessionMemberId == hostMemberId || isAdmin}" />
+
+    <!-- ===== 主揪/管理員 視圖 ===== -->
+    <c:if test="${isHostOrAdmin}">
+        <h2>
+            <c:if test="${isAdmin}">👑 [管理員模式] </c:if>
+            <c:if test="${!isAdmin}">👑 我的揪團管理 </c:if>
+            (場次 ID: ${currentGameId})
+        </h2>
         
         <div class="progress-bar">
             目前人數：<span>${playerCount}</span> 人
+            <!-- 顯示狀態避免已經取消的還顯示綠色 -->
+            <c:if test="${gameStatus == 'cancelled'}">
+                <span style="color:#dc3545; font-size:16px;">(已取消)</span>
+            </c:if>
         </div>
 
         <c:if test="${not empty msg}">
@@ -84,7 +97,8 @@
                     </td>
                     <td>${signup.signedUpAt}</td>
                     <td>
-                        <c:if test="${signup.status != 'host'}">
+                        <!-- 不能踢主揪，如果系統已取消也不需要踢人了 -->
+                        <c:if test="${signup.status != 'host' && gameStatus != 'cancelled'}">
                             <a href="${pageContext.request.contextPath}/pickup?action=kickMember&gameId=${currentGameId}&targetMemberId=${signup.memberId}" 
                                class="btn-kick"
                                onclick="return confirm('確定要將 ${signup.memberName} 踢出嗎？')">
@@ -100,23 +114,44 @@
             </tbody>
         </table>
 
+        <!-- 管理員代客報名區塊 -->
+        <c:if test="${isAdmin && gameStatus != 'cancelled'}">
+            <div style="margin-top: 25px; background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba; text-align: center;">
+                <h4 style="margin-top: 0; color: #856404;">🛠️ 代客報名 (管理員專用)</h4>
+                <form action="${pageContext.request.contextPath}/pickup?action=adminAddPlayer" method="post" style="margin-bottom: 0;">
+                    <input type="hidden" name="gameId" value="${currentGameId}">
+                    <input type="number" name="targetMemberId" placeholder="輸入要加入的會員 ID" required style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; width: 180px;">
+                    <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                        ➕ 強制加入
+                    </button>
+                    <p style="font-size: 13px; color: #666; margin: 8px 0 0 0;">※ 輸入會員編號即可幫該會員報名本場次。如果已有時段衝突仍會阻擋。</p>
+                </form>
+            </div>
+        </c:if>
+
         <div class="actions-area">
-            <a href="${pageContext.request.contextPath}/pickup?action=cancelGame&gameId=${currentGameId}" 
-               class="btn-cancel"
-               onclick="return confirm('確定要取消此揪團嗎？所有成員都會失去報名資格！')">
-               🚫 取消開團
-            </a>
-            <br>
+            <!-- 只有開放中的場次才可以取消開團 -->
+            <c:if test="${gameStatus != 'cancelled'}">
+                <a href="${pageContext.request.contextPath}/pickup?action=cancelGame&gameId=${currentGameId}" 
+                   class="btn-cancel"
+                   onclick="return confirm('確定要取消此揪團嗎？所有成員都會失去報名資格！')">
+                   🚫 取消開團
+                </a>
+                <br>
+            </c:if>
             <a href="${pageContext.request.contextPath}/pickup" class="back-link">← 返回首頁</a>
         </div>
     </c:if>
 
-    <!-- ===== 成員視圖 ===== -->
-    <c:if test="${sessionMemberId != hostMemberId}">
+    <!-- ===== 一般成員視圖 ===== -->
+    <c:if test="${!isHostOrAdmin}">
         <h2>🏸 場次報名名單 (場次 ID: ${currentGameId})</h2>
         
         <div class="progress-bar">
             目前人數：<span>${playerCount}</span> 人
+            <c:if test="${gameStatus == 'cancelled'}">
+                <span style="color:#dc3545; font-size:16px;">(已取消)</span>
+            </c:if>
         </div>
 
         <c:set var="hasJoined" value="false" />
@@ -126,12 +161,18 @@
             </c:if>
         </c:forEach>
 
-        <!-- 主揪聯絡資訊 (僅已加入成員可見完整電話) -->
+        <!-- 主揪聯絡資訊 (僅已加入成員可見完整電話，如果已經取消則無須聯絡) -->
         <c:choose>
-            <c:when test="${hasJoined}">
+            <c:when test="${hasJoined && gameStatus != 'cancelled'}">
                 <div class="host-info">
                     <span class="label">📞 主揪聯絡方式：</span><br>
                     <span>${hostName}</span> ─ <span class="phone">${hostPhone}</span>
+                </div>
+            </c:when>
+            <c:when test="${gameStatus == 'cancelled'}">
+                <div class="host-info" style="background: #f8d7da; border-left: 4px solid #dc3545; color: #721c24;">
+                    <span class="label" style="color:#721c24;">⚠️ 此活動已取消</span><br>
+                    <span>無需聯絡主揪</span>
                 </div>
             </c:when>
             <c:otherwise>

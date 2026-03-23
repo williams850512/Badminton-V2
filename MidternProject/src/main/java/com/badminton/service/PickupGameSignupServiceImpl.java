@@ -1,6 +1,8 @@
 package com.badminton.service;
 
 import java.util.List;
+import com.badminton.dao.PickupGameDAO;
+import com.badminton.dao.PickupGameDAOImpl;
 import com.badminton.dao.PickupGameSignupDAO;
 import com.badminton.dao.PickupGameSignupDAOImpl;
 import com.badminton.dao.SystemOptionDAO;
@@ -12,11 +14,17 @@ import com.badminton.model.TimeSlotBean;
 
 public class PickupGameSignupServiceImpl implements PickupGameSignupService {
     private PickupGameSignupDAO signupDAO = new PickupGameSignupDAOImpl();
+    private PickupGameDAO gameDAO = new PickupGameDAOImpl();
     private SystemOptionDAO systemOptionDAO = new SystemOptionDAOImpl();
 
     @Override
     public List<PickupGameBean> getAllOpenGames() {
         return signupDAO.findAllOpenGames();
+    }
+
+    @Override
+    public List<PickupGameBean> getAllGames() {
+        return gameDAO.getAll();
     }
 
     @Override
