@@ -1,6 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page import="java.time.LocalDate" %>
+<%
+    // 在 Server 端抓取伺服器當下的日期 (格式直接就是 YYYY-MM-DD)
+    request.setAttribute("minDate", LocalDate.now().toString());
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -42,8 +47,8 @@
             
             <div class="form-group" style="margin-bottom: 15px;">
                 <label style="display: inline-block; width: 120px;">預約日期：</label>
-                <!-- 強烈推薦：使用 HTML5 內建的 type="date" 就能直接獲得一個很生動的日曆選擇器！ -->
-                <input type="date" name="bookingDate" class="form-control" style="width: 300px;" required>
+                <!-- 直接利用從 JSP 算出來的 minDate 塞給 min 屬性 -->
+                <input type="date" name="bookingDate" class="form-control" style="width: 300px;" required min="${minDate}">
             </div>
             
             <div class="form-group" style="margin-bottom: 15px;">

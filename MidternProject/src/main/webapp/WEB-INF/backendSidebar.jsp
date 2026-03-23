@@ -4,12 +4,12 @@
         Badminton
     </div>
     <ul class="sidebar-menu">
-        <li><a href="#">會員管理</a></li>
+        <li><a href="<%=request.getContextPath()%>/MembersAdminServlet?action=list">職員與會員管理</a></li>
         <li><a href="<%=request.getContextPath()%>/VenuesServlet?action=list">場館及場地管理</a></li>
         <li><a href="<%=request.getContextPath()%>/BookingsServlet?action=list">預約管理</a></li>
-        <li><a href="#">臨打管理</a></li>
-        <li><a href="#">商品管理</a></li>
-        <li><a href="#">訂單管理</a></li>
+        <li><a href="<%=request.getContextPath()%>/PickupGameServlet?action=list">臨打管理</a></li>
+        <li><a href="<%=request.getContextPath()%>/ProductServlet?action=list">商品管理</a></li>
+        <li><a href="<%=request.getContextPath()%>/OrderListServlet?action=list">訂單管理</a></li>
         <li><a href="<%=request.getContextPath()%>/AnnouncementServlet?action=list">公告管理</a></li>
     </ul>
 </div>
@@ -29,7 +29,22 @@
         } else if (currentPath.includes('AnnouncementServlet')) {
             const annLink = document.querySelector('.sidebar-menu a[href*="AnnouncementServlet"]');
             if(annLink) annLink.parentElement.classList.add('active');
+        } else if (currentPath.includes('MembersAdminServlet')) {
+            const memLink = document.querySelector('.sidebar-menu a[href*="MembersAdminServlet"]');
+            if(memLink) memLink.parentElement.classList.add('active');
+        } else if (currentPath.includes('PickupGameServlet')) {
+            const pickLink = document.querySelector('.sidebar-menu a[href*="PickupGameServlet"]');
+            if(pickLink) pickLink.parentElement.classList.add('active');
+        } else if (currentPath.includes('ProductServlet')) {
+            const prodLink = document.querySelector('.sidebar-menu a[href*="ProductServlet"]');
+            if(prodLink) prodLink.parentElement.classList.add('active');
+        } else if (currentPath.includes('OrderListServlet')) {
+            const orderLink = document.querySelector('.sidebar-menu a[href*="OrderListServlet"]');
+            if(orderLink) orderLink.parentElement.classList.add('active');   
+        } else if (currentPath.includes('BookingsServlet')) {
+            const bookLink = document.querySelector('.sidebar-menu a[href*="BookingsServlet"]');
+            if(bookLink) bookLink.parentElement.classList.add('active');   
         }
-        // 未來如果有 MemberServlet, OrderServlet 等，可以繼續在這邊新增 else if
+        // 未來如果有其他 Servlet 等，可以繼續在這邊新增 else if
     });
 </script>
