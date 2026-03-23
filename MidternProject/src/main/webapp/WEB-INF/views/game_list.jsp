@@ -1,10 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>🏸 尋找臨打揪團</title>
+    <jsp:include page="/WEB-INF/backendHead.jsp" />
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background: #f0f2f5; padding: 40px; }
         .list-container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
@@ -15,8 +16,17 @@
     </style>
 </head>
 <body>
-<div class="list-container">
-    <h2>🏸 目前開放中的揪團</h2>
+<div class="app-container">
+    <jsp:include page="/WEB-INF/backendSidebar.jsp" />
+
+    <div class="main-content">
+        <jsp:include page="/WEB-INF/backendHeader.jsp" />
+        
+        <div class="content-body">
+            <h2 style="margin-bottom: 20px; color: #333;">🏸 目前開放中的揪團</h2>
+            
+            <div class="card">
+                <div class="list-container" style="box-shadow: none; padding: 15px; margin: 0; max-width: none;">
     
     <c:forEach var="game" items="${allGames}">
         <div class="game-item">
@@ -32,6 +42,10 @@
     <c:if test="${empty allGames}">
         <p style="text-align: center; color: #888;">目前沒有任何開放中的揪團喔！</p>
     </c:if>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

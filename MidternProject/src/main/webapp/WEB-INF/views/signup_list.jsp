@@ -5,6 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <title>🏸 羽球活動報名名單</title>
+<jsp:include page="/WEB-INF/backendHead.jsp" />
 <style>
     body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f8f9fa; padding: 30px; }
     .container { max-width: 850px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
@@ -46,8 +47,17 @@
 </style>
 </head>
 <body>
+<div class="app-container">
+    <jsp:include page="/WEB-INF/backendSidebar.jsp" />
 
-<div class="container">
+    <div class="main-content">
+        <jsp:include page="/WEB-INF/backendHeader.jsp" />
+        
+        <div class="content-body">
+            <h2 style="margin-bottom: 20px; color: #333;">🏸 報名名單管理</h2>
+            
+            <div class="card">
+                <div class="container" style="box-shadow: none; padding: 15px; margin: 0;">
 
     <!-- 判斷是否為管理員 (假設 memberId=4 是管理員，或是從 session 取出特定屬性) -->
     <c:set var="isAdmin" value="${sessionMemberId == 4}" />
@@ -228,6 +238,10 @@
         </div>
     </c:if>
 
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 </body>

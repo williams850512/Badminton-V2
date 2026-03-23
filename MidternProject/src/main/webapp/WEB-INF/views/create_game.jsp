@@ -5,6 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <title>🏸 發起羽球臨打揪團</title>
+<jsp:include page="/WEB-INF/backendHead.jsp" />
 <style>
    
     body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f0f2f5; padding: 40px; }
@@ -20,8 +21,17 @@
 </style>
 </head>
 <body>
-<div class="form-container">
-    <h2>🏸 發起新揪團</h2>
+<div class="app-container">
+    <jsp:include page="/WEB-INF/backendSidebar.jsp" />
+
+    <div class="main-content">
+        <jsp:include page="/WEB-INF/backendHeader.jsp" />
+        
+        <div class="content-body">
+            <h2 style="margin-bottom: 20px; color: #333;">🏸 發起新揪團</h2>
+            
+            <div class="card">
+                <div class="form-container" style="box-shadow: none; padding: 15px;">
     
     <c:if test="${not empty msg}">
         <div style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border-radius: 8px; text-align: center; font-weight: bold; border: 1px solid #f5c6cb;">
@@ -83,6 +93,10 @@
             <a href="${pageContext.request.contextPath}/pickup" style="color: #6c757d; text-decoration: none; font-weight: bold;">← 返回首頁</a>
         </div>
     </form>
+</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
