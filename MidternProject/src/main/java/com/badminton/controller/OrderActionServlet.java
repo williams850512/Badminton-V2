@@ -40,8 +40,11 @@ public class OrderActionServlet extends HttpServlet {
             handleUpdateOrder(request, response);
         } else if ("delete".equals(action)) {
             handleDelete(request, response);
-        } else {
-            // 如果遇到不認識的指令，回傳錯誤代碼
+        } 
+        else if ("createBulkAdvanced".equals(action)) {
+            handleCreateBulkAdvanced(request, response);
+        } 
+        else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
@@ -73,7 +76,6 @@ public class OrderActionServlet extends HttpServlet {
                 ? "✅ 資料庫已更新: 訂單 #" + orderId 
                 : "❌ 資料庫更新失敗: 訂單 #" + orderId);
 
-            // 🔥 魔法二：因為前端是用 fetch，我們只要回傳成功代碼 (200 OK)，不用 sendRedirect
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write("{\"success\": true}");
 
@@ -88,19 +90,60 @@ public class OrderActionServlet extends HttpServlet {
             throws IOException {
         try {
             int orderId = Integer.parseInt(request.getParameter("orderId"));
-            // 先刪除明細，再刪除主訂單 (避免 Foreign Key 衝突)
             orderItemDAO.deleteByOrderId(orderId);
             orderDAO.delete(orderId);
             
             System.out.println("🗑 資料庫已刪除: 訂單 #" + orderId);
 
-            // 一樣只回傳成功訊號，不重載頁面
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write("{\"success\": true}");
 
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // ✨ 處理終極巢狀批次建單的專屬方法
+    private void handleCreateBulkAdvanced(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        try {
+            String[] memberIds = request.getParameterValues("memberIds");
+            String[] paymentTypes = request.getParameterValues("paymentTypes");
+            String[] notes = request.getParameterValues("notes");
+
+            String[] itemOrderIndexes = request.getParameterValues("itemOrderIndexes");
+            String[] itemProductIds = request.getParameterValues("itemProductIds");
+            String[] itemQuantities = request.getParameterValues("itemQuantities");
+            String[] itemUnitPrices = request.getParameterValues("itemUnitPrices");
+
+            if (memberIds != null && memberIds.length > 0) {
+                // ✨✨✨ 關鍵修正：用 String 去接，不是 boolean！
+                String result = orderDAO.createMultipleOrdersWithItems(
+                        memberIds, paymentTypes, notes,
+                        itemOrderIndexes, itemProductIds, itemQuantities, itemUnitPrices
+                );
+
+                // ✨✨✨ 判斷回傳的字串是不是 "SUCCESS"
+                if ("SUCCESS".equals(result)) {
+                    System.out.println("✅ 資料庫已成功批次新增 " + memberIds.length + " 筆訂單！");
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().write("{\"success\": true}");
+                } else {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    // 把 SQL 錯誤訊息的引號換掉，避免破壞 JSON 格式
+                    String safeErrorMsg = result.replace("\"", "'").replace("\n", " ").replace("\r", " ");
+                    response.getWriter().write("{\"success\": false, \"message\": \"資料庫寫入失敗 ➔ " + safeErrorMsg + "\"}");
+                }
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\": false, \"message\": \"未接收到任何訂單資料\"}");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"success\": false, \"message\": \"後端發生異常\"}");
         }
     }
 }

@@ -402,4 +402,93 @@ public class OrderDAO {
 			o.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
 		return o;
 	}
+	
+	/*
+	 * 🚀 終極嵌套版：同時寫入多張訂單與對應的商品明細 (含 Transaction & Subtotal)
+	 */
+	public String createMultipleOrdersWithItems(String[] memberIds, String[] paymentTypes, String[] notes,
+												 String[] itemOrderIndexes, String[] itemProductIds,
+												 String[] itemQuantities, String[] itemUnitPrices) {
+		
+		// 準備 SQL 語法 (total_amount 會由後端動態計算後寫入)
+		String insertOrderSql = "INSERT INTO Orders (member_id, payment_type, note, status, total_amount) VALUES (?, ?, ?, 'PENDING', ?)";
+		// ✨ 加上 subtotal 欄位與第 5 個問號
+		String insertItemSql = "INSERT INTO OrderItems (order_id, product_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, ?, ?)";
+
+		try (Connection conn = DBConnection.getConnection()) {
+			// 🔥 開啟 Transaction 防護罩：只要其中一筆失敗，全部還原！
+			conn.setAutoCommit(false); 
+
+			// 注意：主訂單的 PreparedStatement 必須加上 RETURN_GENERATED_KEYS 來拿自動生成的 ID
+			try (PreparedStatement psOrder = conn.prepareStatement(insertOrderSql, java.sql.Statement.RETURN_GENERATED_KEYS);
+				 PreparedStatement psItem = conn.prepareStatement(insertItemSql)) {
+
+				// 迴圈一：遍歷前端傳來的每一張主訂單
+				for (int i = 0; i < memberIds.length; i++) {
+					
+					// 1. 先從明細陣列中，計算出這張訂單的「總金額」
+					int totalAmount = 0;
+					if (itemOrderIndexes != null) {
+						for (int j = 0; j < itemOrderIndexes.length; j++) {
+							if (Integer.parseInt(itemOrderIndexes[j]) == i) {
+								totalAmount += (Integer.parseInt(itemQuantities[j]) * Integer.parseInt(itemUnitPrices[j]));
+							}
+						}
+					}
+
+					// 2. 寫入主訂單
+					psOrder.setInt(1, Integer.parseInt(memberIds[i]));
+					psOrder.setString(2, paymentTypes[i]);
+					psOrder.setString(3, notes[i] == null ? "" : notes[i]);
+					psOrder.setInt(4, totalAmount);
+					psOrder.executeUpdate();
+
+					// 3. 抓取資料庫剛剛自動給這張訂單的 ID
+					int newOrderId = -1;
+					try (ResultSet rs = psOrder.getGeneratedKeys()) {
+						if (rs.next()) {
+							newOrderId = rs.getInt(1);
+						} else {
+							throw new java.sql.SQLException("無法取得新增的訂單 ID");
+						}
+					}
+
+					// 4. 迴圈二：找出屬於這張訂單的商品明細，綁上剛剛拿到的 newOrderId 並寫入
+					if (itemOrderIndexes != null) {
+						for (int j = 0; j < itemOrderIndexes.length; j++) {
+							// 判斷這個明細的 Index 是否等於目前正在處理的訂單 Index (i)
+							if (Integer.parseInt(itemOrderIndexes[j]) == i) {
+								int qty = Integer.parseInt(itemQuantities[j]);
+								int price = Integer.parseInt(itemUnitPrices[j]);
+								int subtotal = qty * price; // ✨ 計算小計
+								
+								psItem.setInt(1, newOrderId);
+								psItem.setInt(2, Integer.parseInt(itemProductIds[j]));
+								psItem.setInt(3, qty);
+								psItem.setInt(4, price);
+								psItem.setInt(5, subtotal); // ✨ 塞入小計
+								psItem.addBatch(); // 先加進批次清單
+							}
+						}
+					}
+					psItem.executeBatch(); // 把這張訂單的明細一次倒進資料庫
+				}
+
+				// 走到這裡代表所有訂單跟明細都沒報錯，完美 Commit！
+				conn.commit(); 
+				return "SUCCESS"; // ✨ 成功回傳字串
+
+			} catch (Exception e) {
+				conn.rollback(); // 發生任何錯誤，時光倒流
+				e.printStackTrace();
+				return e.getMessage(); // ✨ 失敗回傳真實 SQL 錯誤
+			} finally {
+				conn.setAutoCommit(true); // 恢復預設
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "資料庫連線異常: " + e.getMessage();
+		}
+	}
 }
