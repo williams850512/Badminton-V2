@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+  <meta charset="utf-8">
+  <title>Badminton-V2 後端訂單管理系統專題報告</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Reveal.js 核心 CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+  <!-- 採用精美的黑底漸層主題 (Moon) 或深色主題 (Black) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/moon.min.css" id="theme">
+  <style>
+    /* 微調中文字體 */
+    .reveal { font-family: "Microsoft JhengHei", "PingFang TC", sans-serif; }
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 { font-family: "Microsoft JhengHei", "PingFang TC", sans-serif; font-weight: bold; }
+    .highlight-red { color: #ff2c2d; }
+    .highlight-blue { color: #1b91ff; }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Slide 1: 封面 -->
+      <section>
+        <h2>Badminton-V2 羽球專賣店</h2>
+        <h3>🏸 後端訂單管理系統</h3>
+        <p><small>為電商平台打造強大的營運後盾</small></p>
+        <br>
+        <p><small>報告人：負責訂單模組的開發者</small></p>
+      </section>
+
+      <!-- Slide 2: 架構 -->
+      <section>
+        <section>
+          <h3>系統架構</h3>
+          <p>嚴謹的 MVC 與三層式分層設計</p>
+        </section>
+        <section>
+          <h4>核心流程分工</h4>
+          <ul>
+            <li class="fragment"><strong>View (前端 JSP)</strong>：管理員操作介面</li>
+            <li class="fragment"><strong>Controller (Servlet)</strong>：指令攔截與資料收集秘書</li>
+            <li class="fragment"><strong>Service (業務邏輯)</strong>：核心營運規則與計算大腦</li>
+            <li class="fragment"><strong>DAO (資料存取)</strong>：資料庫操作與保險庫管理員</li>
+            <li class="fragment"><strong>Model (Bean)</strong>：標準化資料傳遞載體</li>
+          </ul>
+        </section>
+      </section>
+
+      <!-- Slide 3: 亮點 -->
+      <section>
+        <section>
+          <h3>設計亮點</h3>
+          <p>實踐「單一職責原則」</p>
+        </section>
+        <section>
+          <h4>任務拆分的 Controller</h4>
+          <p>拋棄肥大的單一控制器，將複雜行為細切：</p>
+          <ul style="font-size: 0.8em;">
+            <li>📝 <strong>單筆與修改</strong>：OrderCreateServlet / OrderUpdateServlet</li>
+            <li>🔍 <strong>清單查詢</strong>：OrderListServlet</li>
+            <li>🚀 <strong>進階批次處理</strong>：OrderBulkCreateServlet / OrderBulkDeleteServlet</li>
+          </ul>
+          <p class="fragment"><span class="highlight-blue">高可讀性、易於擴充維護！</span></p>
+        </section>
+      </section>
+
+      <!-- Slide 4: 挑戰與突破 -->
+      <section>
+        <section>
+          <h3>技術挑戰與突破</h3>
+          <p>大量批次處理 (Bulk) 與記憶體綁定</p>
+        </section>
+        <section>
+          <h4>解決痛點</h4>
+          <ul>
+            <li><strong>痛點</strong>：管理員單筆建檔耗時費力。</li>
+            <li><strong>方案</strong>：實作多筆表單陣列接收。</li>
+            <li><strong>實作</strong>：在 Servlet 使用迴圈，將資料陣列封裝為 <code>List&lt;OrderBean&gt;</code>，再整包交給 Service 處理。</li>
+            <li class="fragment"><span class="highlight-red">大幅減少資料庫連線浪費，提升效能。</span></li>
+          </ul>
+        </section>
+      </section>
+
+      <!-- Slide 5: 心得與展望 -->
+      <section>
+        <h3>心得與未來展望</h3>
+        <ul>
+          <li class="fragment">體認到 Service 與 DAO 分離的重要性。</li>
+          <li class="fragment">純 Servlet 開發過程為未來學習 Spring MVC 打下紮實基礎。</li>
+          <li class="fragment"><strong>展望</strong>：未來可順利轉移至 Spring Boot 框架，並加入更多訂單狀態追蹤！</li>
+        </ul>
+        <br><br>
+        <h4 class="fragment">謝謝聆聽！</h4>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+  <script>
+    // 初始化 Reveal.js
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      controls: true,
+      progress: true,
+      transition: 'slide' // 可以換成 fade, convex, concave, zoom
+    });
+  </script>
+</body>
+</html>
