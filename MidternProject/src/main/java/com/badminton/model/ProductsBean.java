@@ -3,7 +3,7 @@ package com.badminton.model;
 import java.math.BigDecimal;
 import java.sql.Date;
 
-public class ProductBean {
+public class ProductsBean {
 	
 	
 	private Integer productId;
@@ -77,7 +77,7 @@ public class ProductBean {
 	public void setProductCreateAt(Date productCreateAt) {
 		this.productCreateAt = productCreateAt;
 	}
-	public ProductBean(Integer productId, String productName, String category, String brand, BigDecimal price,
+	public ProductsBean(Integer productId, String productName, String category, String brand, BigDecimal price,
 			Integer stockQty, String description, String imageUrl, String status, Date productCreateAt) {
 		super();
 		this.productId = productId;
@@ -91,7 +91,7 @@ public class ProductBean {
 		this.status = status;
 		this.productCreateAt = productCreateAt;
 	}
-	public ProductBean() {
+	public ProductsBean() {
 		// TODO Auto-generated constructor stub
 	}
 	

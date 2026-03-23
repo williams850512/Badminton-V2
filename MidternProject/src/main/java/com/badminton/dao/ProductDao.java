@@ -14,7 +14,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import com.badminton.model.ProductBean;
+import com.badminton.model.ProductsBean;
 
 
 
@@ -22,13 +22,13 @@ public class ProductDao {
 	
 	
 	//全部
-	public List<ProductBean> showProduct() {
+	public List<ProductsBean> showProduct() {
 		
 		
 		Connection connection = null;
 		String  sql = "SELECT * FROM Products";
-		ProductBean product = null;
-		List<ProductBean> products = new ArrayList<ProductBean>();
+		ProductsBean product = null;
+		List<ProductsBean> products = new ArrayList<ProductsBean>();
 		
 		try {
 			Context initContext = new InitialContext();
@@ -41,7 +41,7 @@ public class ProductDao {
 
 			while (resultSet.next()) {
 				
-				product = new ProductBean();
+				product = new ProductsBean();
 				
 				product.setProductId(resultSet.getInt("product_id"));
 				product.setProductName(resultSet.getString("product_name"));
@@ -93,14 +93,14 @@ public class ProductDao {
 	} 
 	
 	// 模糊查詢
-	public List<ProductBean> searchProductsByKeyword(String keyword) {
+	public List<ProductsBean> searchProductsByKeyword(String keyword) {
 	    
 	    String sql = "SELECT * FROM Products "
 	               + "WHERE product_name LIKE ? "
 	               + "OR category LIKE ? "
 	               + "OR brand LIKE ?";
 
-	    List<ProductBean> products = new ArrayList<ProductBean>();
+	    List<ProductsBean> products = new ArrayList<ProductsBean>();
 	    PreparedStatement preparedStatement = null;
 	    Connection connection = null;
 	    ResultSet resultSet = null;
@@ -120,7 +120,7 @@ public class ProductDao {
 	        resultSet = preparedStatement.executeQuery();
 
 	        while (resultSet.next()) {
-	            ProductBean product = new ProductBean();
+	            ProductsBean product = new ProductsBean();
 
 	            product.setProductId(resultSet.getInt("product_id"));
 	            product.setProductName(resultSet.getString("product_name"));
@@ -163,10 +163,10 @@ public class ProductDao {
 	
 	
 	
-	public ProductBean searchProductById(Integer productId) {
+	public ProductsBean searchProductById(Integer productId) {
 
 	    String sql = "SELECT * FROM Products WHERE product_id = ?";
-	    ProductBean product = null;
+	    ProductsBean product = null;
 
 	    try {
 	        Context initContext = new InitialContext();
@@ -180,7 +180,7 @@ public class ProductDao {
 	            try (ResultSet resultSet = preparedStatement.executeQuery()) {
 
 	                if (resultSet.next()) {
-	                    product = new ProductBean(
+	                    product = new ProductsBean(
 	                        resultSet.getInt("product_id"),
 	                        resultSet.getString("product_name"),
 	                        resultSet.getString("category"),
@@ -209,7 +209,7 @@ public class ProductDao {
 	
 	
 	//新增
-	public void insertProduct(ProductBean productBean) {
+	public void insertProduct(ProductsBean productBean) {
 	    
 	    String sql = "INSERT INTO Products "
 	            + "(product_name, category, brand, price, stock_qty, description, image_url, status, created_at) "
@@ -304,7 +304,7 @@ public class ProductDao {
 	}
 	
 	//修改
-	public void updateProduct(ProductBean productBean) {
+	public void updateProduct(ProductsBean productBean) {
 	    
 	    String sql = "UPDATE Products SET "
 	            + "product_name = ?, "

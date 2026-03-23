@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List" %>
-<%@ page import="com.badminton.model.ProductBean" %>
+<%@ page import="com.badminton.model.ProductsBean" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,7 +10,7 @@
 </head>
 <body>
 <%
-    List<ProductBean> products = (List<ProductBean>) request.getAttribute("products");
+List<ProductsBean> products = (List<ProductsBean>) request.getAttribute("products");
     String keyword = (String) request.getAttribute("keyword");
     if (keyword == null) {
         keyword = "";
@@ -33,7 +33,7 @@
                     <!-- 查詢表單 -->
                     <form action="<%=request.getContextPath()%>/ProductServlet" method="get" style="margin: 20px 0; display: flex; gap: 10px; align-items: center;">
                         <input type="hidden" name="action" value="searchProduct">
-                        <input type="text" name="keyword" value="<%= keyword %>" placeholder="請輸入商品名稱、分類或品牌"
+                        <input type="text" name="keyword" value="<%=keyword%>" placeholder="請輸入商品名稱、分類或品牌"
                                style="padding: 8px; width: 300px; border: 1px solid #ccc; border-radius: 6px;">
                         <button type="submit" class="btn btn-primary">查詢</button>
                         <a href="<%=request.getContextPath()%>/ProductServlet?action=productList" class="btn btn-secondary">顯示全部</a>
@@ -55,8 +55,8 @@
                         </thead>
                         <tbody>
                         <%
-                            if (products != null && !products.isEmpty()) {
-                                for (ProductBean product : products) {
+                        if (products != null && !products.isEmpty()) {
+                                                        for (ProductsBean product : products) {
                         %>
                             <tr>
                                 <td><%= product.getProductId() %></td>

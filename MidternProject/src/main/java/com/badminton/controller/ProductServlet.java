@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.badminton.dao.ProductDao;
-import com.badminton.model.ProductBean;
+import com.badminton.model.ProductsBean;
 import com.badminton.service.ProductService;
 
 	
@@ -51,14 +51,14 @@ public class ProductServlet extends HttpServlet {
 	            break;
 
 	        case "productList":
-	            List<ProductBean> products = productService.showProduct();
+	            List<ProductsBean> products = productService.showProduct();
 	            request.setAttribute("products", products);
 	            request.getRequestDispatcher("/WEB-INF/views/productList.jsp").forward(request, response);
 	            break;
 	            
 	        case "searchProduct":
 	            String keyword = request.getParameter("keyword");
-	            List<ProductBean> searchResults = productService.searchProductsByKeyword(keyword);
+	            List<ProductsBean> searchResults = productService.searchProductsByKeyword(keyword);
 	            request.setAttribute("products", searchResults);
 	            request.setAttribute("keyword", keyword);
 	            request.getRequestDispatcher("/WEB-INF/views/productList.jsp").forward(request, response);
@@ -70,7 +70,7 @@ public class ProductServlet extends HttpServlet {
 
 	        case "productUpdateForm":
 	            Integer productId = Integer.parseInt(request.getParameter("productId"));
-	            ProductBean product = productService.getProductById(productId);
+	            ProductsBean product = productService.getProductById(productId);
 	            request.setAttribute("product", product);
 	            request.getRequestDispatcher("/WEB-INF/views/productUpdate.jsp").forward(request, response);
 	            break;

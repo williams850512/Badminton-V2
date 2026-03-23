@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.badminton.model.ProductBean" %>
+<%@ page import="com.badminton.model.ProductsBean" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,7 +9,7 @@
 </head>
 <body>
 <%
-    ProductBean product = (ProductBean) request.getAttribute("product");
+ProductsBean product = (ProductsBean) request.getAttribute("product");
 %>
 
 <div class="app-container">

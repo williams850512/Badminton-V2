@@ -9,25 +9,25 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
 
 import com.badminton.dao.ProductDao;
-import com.badminton.model.ProductBean;
+import com.badminton.model.ProductsBean;
 
 public class ProductService {
 
     private ProductDao productDao = new ProductDao();
 
     // 查全部
-    public List<ProductBean> showProduct() {
+    public List<ProductsBean> showProduct() {
         return productDao.showProduct();
     }
 
     // 查單筆
-    public ProductBean getProductById(Integer productId) {
+    public ProductsBean getProductById(Integer productId) {
         return productDao.searchProductById(productId);
     }
 
     // 新增
     public void insertProduct(HttpServletRequest request) {
-        ProductBean productBean = new ProductBean();
+        ProductsBean productBean = new ProductsBean();
 
         productBean.setProductName(request.getParameter("productName"));
         productBean.setCategory(request.getParameter("category"));
@@ -76,14 +76,14 @@ public class ProductService {
         productDao.insertProduct(productBean);
     }
     //模糊查詢
-    public List<ProductBean> searchProductsByKeyword(String keyword) {
+    public List<ProductsBean> searchProductsByKeyword(String keyword) {
         ProductDao productDao = new ProductDao();
         return productDao.searchProductsByKeyword(keyword);
     }
 
     // 修改
     public void updateProduct(HttpServletRequest request) {
-        ProductBean productBean = new ProductBean();
+        ProductsBean productBean = new ProductsBean();
 
         productBean.setProductId(parseInteger(request.getParameter("productId")));
         productBean.setProductName(request.getParameter("productName"));
