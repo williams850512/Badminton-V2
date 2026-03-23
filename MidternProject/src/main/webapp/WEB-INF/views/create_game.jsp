@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <title>🏸 發起羽球臨打揪團</title>
 <style>
-    /* CSS 保留你原本的，此處為節省版面略縮 */
+   
     body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f0f2f5; padding: 40px; }
     .form-container { max-width: 450px; margin: auto; background: white; padding: 35px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
     h2 { color: #1a73e8; text-align: center; margin-bottom: 25px; font-size: 24px; }

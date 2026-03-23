@@ -102,6 +102,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
     @Override
     public int insertNewGame(int hostId, int courtId, String gameDate, String startTime, String endTime, int maxPlayers) {
         String sql = "INSERT INTO BadmintonDB.dbo.PickupGames (host_id, court_id, game_date, start_time, end_time, max_players, current_players, status) VALUES (?, ?, ?, ?, ?, ?, 1, 'open')";
+       // 加上 Statement.RETURN_GENERATED_KEYS，在 INSERT 執行成功後，能透過getGeneratedKeys() 取得資料庫自動生成的流水號 (game_id)
         try (Connection conn = getConnection(); 
         		PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setInt(1, hostId);
@@ -124,11 +125,12 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
             pstmt.setInt(1, signup.getGameId());
             pstmt.setInt(2, signup.getMemberId());
             pstmt.setString(3, signup.getStatus());
+            //直接在後端使用 new Timestamp(System.currentTimeMillis()) 來產生伺服器當下的標準時間，以確保報名時間的正確性與防篡改
             pstmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             return pstmt.executeUpdate() > 0;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
-    //檢查是否重複報名
+    //檢查是否重複報名，防止同一個人，對同一場活動點擊報名兩次
     @Override
     public boolean isAlreadySignedUp(Integer gameId, Integer memberId) {
         String sql = "SELECT 1 FROM BadmintonDB.dbo.PickupGameSignups WHERE game_id = ? AND member_id = ?";

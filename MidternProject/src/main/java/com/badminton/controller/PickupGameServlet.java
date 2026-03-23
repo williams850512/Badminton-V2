@@ -83,9 +83,8 @@ public class PickupGameServlet extends HttpServlet {
         }
     }
 
-    // ================= 以下是原本分散的 Servlet 邏輯 =================
+   
 
-    // 原本的 GoCreateGameServlet
     private void goCreateGame(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         System.out.println("--- 進入發起揪團表單 ---");
@@ -96,7 +95,7 @@ public class PickupGameServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/create_game.jsp").forward(request, response);
     }
 
-    // 原本的 CreateGameServlet
+
     private void createGame(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         HttpSession session = request.getSession();
@@ -142,7 +141,7 @@ public class PickupGameServlet extends HttpServlet {
         }
     }
 
-    // 原本的 GetAllGamesServlet
+    
     private void getAllGames(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         System.out.println("--- 進入：找球賽清單 ---");
@@ -151,7 +150,7 @@ public class PickupGameServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/game_list.jsp").forward(request, response);
     }
 
-    // 原本的 AddSignupServlet
+  
     private void addSignup(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         String gameIdStr = request.getParameter("gameId");
@@ -173,7 +172,7 @@ public class PickupGameServlet extends HttpServlet {
         }
         getSignupList(request, response);
     }
-    // 原本的 GetSignupListServlet
+  
     private void getSignupList(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         String gameIdStr = request.getParameter("gameId");
