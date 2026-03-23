@@ -17,7 +17,7 @@
                 <div class="card">
                     <h2 style="margin-bottom: 20px;">新增商品</h2>
 
-                    <form action="<%=request.getContextPath()%>/ProductServlet" method="post">
+                    <form action="<%=request.getContextPath()%>/ProductServlet" method="post"  enctype="multipart/form-data">
                         <input type="hidden" name="action" value="productInsert">
 
                         <table style="width:100%;">
@@ -46,8 +46,8 @@
                                 <td style="padding:10px;"><input class="form-control" type="text" name="description"></td>
                             </tr>
                             <tr>
-                                <td style="padding:10px;">圖片網址</td>
-                                <td style="padding:10px;"><input class="form-control" type="text" name="imageUrl"></td>
+                                <td style="padding:10px;">商品圖片</td>
+                                <td style="padding:10px;"><input class="form-control" type="file" name="image"></td>
                             </tr>
                             <tr>
                                 <td style="padding:10px;">狀態</td>

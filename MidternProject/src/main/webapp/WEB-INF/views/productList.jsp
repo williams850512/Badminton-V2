@@ -30,6 +30,7 @@
                         <thead>
                             <tr>
                                 <th>商品ID</th>
+                                <th>商品圖片</th>
                                 <th>商品名稱</th>
                                 <th>分類</th>
                                 <th>品牌</th>
@@ -46,6 +47,16 @@
                         %>
                             <tr>
                                 <td><%= product.getProductId() %></td>
+                                <td>
+                                    <%
+                                        String imageUrl = product.getImageUrl();
+
+                                        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+                                            imageUrl = "images/default.png";
+                                        }
+                                    %>
+                                    <img src="<%= request.getContextPath() + "/" + imageUrl %>" width="100">
+                                </td>
                                 <td><%= product.getProductName() %></td>
                                 <td><%= product.getCategory() %></td>
                                 <td><%= product.getBrand() == null ? "" : product.getBrand() %></td>

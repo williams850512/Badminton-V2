@@ -1,10 +1,12 @@
 package com.badminton.service;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
 import com.badminton.dao.ProductDao;
 import com.badminton.model.ProductBean;
@@ -33,9 +35,43 @@ public class ProductService {
         productBean.setPrice(parseBigDecimal(request.getParameter("price")));
         productBean.setStockQty(parseInteger(request.getParameter("stockQty")));
         productBean.setDescription(request.getParameter("description"));
-        productBean.setImageUrl(request.getParameter("imageUrl"));
         productBean.setStatus(request.getParameter("status"));
         productBean.setProductCreateAt(parseDate(request.getParameter("productCreateAt")));
+
+        try {
+            //取得上傳圖片
+            Part filePart = request.getPart("image");
+
+            if (filePart != null && filePart.getSize() > 0) {
+
+                String fileName = filePart.getSubmittedFileName();
+
+                // 防止重名
+                fileName = System.currentTimeMillis() + "_" + fileName;
+
+                // 存檔路徑
+                String uploadPath = request.getServletContext().getRealPath("/images/products");
+
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                // 寫入檔案
+                filePart.write(uploadPath + File.separator + fileName);
+
+                // 存 DB 路徑
+                productBean.setImageUrl("images/products/" + fileName);
+                System.out.println("uploadPath = " + uploadPath);
+
+            } else {
+                // 沒上傳圖片（可給預設圖）
+                productBean.setImageUrl("images/products/default.png");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         productDao.insertProduct(productBean);
     }
@@ -51,8 +87,51 @@ public class ProductService {
         productBean.setPrice(parseBigDecimal(request.getParameter("price")));
         productBean.setStockQty(parseInteger(request.getParameter("stockQty")));
         productBean.setDescription(request.getParameter("description"));
-        productBean.setImageUrl(request.getParameter("imageUrl"));
         productBean.setStatus(request.getParameter("status"));
+
+        try {
+            Part filePart = request.getPart("image");
+
+            // 有上傳新圖片
+            if (filePart != null && filePart.getSize() > 0) {
+
+                String fileName = filePart.getSubmittedFileName();
+                fileName = System.currentTimeMillis() + "_" + fileName;
+
+                String uploadPath = request.getServletContext().getRealPath("/images/products");
+
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                filePart.write(uploadPath + File.separator + fileName);
+
+                productBean.setImageUrl("images/products/" + fileName);
+
+            } else {
+                // 沒上傳新圖 → 用舊的
+                String imageUrl = request.getParameter("imageUrl");
+
+                if (imageUrl == null || imageUrl.trim().isEmpty()) {
+                    imageUrl = "images/products/default.png";
+                }
+
+                productBean.setImageUrl(imageUrl);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            // fallback（避免壞掉）
+            String imageUrl = request.getParameter("imageUrl");
+
+            if (imageUrl == null || imageUrl.trim().isEmpty()) {
+                imageUrl = "images/products/default.png";
+            }
+
+            productBean.setImageUrl(imageUrl);
+        }
 
         productDao.updateProduct(productBean);
     }
