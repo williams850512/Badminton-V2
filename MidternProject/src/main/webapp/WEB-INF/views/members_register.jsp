@@ -2,168 +2,238 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>羽球館 | 會員註冊</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
-<style>
-    :root {
-        --primary-blue: #5c67f2; 
-        --border-color: #e5eaf2;
-        --label-color: #4b5563;
-        --placeholder-color: #cbd5e0;
-        --error-red: #ef4444;
-        --bg-color: #f8fafc;
-    }
-
-    body { 
-        font-family: 'Noto Sans TC', sans-serif; 
-        background-color: var(--bg-color); 
-        display: flex; justify-content: center; align-items: center; 
-        min-height: 100vh; margin: 0; padding: 40px 0;
-    }
-
-    .reg-container { 
-        background: white; padding: 45px 40px; border-radius: 20px; 
-        width: 100%; max-width: 400px; 
-        box-shadow: 0 15px 35px rgba(0,0,0,0.05); 
-        border: 1px solid #f1f5f9;
-    }
-
-    h2 { color: #0f172a; text-align: center; margin-bottom: 30px; font-size: 24px; font-weight: 700; line-height: 1.2; }
-    h2 span { display: block; font-size: 12px; color: #94a3b8; font-weight: 500; text-transform: uppercase; margin-top: 6px; letter-spacing: 1px; }
-
-    .form-group { margin-bottom: 20px; }
+    <meta charset="UTF-8">
+    <title>羽球館 | 會員註冊</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: var(--label-color);
-        font-weight: 700;
-        font-size: 14px;
-        padding-left: 2px;
-    }
-    .form-group label span {
-        font-weight: 400;
-        color: #94a3b8;
-        font-size: 12px;
-        margin-left: 4px;
-    }
+    <style>
+        /* 全域設定，延續整體模板風格 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Noto Sans TC', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { 
+            background-color: #2c3e50; /* 使用與 Sidebar 一致的深色 */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 40px 20px;
+        }
 
-    input[type="text"], input[type="password"], input[type="email"], #birthdayPicker { 
-        width: 100%; padding: 12px 16px; 
-        border: 1.5px solid var(--border-color); 
-        border-radius: 12px; 
-        box-sizing: border-box; font-size: 15px; 
-        transition: all 0.2s ease; 
-        background-color: white;
-        color: #334155;
-    }
+        /* 註冊卡片 */
+        .reg-card { 
+            background: #fff; 
+            padding: 45px; 
+            border-radius: 12px; 
+            width: 100%; 
+            max-width: 450px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); 
+        }
 
-    input:focus, #birthdayPicker:focus {
-        outline: none; 
-        border-color: var(--primary-blue);
-        box-shadow: 0 0 0 4px rgba(92, 103, 242, 0.08);
-    }
+        .reg-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
 
-    input::placeholder { color: var(--placeholder-color); font-size: 14px; }
+        .reg-header h2 { 
+            color: #2c3e50; 
+            font-size: 26px; 
+            font-weight: bold;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
 
-    .radio-group { display: flex; gap: 30px; padding: 5px 2px; }
-    .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; color: #4b5563; font-size: 15px; }
-    .radio-input { width: 18px !important; height: 18px !important; cursor: pointer; accent-color: var(--primary-blue); }
+        .reg-header p {
+            color: #7f8c8d;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
 
-    button { 
-        width: 100%; padding: 14px; 
-        background: var(--primary-blue);
-        color: white; border: none; border-radius: 12px; 
-        font-size: 16px; font-weight: 700; cursor: pointer; 
-        transition: 0.3s; margin-top: 15px;
-        letter-spacing: 0.5px;
-    }
-    button:hover { 
-        background: #4752e8;
-        transform: translateY(-1px); 
-        box-shadow: 0 5px 15px rgba(92, 103, 242, 0.2); 
-    }
+        /* 表單設計 */
+        .form-group { margin-bottom: 20px; }
+        
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: bold; 
+            color: #34495e; 
+            font-size: 14px; 
+        }
 
-    .msg-error { 
-        background-color: #fef2f2; color: var(--error-red); 
-        border: 1px solid #fee2e2; padding: 10px; border-radius: 10px; 
-        text-align: center; margin-bottom: 25px; font-size: 13px; font-weight: 500;
-    }
+        label span {
+            font-weight: normal;
+            color: #95a5a6;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        
+        .form-control { 
+            width: 100%; 
+            padding: 11px 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 15px; 
+            outline: none; 
+            transition: all 0.3s;
+            background-color: #f9f9f9;
+        }
 
-    .footer-link { 
-        text-align: center; 
-        margin-top: 30px; 
-        font-size: 14px; 
-        color: #64748b;
-    }
-    .footer-link a { 
-        color: var(--primary-blue); 
-        text-decoration: none; 
-        font-weight: 700; 
-        margin-left: 5px;
-    }
-    .footer-link a:hover { text-decoration: underline; }
-</style>
+        .form-control:focus {
+            border-color: #3498db;
+            background-color: #fff;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+        }
+
+        /* 單選鈕樣式 */
+        .radio-group { display: flex; gap: 30px; padding: 5px 0; }
+        .radio-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 15px; color: #555; }
+        .radio-item input { accent-color: #3498db; width: 17px; height: 17px; }
+
+        /* 按鈕風格 */
+        .btn-reg { 
+            width: 100%; 
+            padding: 14px; 
+            background: #3498db; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .btn-reg:hover { 
+            background: #2980b9; 
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        /* 錯誤訊息提示 */
+        .msg-error {
+            background-color: #fdf2f2; 
+            color: #e74c3c; 
+            border: 1px solid #fadbd8;
+            padding: 12px; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            text-align: center; 
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        /* 下方連結 */
+        .footer-links {
+            margin-top: 25px;
+            text-align: center;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .footer-links a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-<div class="reg-container">
-    <h2>🏸 會員註冊<br><span>Join Our Badminton Club</span></h2>
+
+<div class="reg-card">
+    <div class="reg-header">
+        <h2>🏸 會員註冊</h2>
+        <p>Create Your Account</p>
+    </div>
     
+    <%-- 錯誤訊息邏輯 --%>
     <% if("2".equals(request.getParameter("error"))) { %>
-        <div class="msg-error">❌ 帳號已存在，請更換帳號</div>
+        <div class="msg-error">
+            <span>❌</span> 帳號已存在，請更換帳號
+        </div>
     <% } else if("1".equals(request.getParameter("error"))) { %>
-        <div class="msg-error">❌ 註冊失敗，請檢查輸入內容</div>
+        <div class="msg-error">
+            <span>❌</span> 註冊失敗，請檢查輸入內容
+        </div>
     <% } %>
 
     <form action="MembersServlet" method="post">
         <input type="hidden" name="action" value="register">
         
         <div class="form-group">
-            <label>帳號 <span>(Username)</span></label>
-            <input type="text" name="username" required placeholder="設定登入帳號" autofocus autocomplete="off">
+            <label>設定帳號 <span>Username</span></label>
+            <input type="text" name="username" class="form-control" 
+                   required placeholder="請輸入登入帳號" autofocus autocomplete="off">
         </div>
         
         <div class="form-group">
-            <label>密碼 <span>(Password)</span></label>
-            <input type="password" name="password" required placeholder="設定登入密碼" autocomplete="new-password">
+            <label>設定密碼 <span>Password</span></label>
+            <input type="password" name="password" class="form-control" 
+                   required placeholder="請設定 6 位以上密碼" autocomplete="new-password">
         </div>
         
         <div class="form-group">
-            <label>姓名 <span>(Full Name)</span></label>
-            <input type="text" name="fullName" placeholder="請輸入姓名" required autocomplete="off">
+            <label>姓名 <span>Full Name</span></label>
+            <input type="text" name="fullName" class="form-control" 
+                   required placeholder="請輸入您的姓名" autocomplete="off">
         </div>
         
         <div class="form-group">
-            <label>性別 <span>(Gender)</span></label>
+            <label>性別 <span>Gender</span></label>
             <div class="radio-group">
-                <label class="radio-label"><input type="radio" name="gender" value="男" class="radio-input" checked required> 男</label>
-                <label class="radio-label"><input type="radio" name="gender" value="女" class="radio-input"> 女</label>
+                <label class="radio-item">
+                    <input type="radio" name="gender" value="男" checked required> 男
+                </label>
+                <label class="radio-item">
+                    <input type="radio" name="gender" value="女"> 女
+                </label>
             </div>
         </div>
         
         <div class="form-group">
-            <label>生日 <span>(Birthday)</span></label>
-            <input type="text" name="birthday" id="birthdayPicker" placeholder="請選取日期" readonly>
+            <label>生日 <span>Birthday</span></label>
+            <input type="text" name="birthday" id="birthdayPicker" 
+                   class="form-control" placeholder="請選取日期" readonly>
         </div>
         
         <div class="form-group">
-            <label>電話 <span>(Phone)</span></label>
-            <input type="text" name="phone" id="phone" maxlength="12" placeholder="09xx-xxx-xxx" required autocomplete="off">
+            <label>電話 <span>Phone</span></label>
+            <input type="text" name="phone" id="phone" class="form-control" 
+                   maxlength="12" placeholder="09xx-xxx-xxx" required autocomplete="off">
         </div>
         
         <div class="form-group">
-            <label>電子信箱 <span>(Email)</span></label>
-            <input type="email" name="email" placeholder="example@mail.com" autocomplete="off">
+            <label>電子信箱 <span>Email</span></label>
+            <input type="email" name="email" class="form-control" 
+                   placeholder="example@mail.com" autocomplete="off">
         </div>
         
-        <button type="submit">立即註冊 Register Now</button>
+        <button type="submit" class="btn-reg">立即註冊並加入</button>
     </form>
     
-    <div class="footer-link">
-        已有帳號？<a href="MembersServlet?action=showLogin">前往登入 Login</a>
+    <div class="footer-links">
+        已經有帳號了？<a href="MembersServlet?action=showLogin">返回登入畫面</a>
     </div>
 </div>
 
@@ -171,16 +241,16 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
 
 <script>
+    // 初始化日期選擇器
     flatpickr("#birthdayPicker", {
         locale: "zh_tw",
         dateFormat: "Y-m-d",
         maxDate: "today",
         monthSelectorType: "dropdown",
-        onReady: function(selectedDates, dateStr, instance) {
-            if (instance.currentYearElement) instance.currentYearElement.setAttribute("min", "1930");
-        }
+        disableMobile: "true"
     });
 
+    // 手機格式自動補橫線 (09xx-xxx-xxx)
     const phoneInput = document.getElementById('phone');
     if (phoneInput) {
         phoneInput.addEventListener('input', function (e) {

@@ -4,221 +4,188 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>羽球館 | 個人中心</title>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
+    <meta charset="UTF-8">
+    <title>羽球館 | 個人中心</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh-tw.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-    :root {
-        --primary-blue: #5c67f2;
-        --text-dark: #334155;
-        --text-light: #94a3b8;
-        --bg-color: #f8fafc;
-        --border-color: #e2e8f0;
-        --card-bg: #ffffff;
-    }
+    <style>
+        /* 全域設定 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Noto Sans TC', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f7f6; color: #333; }
+        
+        /* 佈局容器 */
+        .app-container { display: flex; height: 100vh; overflow: hidden; }
+        
+        /* 左側選單 */
+        .sidebar { width: 15%; background-color: #2c3e50; color: #fff; display: flex; flex-direction: column; transition: all 0.3s; }
+        .sidebar-logo { padding: 20px; font-size: 22px; font-weight: bold; text-align: center; border-bottom: 1px solid #34495e; letter-spacing: 2px;}
+        .sidebar-menu { list-style: none; padding: 10px 0; margin: 0; }
+        .sidebar-menu li { padding: 15px 25px; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; }
+        .sidebar-menu li:hover { background-color: #34495e; border-left: 4px solid #3498db; }
+        .sidebar-menu li.active { background-color: #34495e; border-left: 4px solid #3498db; color: #3498db; font-weight: bold;}
+        .sidebar-menu a { text-decoration: none; color: inherit; display: block; }
+        
+        /* 右側主要區域 */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* 上方導覽列 */
+        .top-header { height: 60px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 10; }
+        .header-title { font-size: 18px; font-weight: bold; color: #555; }
+        .user-info { font-size: 14px; color: #666; }
+        
+        /* 內容區域 */
+        .content-body { flex: 1; padding: 30px; overflow-y: auto; }
+        
+        /* 個人資料卡片 */
+        .profile-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; max-width: 900px; margin: 0 auto; }
+        .profile-header { background: #3498db; color: white; padding: 30px; text-align: center; }
+        .profile-header h2 { font-size: 24px; margin-bottom: 5px; }
+        .profile-header p { font-size: 14px; opacity: 0.9; }
 
-    body {
-        font-family: 'Noto Sans TC', sans-serif;
-        background-color: var(--bg-color);
-        margin: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 40px 20px;
-        color: var(--text-dark);
-    }
+        /* 資料概覽網格 */
+        .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 30px; background-color: #fcfdfe; border-bottom: 1px solid #eee; }
+        .info-item label { display: block; font-size: 11px; color: #95a5a6; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+        .info-item .value { font-size: 15px; font-weight: 600; color: #2c3e50; }
 
-    .profile-card {
-        background: var(--card-bg);
-        width: 100%;
-        max-width: 600px;
-        border-radius: 24px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-        overflow: hidden;
-        border: 1px solid #f1f5f9;
-    }
+        /* 會員等級標籤 */
+        .role-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .badge-user { background: #ecf0f1; color: #7f8c8d; }
+        .badge-vip { background: #fff9db; color: #f1c40f; border: 1px solid #f9eba0; }
 
-    .profile-header {
-        background: var(--primary-blue);
-        color: white;
-        padding: 40px 30px;
-        text-align: center;
-    }
-    
-    .profile-header h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
-    .profile-header p { margin: 8px 0 0; opacity: 0.85; font-size: 13px; font-weight: 400; }
+        /* 表單區域 */
+        .form-section { padding: 40px; }
+        .form-section h3 { font-size: 18px; color: #2c3e50; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        .form-section h3::before { content: ''; display: block; width: 4px; height: 18px; background: #3498db; border-radius: 2px; }
 
-    .profile-body { padding: 40px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; font-size: 14px; }
+        
+        .form-control { 
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; 
+            font-size: 14px; transition: 0.3s; background: #fff;
+        }
+        .form-control:focus { border-color: #3498db; outline: none; box-shadow: 0 0 0 3px rgba(52,152,219,0.1); }
 
+        .radio-group { display: flex; gap: 30px; padding: 10px 0; }
+        .radio-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
 
-    .info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        margin-bottom: 40px;
-        background: #fcfdfe;
-        padding: 25px;
-        border-radius: 16px;
-        border: 1px solid #f1f5f9;
-    }
+        .btn-submit { 
+            width: 100%; padding: 14px; background: #2c3e50; color: white; border: none; 
+            border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-submit:hover { background: #34495e; transform: translateY(-1px); box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
 
-    .info-item label {
-        display: block; font-size: 11px; color: var(--text-light);
-        margin-bottom: 6px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;
-    }
-
-    .info-item .value { font-weight: 600; color: #1e293b; font-size: 14px; }
-
-    /* 會員等級標籤 */
-    .role-badge {
-        display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 6px;
-        font-size: 11px; font-weight: 700;
-    }
-    .badge-user { background: #f1f5f9; color: #64748b; }
-    .badge-vip { background: #fffbeb; color: #d97706; border: 1px solid #fef3c7; }
-
-    .update-section h3 {
-        font-size: 16px; border-left: 4px solid var(--primary-blue);
-        padding-left: 12px; margin-bottom: 25px; color: #1e293b; font-weight: 700;
-    }
-    
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 13px; color: #475569; }
-    
-    input[type="text"], 
-    input[type="email"],
-    .datepicker-input {
-        width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color);
-        border-radius: 10px; box-sizing: border-box; font-size: 14px;
-        font-family: inherit; transition: all 0.2s ease; background-color: #fff;
-    }
-
-    input:focus, .datepicker-input:focus {
-        border-color: var(--primary-blue); outline: none;
-        box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.08);
-    }
-    
-    .radio-group { display: flex; gap: 30px; padding: 5px 0; }
-    .radio-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; font-size: 14px; }
-    .radio-label input { accent-color: var(--primary-blue); width: 16px; height: 16px; }
-
-    .btn-update {
-        width: 100%; background: var(--primary-blue); color: white; border: none;
-        padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 700;
-        cursor: pointer; transition: 0.3s; margin-top: 10px;
-    }
-    .btn-update:hover { background: #3651d4; transform: translateY(-1px); box-shadow: 0 5px 15px rgba(67, 97, 238, 0.15); }
-
-    .nav-links {
-        text-align: center; margin-top: 30px; padding-top: 25px; border-top: 1px solid #f1f5f9;
-    }
-    .nav-links a { color: var(--text-light); text-decoration: none; font-size: 13px; margin: 0 12px; font-weight: 500; }
-    .nav-links a:hover { color: var(--primary-blue); }
-
-    /*  Flatpickr 顏色 */
-    .flatpickr-day.selected { background: var(--primary-blue) !important; border-color: var(--primary-blue) !important; }
-</style>
+        /* Flatpickr 客製化 */
+        .flatpickr-day.selected { background: #3498db !important; border-color: #3498db !important; }
+    </style>
 </head>
 <body>
 
-    <div class="profile-card">
-        <div class="profile-header">
-            <h2>歡迎回來，${user.fullName}</h2>
-            <p>管理您的個人帳戶資訊</p>
+<div class="app-container">
+    <div class="sidebar">
+        <div class="sidebar-logo">Badminton</div>
+        <ul class="sidebar-menu">
+            <li class="active"><a href="${pageContext.request.contextPath}/MembersServlet?action=showProfile">個人中心</a></li>
+            <li><a href="#">我的預約</a></li>
+            <li><a href="#">消費紀錄</a></li>
+            <li><a href="#">修改密碼</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="header-title">會員中心 | Account Settings</div>
+            <div class="user-info">
+                HI! ${user.fullName} | 
+                <a href="${pageContext.request.contextPath}/MembersServlet?action=logout" style="color: #e74c3c; text-decoration: none;">登出</a>
+            </div>
         </div>
 
-        <div class="profile-body">
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>帳號 Username</label>
-                    <div class="value">${user.username}</div>
+        <div class="content-body">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <h2>歡迎回來，${user.fullName}</h2>
+                    <p>您可以在此查看與修改您的帳戶資訊</p>
                 </div>
-                <div class="info-item">
-                    <label>會員等級 Level</label>
-                    <div class="value">
-                        <c:choose>
-                            <c:when test="${user.membershipLevel == 'VIP'}">
-                                <span class="role-badge badge-vip">💎 VIP 會員</span>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="role-badge badge-user">👤 一般會員</span>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                </div>
-                <div class="info-item">
-                    <label>性別 Gender</label>
-                    <div class="value">${not empty user.gender ? user.gender : '未設定'}</div>
-                </div>
-                <div class="info-item">
-                    <label>生日 Birthday</label>
-                    <div class="value">${not empty user.birthday ? user.birthday : '未設定'}</div>
-                </div>
-                <div class="info-item">
-                    <label>電子信箱 Email</label>
-                    <div class="value">${not empty user.email ? user.email : '未填寫'}</div>
-                </div>
-                <div class="info-item">
-                    <label>電話 Phone</label>
-                    <div class="value">${not empty user.phone ? user.phone : '未填寫'}</div>
-                </div>
-            </div>
 
-            <div class="update-section">
-                <h3>修改個人資料</h3>
-                <form id="profileForm" action="MembersServlet" method="post">
-                    <input type="hidden" name="action" value="update">
-                    
-                    <div class="form-group">
-                        <label>姓名 Name</label>
-                        <input type="text" name="fullName" value="${user.fullName}" required autocomplete="off">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>帳號 Username</label>
+                        <div class="value">${user.username}</div>
                     </div>
-
-                    <div class="form-group">
-                        <label>性別 Gender</label>
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="gender" value="男" ${user.gender == '男' ? 'checked' : ''} required> 男
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="gender" value="女" ${user.gender == '女' ? 'checked' : ''}> 女
-                            </label>
+                    <div class="info-item">
+                        <label>會員等級 Level</label>
+                        <div class="value">
+                            <c:choose>
+                                <c:when test="${user.membershipLevel == 'VIP'}">
+                                    <span class="role-badge badge-vip">💎 VIP 會員</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="role-badge badge-user">👤 一般會員</span>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label>生日 Birthday</label>
-                        <input type="text" id="birthdayPicker" name="birthday" 
-                               class="datepicker-input" 
-                               value="${user.birthday}" 
-                               placeholder="請選取日期" readonly>
+                    <div class="info-item">
+                        <label>性別 Gender</label>
+                        <div class="value">${not empty user.gender ? user.gender : '未設定'}</div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label>電話 Phone</label>
-                        <input type="text" id="phoneInput" name="phone" value="${user.phone}" maxlength="12" placeholder="0900-000-000" autocomplete="off">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>信箱 Email</label>
-                        <input type="email" name="email" value="${user.email}" autocomplete="off">
-                    </div>
+                </div>
 
-                    <button type="submit" class="btn-update">儲存變更</button>
-                </form>
-            </div>
+                <div class="form-section">
+                    <h3>修改個人資料</h3>
+                    <form id="profileForm" action="MembersServlet" method="post">
+                        <input type="hidden" name="action" value="update">
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>姓名 Name</label>
+                                <input type="text" name="fullName" class="form-control" value="${user.fullName}" required autocomplete="off">
+                            </div>
 
-            <div class="nav-links">
-                <a href="MembersServlet?action=logout" style="color: #94a3b8;">登出 Logout</a>
+                            <div class="form-group">
+                                <label>性別 Gender</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="gender" value="男" ${user.gender == '男' ? 'checked' : ''} required> 男
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="gender" value="女" ${user.gender == '女' ? 'checked' : ''}> 女
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>生日 Birthday</label>
+                                <input type="text" id="birthdayPicker" name="birthday" 
+                                       class="form-control" 
+                                       value="${user.birthday}" 
+                                       placeholder="請選取日期" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>電話 Phone</label>
+                                <input type="text" id="phoneInput" name="phone" class="form-control" value="${user.phone}" maxlength="12" placeholder="09xx-xxx-xxx" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>電子信箱 Email</label>
+                            <input type="email" name="email" class="form-control" value="${user.email}" placeholder="example@mail.com" autocomplete="off">
+                        </div>
+
+                        <button type="submit" class="btn-submit">儲存所有變更</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
 <script>
 // 1. 初始化 Flatpickr
@@ -226,12 +193,10 @@ flatpickr("#birthdayPicker", {
     locale: "zh_tw",
     dateFormat: "Y-m-d",
     maxDate: "today", 
-    disableMobile: "true",
-    altInput: true,
-    altFormat: "Y-m-d",
+    disableMobile: "true"
 });
 
-// 2. 電話格式
+// 2. 電話格式化 (09xx-xxx-xxx)
 const phoneInput = document.getElementById('phoneInput');
 if (phoneInput) {
     phoneInput.addEventListener('input', function (e) {
@@ -250,10 +215,12 @@ if (urlParams.get('msg') === 'ok') {
     Swal.fire({
         icon: 'success',
         title: '更新成功！',
-        confirmButtonColor: '#4361ee',
-        timer: 1500,
+        text: '您的個人資料已同步至最新狀態。',
+        confirmButtonColor: '#3498db',
+        timer: 2000,
         showConfirmButton: false
     });
+    // 清除 URL 中的成功訊息，避免重整頁面時重複彈窗
     window.history.replaceState({}, document.title, "MembersServlet?action=showProfile");
 }
 </script>

@@ -4,299 +4,201 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>羽球館 | 會員資料編輯</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    
+    <title>羽球館 | 編輯會員資料</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_green.css">
     
     <style>
-        :root { 
-            --accent: #2ec4b6; /* 湖水綠主色 */
-            --accent-hover: #27ad9f;
-            --primary: #0f172a; 
-            --bg: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); 
-            --text-main: #334155;
-            --text-label: #64748b;
-        }
+        /* 全域設定 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Noto Sans TC', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f7f6; color: #333; }
+        
+        /* 佈局容器 */
+        .app-container { display: flex; height: 100vh; overflow: hidden; }
+        
+        /* 左側選單 */
+        .sidebar { width: 15%; background-color: #2c3e50; color: #fff; display: flex; flex-direction: column; transition: all 0.3s; }
+        .sidebar-logo { padding: 20px; font-size: 22px; font-weight: bold; text-align: center; border-bottom: 1px solid #34495e; letter-spacing: 2px;}
+        .sidebar-menu { list-style: none; padding: 10px 0; margin: 0; }
+        .sidebar-menu li { padding: 15px 25px; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; }
+        .sidebar-menu li:hover { background-color: #34495e; border-left: 4px solid #3498db; }
+        .sidebar-menu li.active { background-color: #34495e; border-left: 4px solid #3498db; color: #3498db; font-weight: bold;}
+        .sidebar-menu a { text-decoration: none; color: inherit; display: block; }
+        
+        /* 右側主要區域 */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* 上方導覽列 */
+        .top-header { height: 60px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 10; }
+        .header-title { font-size: 18px; font-weight: bold; color: #555; }
+        .user-info { font-size: 14px; color: #666; }
+        
+        /* 內容區域 */
+        .content-body { flex: 1; padding: 20px; overflow-y: auto; }
+        
+        /* 卡片風格 */
+        .card { background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 30px; max-width: 800px; margin: 0 auto; }
+        
+        /* 表單樣式 */
+        .form-section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .section-title { font-size: 16px; font-weight: bold; color: #3498db; margin-bottom: 15px; display: block; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
+        .form-control { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; outline: none; transition: 0.2s; }
+        .form-control:focus { border-color: #3498db; box-shadow: 0 0 5px rgba(52, 152, 219, 0.3); }
+        .form-control:disabled { background-color: #f8f9fa; cursor: not-allowed; border-style: dashed; }
+        
+        /* 單選鈕與複選樣式 */
+        .radio-group { display: flex; gap: 20px; padding: 10px 0; }
+        .radio-item { display: flex; align-items: center; gap: 5px; cursor: pointer; }
 
-        body { 
-            font-family: 'Noto Sans TC', sans-serif; 
-            background: var(--bg); 
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container { 
-            width: 100%;
-            max-width: 600px; 
-            background: rgba(255, 255, 255, 0.95); 
-            padding: 50px; 
-            border-radius: 32px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.08); 
-            backdrop-filter: blur(10px);
-        }
-
-        h2 { 
-            color: var(--primary); 
-            font-size: 28px;
-            margin-bottom: 35px; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px;
-            letter-spacing: -0.5px;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .section-title {
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--accent);
-            font-weight: 700;
-            margin: 25px 0 15px 0;
-            border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 8px;
-        }
-
-        .form-group { margin-bottom: 24px; }
-
-        label { 
-            display: block; 
-            margin-bottom: 10px; 
-            font-weight: 600; 
-            color: var(--text-main); 
-            font-size: 16px; 
-        }
-
-        input, select, textarea { 
-            width: 100%; 
-            padding: 14px 18px; 
-            border-radius: 14px; 
-            border: 1px solid #cbd5e1; 
-            background-color: #f8fafc;
-            outline: none; 
-            box-sizing: border-box; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 15px;
-            color: var(--primary);
-            font-family: inherit;
-        }
-
-        input:focus, select:focus, textarea:focus { 
-            border-color: var(--accent); 
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(46, 196, 182, 0.15); 
-            transform: translateY(-1px);
-        }
-
-        textarea { resize: none; }
-
-        /* 禁用欄位樣式 */
-        input:disabled, select:disabled {
-            background-color: #f1f5f9;
-            color: #94a3b8;
-            cursor: not-allowed;
-            border-style: dashed;
-            opacity: 0.8;
-        }
-
-        .date-input-wrapper { position: relative; }
-        .date-input-wrapper::after {
-            content: "📅";
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            font-size: 18px;
-            opacity: 0.6;
-        }
-
-        .radio-group { 
-            display: flex; 
-            gap: 30px; 
-            padding: 12px 18px;
-            background: #f8fafc;
-            border-radius: 14px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .radio-item { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            cursor: pointer; 
-            font-size: 16px;
-            color: var(--text-main);
-            font-weight: 500;
-        }
-
-        .radio-item input[type="radio"] { 
-            width: 20px; 
-            height: 20px; 
-            accent-color: var(--accent);
-            cursor: pointer;
-        }
-
-        .btn-group { 
-            display: flex; 
-            gap: 16px; 
-            margin-top: 45px; 
-        }
-
-        .btn-base { 
-            flex: 1; 
-            padding: 16px; 
-            border-radius: 16px; 
-            font-size: 17px; 
-            font-weight: 700; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            transition: all 0.3s ease; 
-            cursor: pointer; 
-            border: none; 
-            text-decoration: none; 
-            font-family: inherit;
-        }
-
-        .btn-save { 
-            background: var(--accent); 
-            color: white; 
-            box-shadow: 0 8px 20px rgba(46, 196, 182, 0.3);
-        }
-
-        .btn-save:hover { 
-            background: var(--accent-hover); 
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(46, 196, 182, 0.4); 
-        }
-
-        .btn-cancel { 
-            background: #fff; 
-            color: #64748b; 
-            border: 1px solid #e2e8f0;
-        }
-
-        .btn-cancel:hover { 
-            background: #f1f5f9; 
-            color: #475569;
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 480px) {
-            .container { padding: 30px; border-radius: 0; }
-            .btn-group { flex-direction: column-reverse; }
-        }
+        /* 按鈕風格 */
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; text-decoration: none; display: inline-block; transition: 0.2s; text-align: center; }
+        .btn-primary { background-color: #3498db; color: white; min-width: 120px; }
+        .btn-primary:hover { background-color: #2980b9; }
+        .btn-secondary { background-color: #95a5a6; color: white; }
+        .btn-secondary:hover { background-color: #7f8c8d; }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 30px; justify-content: flex-end; }
+        
+        .help-text { font-size: 12px; color: #94a3b8; margin-top: 5px; }
     </style>
 </head>
 <body>
-<div class="container">
-    <h2>編輯會員資料</h2>
-    <form action="${pageContext.request.contextPath}/MembersAdminServlet" method="post">
-        <input type="hidden" name="action" value="update">
-        <input type="hidden" name="memberId" value="${m.memberId}">
-        
-        <%-- ✨ 判斷當前登入者是否為主管 --%>
-        <c:set var="isManager" value="${adminUser.role == 'manager'}" />
 
-        <div class="section-title">帳號資訊</div>
-        <div class="form-group">
-            <label>會員帳號 Username</label>
-            <input type="text" value="${m.username}" disabled>
-        </div>
+<div class="app-container">
+    <div class="sidebar">
+        <div class="sidebar-logo">Badminton</div>
+        <ul class="sidebar-menu">
+            <li class="active"><a href="${pageContext.request.contextPath}/MembersAdminServlet?action=dashboard">會員管理</a></li>
+            <li><a href="#">預約管理</a></li>
+            <li><a href="#">臨打管理</a></li>
+            <li><a href="#">商品管理</a></li>
+            <li><a href="#">訂單管理</a></li>
+            <li><a href="<%=request.getContextPath()%>/AnnouncementServlet?action=list">公告管理</a></li>
+        </ul>
+    </div>
 
-        <div class="section-title">個人資訊</div>
-        <div class="form-group">
-            <label>姓名 Name</label>
-            <input type="text" name="fullName" value="${m.fullName}" required placeholder="請輸入姓名">
-        </div>
-        
-        <div class="form-group">
-            <label>性別 Gender</label>
-            <div class="radio-group">
-                <label class="radio-item">
-                    <input type="radio" name="gender" value="男" ${m.gender == '男' ? 'checked' : ''} required> 男
-                </label>
-                <label class="radio-item">
-                    <input type="radio" name="gender" value="女" ${m.gender == '女' ? 'checked' : ''}> 女
-                </label>
+    <div class="main-content">
+        <%
+            String empName = (String) session.getAttribute("empName");
+            if (empName == null || empName.isEmpty()) { empName = "測試管理員"; }
+        %>
+        <div class="top-header">
+            <div class="header-title">羽球館管理系統</div>
+            <div class="user-info">
+                HI! <%= empName %> | 
+                <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=logout" style="color: #e74c3c; text-decoration: none;">登出</a>
             </div>
         </div>
 
-        <div class="form-group">
-            <label>生日 Birthday</label>
-            <div class="date-input-wrapper">
-                <input type="text" id="birthdayPicker" name="birthday" value="${m.birthday}" placeholder="請選取日期" readonly>
+        <div class="content-body">
+            <div class="card">
+                <h2 style="margin-bottom: 25px; color: #2c3e50;">📝 編輯會員資料</h2>
+                
+                <form action="${pageContext.request.contextPath}/MembersAdminServlet" method="post">
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="memberId" value="${m.memberId}">
+                    
+                    <c:set var="isManager" value="${adminUser.role == 'manager'}" />
+
+                    <div class="form-section">
+                        <span class="section-title">帳號資訊</span>
+                        <div class="form-group">
+                            <label>會員帳號 Username</label>
+                            <input type="text" class="form-control" value="${m.username}" disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <span class="section-title">個人資訊</span>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label>姓名 Name</label>
+                                <input type="text" name="fullName" class="form-control" value="${m.fullName}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>性別 Gender</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="gender" value="男" ${m.gender == '男' ? 'checked' : ''} required> 男
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="gender" value="女" ${m.gender == '女' ? 'checked' : ''}> 女
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label>生日 Birthday</label>
+                                <input type="text" id="birthdayPicker" name="birthday" class="form-control" value="${m.birthday}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>電話 Phone</label>
+                                <input type="tel" id="phoneInput" name="phone" class="form-control" value="${m.phone}" placeholder="09XX-XXX-XXX" maxlength="12">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>電子信箱 Email</label>
+                            <input type="email" name="email" class="form-control" value="${m.email}">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <span class="section-title">權限與備註</span>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label>帳號狀態 Status</label>
+                                <select name="status" class="form-control" ${!isManager ? 'disabled' : ''}>
+                                    <option value="Active" ${m.status == 'Active' ? 'selected' : ''}>正常 (Active)</option>
+                                    <option value="Suspended" ${m.status == 'Suspended' ? 'selected' : ''}>停權 (Suspended)</option>
+                                </select>
+                                <c:if test="${!isManager}">
+                                    <input type="hidden" name="status" value="${m.status}">
+                                    <p class="help-text">* 僅主管可修改</p>
+                                </c:if>
+                            </div>
+                            <div class="form-group">
+                                <label>會員等級 Level</label>
+                                <select name="membershipLevel" class="form-control" ${!isManager ? 'disabled' : ''}>
+                                    <option value="Regular" ${m.membershipLevel == 'Regular' ? 'selected' : ''}>一般會員 (Regular)</option>
+                                    <option value="VIP" ${m.membershipLevel == 'VIP' ? 'selected' : ''}>VIP 會員 (VIP)</option>
+                                </select>
+                                <c:if test="${!isManager}">
+                                    <input type="hidden" name="membershipLevel" value="${m.membershipLevel}">
+                                    <p class="help-text">* 僅主管可修改</p>
+                                </c:if>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>備註 Note</label>
+                            <textarea name="note" class="form-control" rows="3" style="resize: vertical;">${m.note}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=dashboard" class="btn btn-secondary">取消返回</a>
+                        <button type="submit" class="btn btn-primary">儲存更新</button>
+                    </div>
+                </form>
             </div>
         </div>
-
-        <div class="form-group">
-            <label>電子信箱 Email</label>
-            <input type="email" name="email" value="${m.email}" placeholder="example@mail.com">
-        </div>
-
-        <div class="form-group">
-            <label>電話 Phone</label>
-            <input type="tel" id="phoneInput" name="phone" value="${m.phone}" placeholder="例如：0912-345-678" maxlength="12">
-        </div>
-
-        <div class="section-title">帳戶權限</div>
-        
-        <%-- 🛡️ 權限控制：帳號狀態 --%>
-        <div class="form-group">
-            <label>帳號狀態 Status</label>
-            <select name="status" ${!isManager ? 'disabled' : ''}>
-                <option value="Active" ${m.status == 'Active' ? 'selected' : ''}>🟢 正常 (Active)</option>
-                <option value="Suspended" ${m.status == 'Suspended' ? 'selected' : ''}>🔴 停權 (Suspended)</option>
-            </select>
-            <c:if test="${!isManager}">
-                <input type="hidden" name="status" value="${m.status}">
-                <div style="font-size: 12px; color: #94a3b8; margin-top: 5px;">* 僅主管權限可修改狀態</div>
-            </c:if>
-        </div>
-
-        <%-- 🛡️ 權限控制：會員等級 --%>
-        <div class="form-group">
-            <label>會員等級 Membership Level</label>
-            <select name="membershipLevel" ${!isManager ? 'disabled' : ''}>
-                <option value="Regular" ${m.membershipLevel == 'Regular' ? 'selected' : ''}>👤 一般會員 (Regular)</option>
-                <option value="VIP" ${m.membershipLevel == 'VIP' ? 'selected' : ''}>💎 VIP 會員 (VIP)</option>
-            </select>
-            <c:if test="${!isManager}">
-                <input type="hidden" name="membershipLevel" value="${m.membershipLevel}">
-                <div style="font-size: 12px; color: #94a3b8; margin-top: 5px;">* 僅主管權限可修改等級</div>
-            </c:if>
-        </div>
-
-        <div class="form-group">
-            <label>管理員備註 Note</label>
-            <textarea name="note" rows="3" placeholder="請輸入備註">${m.note}</textarea>
-        </div>
-
-        <div class="btn-group">
-            <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=dashboard" class="btn-base btn-cancel">返回列表</a>
-            <button type="submit" class="btn-base btn-save">更新</button>
-        </div>
-    </form>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://npmcdn.com/flatpickr/dist/l10n/zh-tw.js"></script>
 <script>
+    // 日期選擇器初始化
     flatpickr("#birthdayPicker", {
-        locale: "zh_tw",
         dateFormat: "Y-m-d",
-        maxDate: "today",
-        disableMobile: "true"
+        maxDate: "today"
     });
 
+    // 電話格式自動補橫線
     const phoneInput = document.getElementById('phoneInput');
     if (phoneInput) {
         phoneInput.addEventListener('input', function (e) {
@@ -309,5 +211,6 @@
         });
     }
 </script>
+
 </body>
 </html>
