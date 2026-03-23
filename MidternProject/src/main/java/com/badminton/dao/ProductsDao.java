@@ -18,7 +18,7 @@ import com.badminton.model.ProductsBean;
 
 
 
-public class ProductDao {
+public class ProductsDao {
 	
 	
 	//全部
@@ -364,13 +364,5 @@ public class ProductDao {
 	}
 	
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
-		
-		
-		
-		
-	}
 
 }

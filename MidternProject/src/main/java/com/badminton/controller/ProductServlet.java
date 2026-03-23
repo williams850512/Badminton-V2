@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.badminton.dao.ProductDao;
+import com.badminton.dao.ProductsDao;
 import com.badminton.model.ProductsBean;
 import com.badminton.service.ProductService;
 

@@ -8,12 +8,12 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
 
-import com.badminton.dao.ProductDao;
+import com.badminton.dao.ProductsDao;
 import com.badminton.model.ProductsBean;
 
 public class ProductService {
 
-    private ProductDao productDao = new ProductDao();
+    private ProductsDao productDao = new ProductsDao();
 
     // 查全部
     public List<ProductsBean> showProduct() {
@@ -77,7 +77,7 @@ public class ProductService {
     }
     //模糊查詢
     public List<ProductsBean> searchProductsByKeyword(String keyword) {
-        ProductDao productDao = new ProductDao();
+        ProductsDao productDao = new ProductsDao();
         return productDao.searchProductsByKeyword(keyword);
     }
 
