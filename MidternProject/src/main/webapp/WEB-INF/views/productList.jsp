@@ -11,6 +11,10 @@
 <body>
 <%
     List<ProductBean> products = (List<ProductBean>) request.getAttribute("products");
+    String keyword = (String) request.getAttribute("keyword");
+    if (keyword == null) {
+        keyword = "";
+    }
 %>
 
     <div class="app-container">
@@ -25,6 +29,15 @@
                         <h2>商品列表</h2>
                         <a class="btn btn-primary" href="<%=request.getContextPath()%>/ProductServlet?action=productInsertForm">新增商品</a>
                     </div>
+
+                    <!-- 查詢表單 -->
+                    <form action="<%=request.getContextPath()%>/ProductServlet" method="get" style="margin: 20px 0; display: flex; gap: 10px; align-items: center;">
+                        <input type="hidden" name="action" value="searchProduct">
+                        <input type="text" name="keyword" value="<%= keyword %>" placeholder="請輸入商品名稱、分類或品牌"
+                               style="padding: 8px; width: 300px; border: 1px solid #ccc; border-radius: 6px;">
+                        <button type="submit" class="btn btn-primary">查詢</button>
+                        <a href="<%=request.getContextPath()%>/ProductServlet?action=productList" class="btn btn-secondary">顯示全部</a>
+                    </form>
 
                     <table class="table-custom">
                         <thead>
@@ -78,7 +91,7 @@
                             } else {
                         %>
                             <tr>
-                                <td colspan="8" style="text-align: center;">目前沒有商品資料</td>
+                                <td colspan="9" style="text-align: center;">目前沒有商品資料</td>
                             </tr>
                         <%
                             }

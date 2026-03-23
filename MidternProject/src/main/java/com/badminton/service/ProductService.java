@@ -75,6 +75,11 @@ public class ProductService {
 
         productDao.insertProduct(productBean);
     }
+    //模糊查詢
+    public List<ProductBean> searchProductsByKeyword(String keyword) {
+        ProductDao productDao = new ProductDao();
+        return productDao.searchProductsByKeyword(keyword);
+    }
 
     // 修改
     public void updateProduct(HttpServletRequest request) {

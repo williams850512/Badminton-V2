@@ -92,7 +92,72 @@ public class ProductDao {
 		return products;
 	} 
 	
-	
+	// 模糊查詢
+	public List<ProductBean> searchProductsByKeyword(String keyword) {
+	    
+	    String sql = "SELECT * FROM Products "
+	               + "WHERE product_name LIKE ? "
+	               + "OR category LIKE ? "
+	               + "OR brand LIKE ?";
+
+	    List<ProductBean> products = new ArrayList<ProductBean>();
+	    PreparedStatement preparedStatement = null;
+	    Connection connection = null;
+	    ResultSet resultSet = null;
+
+	    try {
+	        Context initContext = new InitialContext();
+	        DataSource ds = (DataSource) initContext.lookup("java:comp/env/jdbc/BadmintonDB");
+	        connection = ds.getConnection();
+
+	        preparedStatement = connection.prepareStatement(sql);
+
+	        String searchKeyword = "%" + keyword + "%";
+	        preparedStatement.setString(1, searchKeyword);
+	        preparedStatement.setString(2, searchKeyword);
+	        preparedStatement.setString(3, searchKeyword);
+
+	        resultSet = preparedStatement.executeQuery();
+
+	        while (resultSet.next()) {
+	            ProductBean product = new ProductBean();
+
+	            product.setProductId(resultSet.getInt("product_id"));
+	            product.setProductName(resultSet.getString("product_name"));
+	            product.setCategory(resultSet.getString("category"));
+	            product.setBrand(resultSet.getString("brand"));
+	            product.setPrice(resultSet.getBigDecimal("price"));
+	            product.setStockQty(resultSet.getInt("stock_qty"));
+	            product.setDescription(resultSet.getString("description"));
+	            product.setImageUrl(resultSet.getString("image_url"));
+	            product.setStatus(resultSet.getString("status"));
+	            product.setProductCreateAt(resultSet.getDate("created_at"));
+
+	            products.add(product);
+	        }
+
+	    } catch (NamingException e) {
+	        e.printStackTrace();
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (resultSet != null) {
+	                resultSet.close();
+	            }
+	            if (preparedStatement != null) {
+	                preparedStatement.close();
+	            }
+	            if (connection != null) {
+	                connection.close();
+	            }
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return products;
+	}
 	
 	
 	

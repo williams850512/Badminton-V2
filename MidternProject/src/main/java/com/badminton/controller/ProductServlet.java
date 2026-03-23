@@ -55,6 +55,14 @@ public class ProductServlet extends HttpServlet {
 	            request.setAttribute("products", products);
 	            request.getRequestDispatcher("/WEB-INF/views/productList.jsp").forward(request, response);
 	            break;
+	            
+	        case "searchProduct":
+	            String keyword = request.getParameter("keyword");
+	            List<ProductBean> searchResults = productService.searchProductsByKeyword(keyword);
+	            request.setAttribute("products", searchResults);
+	            request.setAttribute("keyword", keyword);
+	            request.getRequestDispatcher("/WEB-INF/views/productList.jsp").forward(request, response);
+	            break;
 
 	        case "productInsertForm":
 	            request.getRequestDispatcher("/WEB-INF/views/productInsert.jsp").forward(request, response);
