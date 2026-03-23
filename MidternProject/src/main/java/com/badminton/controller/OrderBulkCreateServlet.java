@@ -98,7 +98,7 @@ public class OrderBulkCreateServlet extends HttpServlet {
                 System.out.println("✅ 批次大交易成功！共新增了 " + orderIndices.length + " 筆訂單。");
 
                 // 成功後直接回到列表
-                response.sendRedirect(request.getContextPath() + "/orderList");
+                response.sendRedirect(request.getContextPath() + "/views/orderList");
 
             } catch (Exception e) {
                 // ❌ 只要有任何一張訂單、任何一項商品出錯，全部退回！
