@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -71,10 +73,10 @@
         	<td>${b.memberName}</td>
         	<td>${b.courtId}</td>
         	<td>${b.bookingDate}</td>
-        	<td>${b.startTime}</td>
-        	<td>${b.endTime}</td>
+        	<td>${fn:substring(b.startTime, 0, 5)}</td>
+        	<td>${fn:substring(b.endTime, 0, 5)}</td>
         	<td>${b.status}</td>
-        	<td>${b.totalAmount}</td>
+        	<td>$<fmt:formatNumber value="${b.totalAmount}" pattern="#,###" /></td>
         	<td>${b.note}</td>
         	<td>
         		<form action="${pageContext.request.contextPath}/BookingsServlet?action=updateStatus" method="post" style="display:inline;">

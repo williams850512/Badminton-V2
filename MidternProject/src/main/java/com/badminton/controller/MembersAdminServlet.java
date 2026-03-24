@@ -63,6 +63,21 @@ public class MembersAdminServlet extends HttpServlet {
             case "showAdminEdit":
                 processShowAdminEdit(request, response);
                 break;
+            case "searchAdmin":
+                if (currentLogin != null && "manager".equals(currentLogin.getRole())) {
+                    String keyword = request.getParameter("keyword");
+                    java.util.List<MembersAdminBean> adminList;
+                    if (keyword != null && !keyword.trim().isEmpty()) {
+                        adminList = adminService.searchAdmins(keyword.trim());
+                    } else {
+                        adminList = adminService.getAllAdmins();
+                    }
+                    request.setAttribute("adminList", adminList);
+                    request.getRequestDispatcher("/WEB-INF/views/members_adminList.jsp").forward(request, response);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=no_permission");
+                }
+                break;
             case "deleteAdmin": 
                 processAdminDelete(request, response);
                 break;
@@ -220,6 +235,7 @@ public class MembersAdminServlet extends HttpServlet {
             a.setRole(request.getParameter("role"));
             a.setPhone(request.getParameter("phone"));
             a.setEmail(request.getParameter("email"));
+            a.setNote(request.getParameter("note"));
             a.setStatus("active");
 
             if (adminService.addAdmin(a)) {

@@ -48,7 +48,9 @@ public class OrderDAO {
 	 */
 	public List<OrderBean> findAll() {
 		List<OrderBean> list = new ArrayList<>();
-		String sql = "SELECT * FROM orders ORDER BY created_at DESC";
+		String sql = "SELECT o.*, m.full_name as member_name FROM orders o " +
+		             "LEFT JOIN Members m ON o.member_id = m.member_id " +
+		             "ORDER BY o.created_at DESC";
 		
 		try (Connection conn = DBConnection.getConnection();
 			 PreparedStatement ps = conn.prepareStatement(sql);
@@ -76,7 +78,9 @@ public class OrderDAO {
 			
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) { 
-					return mapRow(rs);
+					OrderBean o = mapRow(rs);
+					// 單筆查詢若沒加入 JOIN，可由前端或這裡再補發查詢，但為求簡單可直接讓它略過 member_name或另外查
+					return o;
 				}
 			}
 		} catch (SQLException e) {
@@ -273,9 +277,10 @@ public class OrderDAO {
 	public List<OrderBean> findByAdvancedSearch(String keyword, Integer minPrice, Integer maxPrice) {
 		List<OrderBean> list = new ArrayList<>();
 		StringBuilder sql = new StringBuilder(
-			"SELECT DISTINCT o.order_id, o.member_id, o.order_date, o.total_amount, " +
+			"SELECT DISTINCT o.order_id, o.member_id, m.full_name as member_name, o.order_date, o.total_amount, " +
 			"o.status, o.payment_type, o.note, o.created_at " +
 			"FROM Orders o " +
+			"LEFT JOIN Members m ON o.member_id = m.member_id " +
 			"LEFT JOIN OrderItems oi ON o.order_id = oi.order_id " +
 			"LEFT JOIN Products p ON oi.product_id = p.product_id " +
 			"WHERE 1=1 "
@@ -396,6 +401,11 @@ public class OrderDAO {
 		OrderBean o = new OrderBean();
 		o.setOrderId(rs.getInt("order_id"));
 		o.setMemberId(rs.getInt("member_id"));
+		try {
+			o.setMemberName(rs.getString("member_name"));
+		} catch (SQLException e) {
+			// 如果查詢結果沒有 member_name 欄位則忽略
+		}
 		if (rs.getTimestamp("order_date") != null)
 			o.setOrderDate(rs.getTimestamp("order_date").toLocalDateTime());
 		o.setTotalAmount(rs.getInt("total_amount"));

@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List, java.util.Map" %>
-<%@ page import="com.badminton.model.OrderBean, com.badminton.model.OrderItemBean" %>
+<%@ page import="com.badminton.model.*" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <!DOCTYPE html>
 <html lang="zh-TW">
@@ -167,7 +167,7 @@ if (orderList != null) {
                             <th width="40"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
                             <th width="40"></th>
                             <th>訂單 ID</th>
-                            <th>會員 ID</th>
+                            <th>會員名稱</th>
                             <th>總金額</th>
                             <th>付款方式</th>
                             <th>狀態</th>
@@ -185,7 +185,7 @@ if (orderList != null) {
                         <td style="text-align: center;" onclick="event.stopPropagation();"><input type="checkbox" class="order-checkbox" value="<%=order.getOrderId()%>"></td>
                         <td style="text-align: center;"><span class="expand-arrow" id="arr-<%=order.getOrderId()%>">▶</span></td>
                         <td style="font-weight:bold; color:#3498db;">#<%=order.getOrderId()%></td>
-                        <td><%=order.getMemberId()%></td>
+                        <td><%=order.getMemberName() != null ? order.getMemberName() : order.getMemberId()%></td>
                         <td id="td-total-<%=order.getOrderId()%>" style="font-weight:bold; color:#28a745;">$<%=String.format("%,d", order.getTotalAmount())%></td>
                         <td id="td-pay-<%=order.getOrderId()%>"><%=order.getPaymentType()%></td>
                         <td><span class="badge <%=badgeCls%>" id="badge-<%=order.getOrderId()%>"><%=stLabel%></span></td>

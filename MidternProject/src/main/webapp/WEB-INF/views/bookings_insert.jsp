@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page import="java.time.LocalDate" %>
 <%
     // 在 Server 端抓取伺服器當下的日期 (格式直接就是 YYYY-MM-DD)
@@ -92,7 +93,7 @@
                 <select name="startTime" class="form-control" style="width: 300px;" required>
                     <option value="">-- 請選擇開始時間 --</option>
                     <c:forEach var="slot" items="${AllTimeSlots}">
-                        <option value="${slot.startTime}"> ${slot.startTime} </option>
+                        <option value="${slot.startTime}"> ${fn:substring(slot.startTime, 0, 5)} </option>
                     </c:forEach>
                 </select>
             </div>
@@ -102,7 +103,7 @@
                 <select name="endTime" class="form-control" style="width: 300px;" required>
                     <option value="">-- 請選擇結束時間 --</option>
                     <c:forEach var="slot" items="${AllTimeSlots}">
-                        <option value="${slot.endTime}"> ${slot.endTime} </option>
+                        <option value="${slot.endTime}"> ${fn:substring(slot.endTime, 0, 5)} </option>
                     </c:forEach>
                 </select>
             </div>

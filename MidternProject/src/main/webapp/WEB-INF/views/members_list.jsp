@@ -42,7 +42,7 @@
         <jsp:include page="/WEB-INF/backendHeader.jsp" />
 
         <div class="content-body">
-            <h2 style="margin-bottom: 20px; color: #333;">🏸 會員管理中心</h2>
+            <h2 style="margin-bottom: 20px; color: #333;">會員管理中心</h2>
             
             <div class="card">
                 <div class="search-bar">

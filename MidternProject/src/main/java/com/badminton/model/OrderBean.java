@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public class OrderBean {
 	private Integer orderId;
 	private Integer memberId;
+	private String memberName; // 新增會員名稱欄位
 	private LocalDateTime orderDate;
 	private Integer totalAmount;
 	private String status;
@@ -45,6 +46,14 @@ public class OrderBean {
 
 	public void setMemberId(Integer memberId) {
 		this.memberId = memberId;
+	}
+
+	public String getMemberName() {
+		return memberName;
+	}
+
+	public void setMemberName(String memberName) {
+		this.memberName = memberName;
 	}
 
 	public LocalDateTime getOrderDate() {
@@ -97,9 +106,9 @@ public class OrderBean {
 
 	@Override
 	public String toString() {
-		return "OrderBean [orderId=" + orderId + ", memberId=" + memberId + ", orderDate=" + orderDate
-				+ ", totalAmount=" + totalAmount + ", status=" + status + ", paymentType=" + paymentType + ", note="
-				+ note + ", createdAt=" + createdAt + "]";
+		return "OrderBean [orderId=" + orderId + ", memberId=" + memberId + ", memberName=" + memberName 
+				+ ", orderDate=" + orderDate + ", totalAmount=" + totalAmount + ", status=" + status 
+				+ ", paymentType=" + paymentType + ", note=" + note + ", createdAt=" + createdAt + "]";
 	}
 	
 	
