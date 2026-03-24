@@ -19,6 +19,8 @@ public class BookingsBean implements java.io.Serializable {
 	private String note;
 	private Timestamp createdAt;
 	private String memberName; // 為了關聯顯示會員姓名加上的屬性
+	private String venueName;  // 為了關聯顯示球館名稱加上的屬性
+	private String courtName;  // 為了關聯顯示場地名稱加上的屬性
 	
 	public BookingsBean() {	
 	}
@@ -34,6 +36,8 @@ public class BookingsBean implements java.io.Serializable {
 	public String getNote() {return note;}
 	public Timestamp getCreatedAt() {return createdAt;}
 	public String getMemberName() {return memberName;}
+	public String getVenueName() {return venueName;}
+	public String getCourtName() {return courtName;}
 
 	public void setBookingId(Integer bookingId) {this.bookingId = bookingId;}
 	public void setMemberId(Integer memberId) {this.memberId = memberId;}
@@ -46,6 +50,8 @@ public class BookingsBean implements java.io.Serializable {
 	public void setNote(String note) {this.note = note;}
 	public void setCreatedAt(Timestamp createdAt) {this.createdAt = createdAt;}
 	public void setMemberName(String memberName) {this.memberName = memberName;}
+	public void setVenueName(String venueName) {this.venueName = venueName;}
+	public void setCourtName(String courtName) {this.courtName = courtName;}
 
 	@Override
 	public String toString() {

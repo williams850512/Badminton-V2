@@ -73,12 +73,19 @@
             </div>
             
             <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: inline-block; width: 120px;">選擇場地：</label>
-                <select name="courtId" class="form-control" style="width: 300px;" required>
-                    <option value="">-- 請選擇想預約的場地 --</option>
-                    <c:forEach var="c" items="${AllCourts}">
-                        <option value="${c.courtId}">${c.courtName} (場地ID: ${c.courtId})</option>
+                <label style="display: inline-block; width: 120px;">選擇球館：</label>
+                <select id="venueSelect" class="form-control" style="width: 300px;" required>
+                    <option value="">-- 請選擇球館 --</option>
+                    <c:forEach var="v" items="${AllVenues}">
+                        <option value="${v.venueId}">${v.venueName}</option>
                     </c:forEach>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="display: inline-block; width: 120px;">選擇場地：</label>
+                <select name="courtId" id="courtSelect" class="form-control" style="width: 300px;" required disabled>
+                    <option value="">-- 請先選擇球館 --</option>
                 </select>
             </div>
             
@@ -132,10 +139,45 @@
 <script>
     // 監聽網頁載入完成
     document.addEventListener("DOMContentLoaded", function() {
+        const venueSelect = document.getElementById('venueSelect');
+        const courtSelect = document.getElementById('courtSelect');
         const startTimeSelect = document.querySelector('select[name="startTime"]');
         const endTimeSelect = document.querySelector('select[name="endTime"]');
         const amountInput = document.querySelector('input[name="totalAmount"]');
         const HOURLY_RATE = 400; // 設定每小時的費率為 400 元
+
+        // ===== 球館切換 → AJAX 載入場地 =====
+        venueSelect.addEventListener('change', function() {
+            const venueId = this.value;
+
+            // 清空場地選單並禁用
+            courtSelect.innerHTML = '<option value="">-- 載入中... --</option>';
+            courtSelect.disabled = true;
+
+            if (!venueId) {
+                courtSelect.innerHTML = '<option value="">-- 請先選擇球館 --</option>';
+                return;
+            }
+
+            // 發送 AJAX 請求
+            fetch('${pageContext.request.contextPath}/BookingsServlet?action=getCourtsByVenue&venueId=' + venueId)
+                .then(response => response.json())
+                .then(courts => {
+                    courtSelect.innerHTML = '<option value="">-- 請選擇場地 --</option>';
+                    courts.forEach(c => {
+                        const option = document.createElement('option');
+                        option.value = c.courtId;
+                        option.textContent = c.courtName;
+                        courtSelect.appendChild(option);
+                    });
+                    courtSelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('載入場地失敗:', error);
+                    courtSelect.innerHTML = '<option value="">-- 載入失敗，請重試 --</option>';
+                });
+        });
+        // =====================================
 
         // 建立一個共用的計算函數
         function calculateAmount() {

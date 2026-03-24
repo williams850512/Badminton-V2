@@ -223,7 +223,12 @@ public class BookingsDAOImpl implements BookingsDAO {
 	public List<BookingsBean> getAll() {
 		
 		List<BookingsBean> list = new ArrayList<>();
-		String sql = "SELECT b.*, m.full_name AS member_name FROM Bookings b JOIN Members m ON b.member_id = m.member_id ORDER BY b.booking_id DESC";
+		String sql = "SELECT b.*, m.full_name AS member_name, v.venue_name, c.court_name "
+				+ "FROM Bookings b "
+				+ "JOIN Members m ON b.member_id = m.member_id "
+				+ "JOIN Courts c ON b.court_id = c.court_id "
+				+ "JOIN Venues v ON c.venue_id = v.venue_id "
+				+ "ORDER BY b.booking_id DESC";
 		
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -250,6 +255,8 @@ public class BookingsDAOImpl implements BookingsDAO {
 				booking.setNote(rs.getString("note"));
 				booking.setCreatedAt(rs.getTimestamp("created_at"));
 				booking.setMemberName(rs.getString("member_name"));
+				booking.setVenueName(rs.getString("venue_name"));
+				booking.setCourtName(rs.getString("court_name"));
 				
 				list.add(booking);
 			}
@@ -270,5 +277,71 @@ public class BookingsDAOImpl implements BookingsDAO {
 		return list;
 	}
 	
+	@Override
+	public List<BookingsBean> searchByKeyword(String keyword) {
+		List<BookingsBean> list = new ArrayList<>();
+		// 模糊比對：會員姓名、預約日期(轉字串)、狀態
+		String sql = "SELECT b.*, m.full_name AS member_name, v.venue_name, c.court_name "
+				+ "FROM Bookings b "
+				+ "JOIN Members m ON b.member_id = m.member_id "
+				+ "JOIN Courts c ON b.court_id = c.court_id "
+				+ "JOIN Venues v ON c.venue_id = v.venue_id "
+				+ "WHERE m.full_name LIKE ? "
+				+ "OR CONVERT(VARCHAR, b.booking_date, 23) LIKE ? "
+				+ "OR b.status LIKE ? "
+				+ "ORDER BY b.booking_id DESC";
+		
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		
+		try {
+			Context context = new InitialContext();
+			DataSource ds = (DataSource) context.lookup("java:/comp/env/jdbc/BadmintonDB");
+			conn = ds.getConnection();
+			stmt = conn.prepareStatement(sql);
+			
+			String likePattern = "%" + keyword + "%";
+			stmt.setString(1, likePattern);
+			stmt.setString(2, likePattern);
+			stmt.setString(3, likePattern);
+			
+			rs = stmt.executeQuery();
+			
+			while(rs.next()) {
+				BookingsBean booking = new BookingsBean();
+				
+				booking.setBookingId(rs.getInt("booking_id"));
+				booking.setMemberId(rs.getInt("member_id"));
+				booking.setCourtId(rs.getInt("court_id"));
+				booking.setBookingDate(rs.getDate("booking_date"));
+				booking.setStartTime(rs.getTime("start_time"));
+				booking.setEndTime(rs.getTime("end_time"));
+				booking.setStatus(rs.getString("status"));
+				booking.setTotalAmount(rs.getBigDecimal("total_amount"));
+				booking.setNote(rs.getString("note"));
+				booking.setCreatedAt(rs.getTimestamp("created_at"));
+				booking.setMemberName(rs.getString("member_name"));
+				booking.setVenueName(rs.getString("venue_name"));
+				booking.setCourtName(rs.getString("court_name"));
+				
+				list.add(booking);
+			}
+			
+		} catch (NamingException | SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+			}
+			if(stmt != null) {
+				try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+			}
+			if(conn != null) {
+				try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+			}
+		}
+		return list;
+	}
 
 }

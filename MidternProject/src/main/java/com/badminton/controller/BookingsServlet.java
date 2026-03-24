@@ -25,6 +25,36 @@ public class BookingsServlet extends HttpServlet {
 		
 		String action = request.getParameter("action");
 		
+		// ===== AJAX：根據球館ID回傳該球館的場地 JSON =====
+		if ("getCourtsByVenue".equals(action)) {
+			response.setContentType("application/json; charset=UTF-8");
+			String venueIdStr = request.getParameter("venueId");
+			try {
+				int venueId = Integer.parseInt(venueIdStr);
+				com.badminton.dao.CourtsDAO cDao = new com.badminton.dao.CourtsDAOImpl();
+				List<com.badminton.model.CourtsBean> courts = cDao.findByVenueId(venueId);
+				
+				// 手動拼 JSON 陣列
+				StringBuilder json = new StringBuilder("[");
+				for (int i = 0; i < courts.size(); i++) {
+					com.badminton.model.CourtsBean c = courts.get(i);
+					json.append("{\"courtId\":").append(c.getCourtId())
+						.append(",\"courtName\":\"").append(c.getCourtName().replace("\"", "\\\"")).append("\"}");
+					if (i < courts.size() - 1) {
+						json.append(",");
+					}
+				}
+				json.append("]");
+				
+				response.getWriter().write(json.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+				response.getWriter().write("[]");
+			}
+			return;
+		}
+		// ================================================
+		
 		if ("addForm".equals(action)) {
 			try {
 				com.badminton.dao.VenuesDAO vDao = new com.badminton.dao.VenuesDAOImpl();
@@ -61,8 +91,19 @@ public class BookingsServlet extends HttpServlet {
 		try {
 			BookingsDAO dao = new BookingsDAOImpl();
 			
-			// 預設列出所有預約
-			List<BookingsBean> bookingsList = dao.getAll();
+			// 檢查是否有搜尋關鍵字
+			String searchKeyword = request.getParameter("searchKeyword");
+			List<BookingsBean> bookingsList;
+			
+			if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+				// 模糊搜尋
+				bookingsList = dao.searchByKeyword(searchKeyword.trim());
+				request.setAttribute("searchKeyword", searchKeyword.trim());
+				request.setAttribute("searchMsg", "搜尋「" + searchKeyword.trim() + "」，共找到 " + bookingsList.size() + " 筆結果");
+			} else {
+				// 預設列出所有預約
+				bookingsList = dao.getAll();
+			}
 			
 			request.setAttribute("AllBookings", bookingsList);
 			request.getRequestDispatcher("/WEB-INF/views/bookings_list.jsp").forward(request, response);

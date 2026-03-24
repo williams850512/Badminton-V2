@@ -16,7 +16,7 @@
             <jsp:include page="/WEB-INF/backendHeader.jsp" />
 
             <div class="content-body">
-                <h2 style="margin-bottom: 20px; color: #333;">隔壁老謙高級羽球-場館列表</h2>
+                <h2 style="margin-bottom: 20px; color: #333;">隔壁老謙高級羽球-球館列表</h2>
                 
                 <div class="card">
             
@@ -47,15 +47,15 @@
 	<!-- 加入「新增場館」的按鈕，連結到 Servlet 並帶上 action=addForm 參數 -->
 	<div style="margin-bottom: 15px;">
 		<a href="${pageContext.request.contextPath}/VenuesServlet?action=addForm" class="btn btn-primary">
-		   ➕ 新增場館
+		   ➕ 新增球館
 		</a>
 	</div>
 	
 	<table class="table-custom">
 		<tr>
-			<th>場館編號</th>
+			<th>球館編號</th>
 			<th>球館名稱</th>
-			<th>場館地址</th>
+			<th>球館地址</th>
 			<th>聯絡電話</th>
 			<th>目前狀態</th>
 			<th>操作</th>

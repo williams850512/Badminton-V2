@@ -21,5 +21,8 @@ public interface BookingsDAO {
 	
 	//5.查詢所有預約
 	List<BookingsBean> getAll();
+	
+	//6.模糊搜尋預約 (會員姓名/預約日期/狀態)
+	List<BookingsBean> searchByKeyword(String keyword);
 
 }

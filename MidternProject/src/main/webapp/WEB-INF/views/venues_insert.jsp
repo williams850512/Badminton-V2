@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>羽球預約管理系統 - 新增場館</title>
+<title>羽球預約管理系統 - 新增球館</title>
 <jsp:include page="/WEB-INF/backendHead.jsp" />
 </head>
 <body>
@@ -15,7 +15,7 @@
             <jsp:include page="/WEB-INF/backendHeader.jsp" />
 
             <div class="content-body">
-                <h2 style="margin-bottom: 20px; color: #333;">新增場館</h2>
+                <h2 style="margin-bottom: 20px; color: #333;">新增球館</h2>
                 
                 <div class="card">
     

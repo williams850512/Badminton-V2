@@ -44,18 +44,33 @@
     </div>
 </c:if>
 
-<!-- 加入「新增預約」的按鈕，連結到 Servlet 並帶上 action=addForm 參數 -->
-	<div style="margin-bottom: 15px;">
+<!-- 加入「新增預約」的按鈕和搜尋列 -->
+	<div style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
 		<a href="${pageContext.request.contextPath}/BookingsServlet?action=addForm" class="btn btn-primary">
 		   ➕ 新增預約
-		   </a>
+		</a>
+		
+		<form action="${pageContext.request.contextPath}/BookingsServlet" method="get" style="display: flex; align-items: center; gap: 8px; margin: 0;">
+			<input type="text" name="searchKeyword" class="form-control" style="width: 250px;" placeholder="搜尋會員姓名 / 日期 / 狀態" value="${searchKeyword}" required>
+			<button type="submit" class="btn btn-info" style="background-color: #17a2b8; color: white;">🔍 搜尋</button>
+			<c:if test="${not empty searchKeyword}">
+				<a href="${pageContext.request.contextPath}/BookingsServlet" class="btn btn-secondary" style="background-color: #6c757d; color: white; text-decoration: none;">顯示全部</a>
+			</c:if>
+		</form>
     </div>
+    
+    <c:if test="${not empty searchMsg}">
+    	<div style="padding: 10px; margin-bottom: 15px; border-radius: 4px; background-color: #d1ecf1; color: #0c5460;">
+    		${searchMsg}
+    	</div>
+    </c:if>
     
 	<table class="table-custom">
 		<tr>
 			<th>預約編號</th>
 			<th>會員姓名</th>
-			<th>場館編號</th>
+			<th>球館名稱</th>
+			<th>場地名稱</th>
 			<th>預約日期</th>
 			<th>開始時間</th>
 			<th>結束時間</th>
@@ -71,7 +86,8 @@
         <tr>
         	<td>${b.bookingId}</td>
         	<td>${b.memberName}</td>
-        	<td>${b.courtId}</td>
+        	<td>${b.venueName}</td>
+        	<td>${b.courtName}</td>
         	<td>${b.bookingDate}</td>
         	<td>${fn:substring(b.startTime, 0, 5)}</td>
         	<td>${fn:substring(b.endTime, 0, 5)}</td>

@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>羽球預約管理系統 - 球場列表</title>
+<title>羽球預約管理系統 - 場地列表</title>
 <jsp:include page="/WEB-INF/backendHead.jsp" />
 </head>
 <body>
@@ -23,17 +23,17 @@
 	<!-- 成功訊息提示 -->
 <c:if test="${param.message == 'insertSuccess'}">
     <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
-        ✅ 新增場館成功！
+        ✅ 新增場地成功！
     </div>
 </c:if>
 <c:if test="${param.message == 'updateSuccess'}">
     <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
-        ✅ 修改場館成功！
+        ✅ 修改場地成功！
     </div>
 </c:if>
 <c:if test="${param.message == 'deleteSuccess'}">
     <div style="background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
-        ⚠️ 場館已停用！
+        ⚠️ 場地已停用！
     </div>
 </c:if>
      <!-- 失敗訊息提示 -->
@@ -49,7 +49,7 @@
 		</a>
 		
 		<a href="${pageContext.request.contextPath}/VenuesServlet" class="btn btn-warning" style="margin-left: 10px;">
-		 	⬅️ 返回場館列表
+		 	⬅️ 返回球館列表
 		</a>
 	</div>
 <table class="table-custom">
