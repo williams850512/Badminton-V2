@@ -112,7 +112,7 @@
                                 <td>
 								    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
 								        <a href="<%=request.getContextPath()%>/AnnouncementServlet?action=edit&id=<%= bean.getAnnouncementId() %>" class="btn btn-warning" style="padding: 4px 8px; font-size: 12px;">編輯</a>
-								        <a href="<%=request.getContextPath()%>/AnnouncementServlet?action=delete&id=<%= bean.getAnnouncementId() %>" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="return confirm('確定要刪除嗎？');">刪除</a>
+								        <a href="<%=request.getContextPath()%>/AnnouncementServlet?action=delete&id=<%= bean.getAnnouncementId() %>" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="return confirm('確定要刪除嗎？ ヾ(;ﾟ;Д;ﾟ;)ﾉﾞ');">刪除</a>
 								    </div>
 								</td>
                             </tr>
