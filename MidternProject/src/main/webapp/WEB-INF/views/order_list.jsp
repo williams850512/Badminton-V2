@@ -186,7 +186,7 @@ if (orderList != null) {
                         <td style="text-align: center;"><span class="expand-arrow" id="arr-<%=order.getOrderId()%>">▶</span></td>
                         <td style="font-weight:bold; color:#3498db;">#<%=order.getOrderId()%></td>
                         <td><%=order.getMemberId()%></td>
-                        <td style="font-weight:bold; color:#28a745;">$<%=String.format("%,d", order.getTotalAmount())%></td>
+                        <td id="td-total-<%=order.getOrderId()%>" style="font-weight:bold; color:#28a745;">$<%=String.format("%,d", order.getTotalAmount())%></td>
                         <td id="td-pay-<%=order.getOrderId()%>"><%=order.getPaymentType()%></td>
                         <td><span class="badge <%=badgeCls%>" id="badge-<%=order.getOrderId()%>"><%=stLabel%></span></td>
                         <td style="font-size: 0.8rem; color:#666;"><%=order.getCreatedAt() != null ? order.getCreatedAt().format(df) : "-"%></td>
@@ -377,7 +377,8 @@ function updateOrder(orderId) {
     fd.append('note', note || '');
 
     fetch('<%=request.getContextPath()%>/orderAction', { method:'POST', body:fd })
-    .then(() => {
+    .then(r => r.json())
+    .then(data => {
         const badgeMap = {
             'PENDING': {cls: 'bg-P', txt: '待處理'}, 'PROCESSING': {cls: 'bg-PR', txt: '理貨中'},
             'READY': {cls: 'bg-R', txt: '待取貨'}, 'COMPLETED': {cls: 'bg-CPL', txt: '已完成'}, 'CANCELLED': {cls: 'bg-C', txt: '已取消'}
@@ -389,6 +390,12 @@ function updateOrder(orderId) {
         
         const payTd = document.getElementById('td-pay-' + orderId);
         if (payTd) payTd.textContent = paymentType;
+
+        // 即時更新總金額
+        if (data.totalAmount !== undefined) {
+            const totalTd = document.getElementById('td-total-' + orderId);
+            if (totalTd) totalTd.textContent = '$' + data.totalAmount.toLocaleString('en-US');
+        }
 
         if (noteEl) {
             noteEl.setAttribute('readonly', 'true');
@@ -484,6 +491,7 @@ function deleteItem(itemId, orderId) {
     const fd = new FormData();
     fd.append('action', 'deleteItem');
     fd.append('itemId', itemId);
+    fd.append('orderId', orderId);
 
     fetch('<%=request.getContextPath()%>/orderItemAction', {method:'POST', body:fd})
     .then(r => r.json())
@@ -491,6 +499,11 @@ function deleteItem(itemId, orderId) {
         if (data.success) {
             const row = document.getElementById('irow-' + itemId);
             if (row) row.remove();
+            // 即時更新總金額
+            if (data.totalAmount !== undefined) {
+                const totalTd = document.getElementById('td-total-' + orderId);
+                if (totalTd) totalTd.textContent = '$' + data.totalAmount.toLocaleString('en-US');
+            }
             showToast('🗑 明細已刪除', 'success');
         } else {
             showToast('❌ ' + data.message, 'error');

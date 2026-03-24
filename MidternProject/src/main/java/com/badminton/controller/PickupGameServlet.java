@@ -156,6 +156,22 @@ public class PickupGameServlet extends HttpServlet {
         List<CourtBean> courts = gameService.getAllCourts();
         request.setAttribute("courts", courts);
         request.setAttribute("timeSlots", gameService.getAllTimeSlots());
+        
+        // ===== 關鍵字模糊查詢會員功能 =====
+        String searchKeyword = request.getParameter("searchKeyword");
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            com.badminton.service.MembersService memberService = new com.badminton.service.MembersService();
+            List<MembersBean> foundMembers = memberService.searchMembers(searchKeyword.trim());
+            
+            if (foundMembers != null && !foundMembers.isEmpty()) {
+                request.setAttribute("foundMembers", foundMembers);
+                request.setAttribute("searchMsg", "搜尋成功：找到 " + foundMembers.size() + " 位符合的會員，請在下方確認並選取。");
+            } else {
+                request.setAttribute("searchMsg", "找不到符合該關鍵字的會員！");
+            }
+        }
+        // ==================================
+        
         request.getRequestDispatcher("/WEB-INF/views/create_game.jsp").forward(request, response);
     }
     private void createGame(HttpServletRequest request, HttpServletResponse response)
@@ -168,6 +184,15 @@ public class PickupGameServlet extends HttpServlet {
             return;
         }
         try {
+            // 從表單接收主揪會員ID
+            String hostMemberIdStr = request.getParameter("hostMemberId");
+            int actualHostId;
+            if (hostMemberIdStr != null && !hostMemberIdStr.trim().isEmpty()) {
+                actualHostId = Integer.parseInt(hostMemberIdStr.trim());
+            } else {
+                actualHostId = hostId; // fallback 用登入者本人
+            }
+            
             int courtId = Integer.parseInt(request.getParameter("courtId"));
             String gameDate = request.getParameter("gameDate");
             String startTime = request.getParameter("startTime");
@@ -181,8 +206,8 @@ public class PickupGameServlet extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/views/create_game.jsp").forward(request, response);
                 return;
             }
-            // 使用從 session 動態抓取的 hostId 建立揪團
-            boolean success = gameService.createAndJoin(hostId, courtId, gameDate, startTime, endTime, totalMaxPlayers);
+            // 使用從表單取得的主揪會員 ID 建立揪團
+            boolean success = gameService.createAndJoin(actualHostId, courtId, gameDate, startTime, endTime, totalMaxPlayers);
             if (success) {
                 Integer latestGameId = gameService.getLatestGameId();
                 response.sendRedirect(request.getContextPath() + "/pickup?action=getSignupList&gameId=" + latestGameId);
@@ -265,15 +290,30 @@ public class PickupGameServlet extends HttpServlet {
         // 把當前登入者的 memberId 傳回 JSP
         HttpSession session = request.getSession();
         request.setAttribute("sessionMemberId", getLoggedInMemberId(session));
+        
+        // ===== 代客報名用：關鍵字模糊查詢會員 =====
+        String searchKeyword = request.getParameter("searchKeyword");
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            com.badminton.service.MembersService memberService = new com.badminton.service.MembersService();
+            List<com.badminton.model.MembersBean> foundMembers = memberService.searchMembers(searchKeyword.trim());
+            if (foundMembers != null && !foundMembers.isEmpty()) {
+                request.setAttribute("proxyFoundMembers", foundMembers);
+                request.setAttribute("proxySearchMsg", "搜尋成功：找到 " + foundMembers.size() + " 位符合的會員");
+            } else {
+                request.setAttribute("proxySearchMsg", "找不到符合該關鍵字的會員！");
+            }
+        }
+        // ========================================
+        
         request.getRequestDispatcher("/WEB-INF/views/signup_list.jsp").forward(request, response);
     }
-    // 主揪踢人
+    // 主揪踢人 (管理員也可以踢)
     private void kickMember(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        Integer hostId = getLoggedInMemberId(session);
+        Integer operatorId = getLoggedInMemberId(session);
         
-        if (hostId == null) {
+        if (operatorId == null) {
             redirectForLogin(request, response);
             return;
         }
@@ -282,7 +322,21 @@ public class PickupGameServlet extends HttpServlet {
         if (gameIdStr != null && targetIdStr != null) {
             int gameId = Integer.parseInt(gameIdStr);
             int targetMemberId = Integer.parseInt(targetIdStr);
-            String resultMsg = gameService.kickMember(gameId, hostId, targetMemberId);
+            
+            // 如果是管理員，用真實的主揪 ID 來操作，繞過主揪驗證
+            int effectiveHostId = operatorId;
+            if (isAdminLoggedIn(session)) {
+                // 找出該場次的真實主揪 ID
+                List<PickupGameSignupBean> signups = gameService.getSignupListByGame(gameId, false);
+                for (PickupGameSignupBean s : signups) {
+                    if ("host".equals(s.getStatus())) {
+                        effectiveHostId = s.getMemberId();
+                        break;
+                    }
+                }
+            }
+            
+            String resultMsg = gameService.kickMember(gameId, effectiveHostId, targetMemberId);
             request.setAttribute("msg", resultMsg);
         }
         getSignupList(request, response);
@@ -311,21 +365,33 @@ public class PickupGameServlet extends HttpServlet {
         
         getSignupList(request, response);
     }
-    // 主揪取消開團
+    // 主揪或管理員取消開團
     private void cancelGame(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        Integer hostId = getLoggedInMemberId(session);
+        Integer operatorId = getLoggedInMemberId(session);
         
-        if (hostId == null) {
+        if (operatorId == null) {
             redirectForLogin(request, response);
             return;
         }
         String gameIdStr = request.getParameter("gameId");
         if (gameIdStr != null) {
             int gameId = Integer.parseInt(gameIdStr);
-            // 使用真實的主揪 ID 去取消
-            String resultMsg = gameService.cancelGame(gameId, hostId);
+            
+            // 如果是管理員，用真實的主揪 ID 來操作，繞過主揪驗證
+            int effectiveHostId = operatorId;
+            if (isAdminLoggedIn(session)) {
+                List<PickupGameSignupBean> signups = gameService.getSignupListByGame(gameId, false);
+                for (PickupGameSignupBean s : signups) {
+                    if ("host".equals(s.getStatus())) {
+                        effectiveHostId = s.getMemberId();
+                        break;
+                    }
+                }
+            }
+            
+            String resultMsg = gameService.cancelGame(gameId, effectiveHostId);
             session.setAttribute("msg", resultMsg); 
         }
         response.sendRedirect(request.getContextPath() + "/pickup");

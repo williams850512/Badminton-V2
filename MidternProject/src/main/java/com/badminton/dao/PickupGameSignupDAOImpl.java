@@ -53,7 +53,7 @@ public class PickupGameSignupDAOImpl implements PickupGameSignupDAO {
     public List<PickupGameSignupBean> findByGameId(Integer gameId, boolean isNewestFirst) {
         List<PickupGameSignupBean> list = new ArrayList<>();
         // JOIN Members 取得姓名和電話，JOIN PickupGames 取得 host_id 來判斷角色
-        String sql = "SELECT s.*, m.name as member_name, m.phone as member_phone, g.host_id AS game_host_id " +
+        String sql = "SELECT s.*, m.full_name as member_name, m.phone as member_phone, g.host_id AS game_host_id " +
                      "FROM BadmintonDB.dbo.PickupGameSignups s " +
                      "JOIN BadmintonDB.dbo.Members m ON s.member_id = m.member_id " +
                      "JOIN BadmintonDB.dbo.PickupGames g ON s.game_id = g.game_id " +

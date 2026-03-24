@@ -32,14 +32,14 @@
         } else if (currentPath.includes('MembersAdminServlet')) {
             const memLink = document.querySelector('.sidebar-menu a[href*="MembersAdminServlet"]');
             if(memLink) memLink.parentElement.classList.add('active');
-        } else if (currentPath.includes('PickupGameServlet')) {
-            const pickLink = document.querySelector('.sidebar-menu a[href*="PickupGameServlet"]');
+        } else if (currentPath.includes('/pickup')) {
+            const pickLink = document.querySelector('.sidebar-menu a[href*="pickup"]');
             if(pickLink) pickLink.parentElement.classList.add('active');
         } else if (currentPath.includes('ProductServlet')) {
             const prodLink = document.querySelector('.sidebar-menu a[href*="ProductServlet"]');
             if(prodLink) prodLink.parentElement.classList.add('active');
-        } else if (currentPath.includes('OrderListServlet')) {
-            const orderLink = document.querySelector('.sidebar-menu a[href*="OrderListServlet"]');
+        } else if (currentPath.includes('/orderList')) {
+            const orderLink = document.querySelector('.sidebar-menu a[href*="orderList"]');
             if(orderLink) orderLink.parentElement.classList.add('active');   
         } else if (currentPath.includes('BookingsServlet')) {
             const bookLink = document.querySelector('.sidebar-menu a[href*="BookingsServlet"]');

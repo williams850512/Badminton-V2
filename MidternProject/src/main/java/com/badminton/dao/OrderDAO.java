@@ -368,7 +368,10 @@ public class OrderDAO {
 	 * 同時更新訂單狀態 / 付款方式 / 備註，並記錄 updated_at
 	 * ───────────────────────────────────────────────────── */
 	public boolean updateOrder(int orderId, String status, String paymentType, String note) {
-	    String sql = "UPDATE Orders SET status = ?, payment_type = ?, note = ? WHERE order_id = ?";
+	    // 更新訂單基本資訊，並自動根據 OrderItems 重新計算 total_amount
+	    String sql = "UPDATE Orders SET status = ?, payment_type = ?, note = ?, " +
+	                 "total_amount = (SELECT ISNULL(SUM(quantity * unit_price), 0) FROM OrderItems WHERE order_id = ?) " +
+	                 "WHERE order_id = ?";
 
 	    try (Connection conn = DBConnection.getConnection();
 	         PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -377,6 +380,7 @@ public class OrderDAO {
 	        ps.setString(2, paymentType);
 	        ps.setString(3, note);
 	        ps.setInt(4, orderId);
+	        ps.setInt(5, orderId);
 
 	        int rows = ps.executeUpdate();
 	        return rows > 0;

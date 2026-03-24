@@ -62,7 +62,6 @@ public class OrderActionServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/orderList");
     }
 
-    /** 同時更新狀態 / 付款方式 / 備註（搭配 AJAX） */
     private void handleUpdateOrder(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         try {
@@ -76,8 +75,17 @@ public class OrderActionServlet extends HttpServlet {
                 ? "✅ 資料庫已更新: 訂單 #" + orderId 
                 : "❌ 資料庫更新失敗: 訂單 #" + orderId);
 
+            // 更新成功後，重新查詢取得最新的 totalAmount
+            int newTotal = 0;
+            if (ok) {
+                com.badminton.model.OrderBean updated = orderDAO.findById(orderId);
+                if (updated != null && updated.getTotalAmount() != null) {
+                    newTotal = updated.getTotalAmount();
+                }
+            }
+
             response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write("{\"success\": true}");
+            response.getWriter().write("{\"success\": true, \"totalAmount\": " + newTotal + "}");
 
         } catch (Exception e) {
             e.printStackTrace();

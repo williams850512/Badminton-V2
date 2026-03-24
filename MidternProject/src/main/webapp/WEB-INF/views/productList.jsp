@@ -65,7 +65,7 @@ List<ProductsBean> products = (List<ProductsBean>) request.getAttribute("product
                                         String imageUrl = product.getImageUrl();
 
                                         if (imageUrl == null || imageUrl.trim().isEmpty()) {
-                                            imageUrl = "images/default.png";
+                                            imageUrl = "images/products/default.png";
                                         }
                                     %>
                                     <img src="<%= request.getContextPath() + "/" + imageUrl %>" width="100">

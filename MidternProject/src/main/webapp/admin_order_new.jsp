@@ -5,136 +5,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理員新增訂單 — 羽球專題</title>
+    <jsp:include page="/WEB-INF/backendHead.jsp" />
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            padding: 30px 16px;
-            color: #e0e0e0;
-        }
-        .container { max-width: 960px; margin: 0 auto; }
-        .back-btn {
-            display: inline-flex; align-items: center; gap: 6px;
-            color: #53d8fb; text-decoration: none; font-size: 0.85rem;
-            margin-bottom: 20px; transition: opacity .2s;
-        }
-        .back-btn:hover { opacity: .7; }
-        h1 { color: #53d8fb; font-size: 1.6rem; margin-bottom: 24px; }
+        /* ===== 新增訂單表單專用 CSS ===== */
+        .order-form-container { max-width: 960px; margin: 0 auto; }
 
-        /* Card */
-        .card {
-            background: rgba(255,255,255,.07);
+        .order-card-dark {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             border: 1px solid rgba(83,216,251,.2);
             border-radius: 16px;
             padding: 28px 32px;
             margin-bottom: 20px;
+            color: #e0e0e0;
         }
-        .card h2 { font-size: 1rem; color: #53d8fb; margin-bottom: 18px; border-bottom: 1px solid rgba(83,216,251,.15); padding-bottom: 10px; }
+        .order-card-dark h2 { font-size: 1rem; color: #53d8fb; margin-bottom: 18px; border-bottom: 1px solid rgba(83,216,251,.15); padding-bottom: 10px; }
 
-        /* Form Grid */
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
         .full { grid-column: 1/-1; }
-        label { display: block; font-size: .8rem; color: #a0c4d8; margin-bottom: 6px; }
-        input, select, textarea {
-            width: 100%;
-            padding: 9px 12px;
+        .order-card-dark label { display: block; font-size: .8rem; color: #a0c4d8; margin-bottom: 6px; }
+        .order-card-dark input, .order-card-dark select, .order-card-dark textarea {
+            width: 100%; padding: 9px 12px;
             background: rgba(255,255,255,.08);
             border: 1px solid rgba(83,216,251,.25);
-            border-radius: 8px;
-            color: #e0e0e0;
-            font-size: .9rem;
+            border-radius: 8px; color: #e0e0e0; font-size: .9rem;
         }
-        input:focus, select:focus, textarea:focus {
+        .order-card-dark input:focus, .order-card-dark select:focus, .order-card-dark textarea:focus {
             outline: none; border-color: #53d8fb;
         }
-        select option { background: #1a1a2e; }
-        textarea { resize: vertical; min-height: 72px; }
+        .order-card-dark select option { background: #1a1a2e; }
+        .order-card-dark textarea { resize: vertical; min-height: 72px; }
 
-        /* 商品列 */
         .item-row {
             display: grid;
             grid-template-columns: 0.8fr 2fr 0.8fr 1.2fr 1.2fr auto;
-            gap: 10px;
-            align-items: end;
-            padding: 12px;
-            background: rgba(0,0,0,.2);
-            border-radius: 10px;
-            margin-bottom: 10px;
+            gap: 10px; align-items: end; padding: 12px;
+            background: rgba(0,0,0,.2); border-radius: 10px; margin-bottom: 10px;
         }
         .item-row label { margin-bottom: 4px; }
         .subtotal-display {
             background: rgba(83,216,251,.08);
             border: 1px solid rgba(83,216,251,.2);
-            border-radius: 8px;
-            padding: 9px 12px;
-            color: #2ed573;
-            font-weight: bold;
-            font-size: .9rem;
+            border-radius: 8px; padding: 9px 12px;
+            color: #2ed573; font-weight: bold; font-size: .9rem;
         }
         .remove-btn {
-            background: rgba(231,76,60,.12);
-            border: 1px solid #e74c3c;
-            color: #e74c3c;
-            border-radius: 6px;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: .85rem;
-            transition: background .2s;
+            background: rgba(231,76,60,.12); border: 1px solid #e74c3c; color: #e74c3c;
+            border-radius: 6px; padding: 8px 12px; cursor: pointer; font-size: .85rem; transition: background .2s;
         }
         .remove-btn:hover { background: rgba(231,76,60,.3); }
         .add-btn {
             display: inline-flex; align-items: center; gap: 6px;
-            padding: 9px 18px;
-            background: rgba(83,216,251,.1);
-            border: 1px dashed #53d8fb;
-            color: #53d8fb;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: .85rem;
-            transition: background .2s;
-            margin-top: 4px;
+            padding: 9px 18px; background: rgba(83,216,251,.1);
+            border: 1px dashed #53d8fb; color: #53d8fb;
+            border-radius: 8px; cursor: pointer; font-size: .85rem; transition: background .2s; margin-top: 4px;
         }
         .add-btn:hover { background: rgba(83,216,251,.2); }
 
-        /* Total */
         .total-bar {
             display: flex; justify-content: flex-end; align-items: center; gap: 16px;
-            padding: 14px 0;
-            border-top: 1px solid rgba(83,216,251,.15);
-            margin-top: 8px;
+            padding: 14px 0; border-top: 1px solid rgba(83,216,251,.15); margin-top: 8px;
         }
         .total-bar span { color: #a0c4d8; }
         .total-bar strong { color: #2ed573; font-size: 1.4rem; }
 
-        /* Submit */
         .submit-btn {
-            display: block; width: 100%;
-            padding: 14px;
+            display: block; width: 100%; padding: 14px;
             background: linear-gradient(90deg, #53d8fb, #0f3460);
             border: none; border-radius: 10px;
             color: #fff; font-size: 1rem; font-weight: bold;
             cursor: pointer; transition: opacity .2s, background .2s;
         }
         .submit-btn:hover:not(:disabled) { opacity: .85; }
-        .submit-btn:disabled {
-            background: #444; color: #888; cursor: not-allowed;
-        }
+        .submit-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
 
         .admin-badge {
-            display: inline-block;
-            font-size: 0.75rem; 
-            background: linear-gradient(135deg, #e74c3c, #c0392b); 
-            color: white; 
-            padding: 4px 10px; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            letter-spacing: 1px; 
+            display: inline-block; font-size: 0.75rem;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white; padding: 4px 10px; border-radius: 8px;
+            font-weight: bold; letter-spacing: 1px;
             box-shadow: 0 2px 8px rgba(231,76,60,0.4);
-            margin-left: 10px;
-            vertical-align: middle;
-            border: none;
+            margin-left: 10px; vertical-align: middle; border: none;
         }
 
         @media (max-width: 640px) {
@@ -144,63 +94,75 @@
     </style>
 </head>
 <body>
-<div class="container">
-    <a href="<%=request.getContextPath()%>/orderList" class="back-btn">◀ 返回訂單管理中心</a>
-    <h1>🛒 新增訂單 <span class="admin-badge">後台管理員專用</span></h1>
 
-    <form action="<%=request.getContextPath()%>/adminCheckout" method="post" id="adminOrderForm"> 
+<div class="app-container">
 
-        <!-- ── 訂單基本資訊 ── -->
-        <div class="card">
-            <h2>📋 訂單資訊</h2>
-            <div class="grid">
-                <div>
-                    <label>會員 ID <span style="color:#e74c3c">*</span></label>
-                    <input type="number" name="memberId" id="memberId" min="1" required placeholder="輸入會員 ID">
-                </div>
-                <div>
-                    <label>付款方式 <span style="color:#e74c3c">*</span></label>
-                    <select name="paymentType" required>
-                        <option value="">— 請選擇 —</option>
-                        <option value="信用卡">💳 信用卡</option>
-                        <option value="現金">💵 現金</option>
-                        <option value="轉帳">🏦 銀行轉帳</option>
-                        <option value="LinePay">📱 LINE Pay</option>
-                        <option value="街口支付">📱 街口支付</option>
-                    </select>
-                </div>
-                <div>
-                    <label>訂單狀態</label>
-                    <select name="status">
-                        <option value="PENDING">⏳ 待付款 (PENDING)</option>
-                        <option value="PAID">✅ 已付款 (PAID)</option>
-                        <option value="SHIPPED">🚚 已出貨 (SHIPPED)</option>
-                        <option value="CANCELLED">❌ 已取消 (CANCELLED)</option>
-                    </select>
-                </div>
-                <div>
-                    <label>管理員備註</label>
-                    <input type="text" name="note" placeholder="選填：管理人員補充說明">
-                </div>
+    <jsp:include page="/WEB-INF/backendSidebar.jsp" />
+
+    <div class="main-content">
+        <jsp:include page="/WEB-INF/backendHeader.jsp" />
+
+        <div class="content-body">
+            <div class="order-form-container">
+                <a href="<%=request.getContextPath()%>/orderList" class="btn btn-warning" style="margin-bottom: 15px;">◀ 返回訂單管理中心</a>
+                <h2 style="color: #2c3e50; margin-bottom: 20px;">🛒 新增訂單 <span class="admin-badge">後台管理員專用</span></h2>
+
+                <form action="<%=request.getContextPath()%>/adminCheckout" method="post" id="adminOrderForm"> 
+
+                    <!-- ── 訂單基本資訊 ── -->
+                    <div class="order-card-dark">
+                        <h2>📋 訂單資訊</h2>
+                        <div class="grid">
+                            <div>
+                                <label>會員 ID <span style="color:#e74c3c">*</span></label>
+                                <input type="number" name="memberId" id="memberId" min="1" required placeholder="輸入會員 ID">
+                            </div>
+                            <div>
+                                <label>付款方式 <span style="color:#e74c3c">*</span></label>
+                                <select name="paymentType" required>
+                                    <option value="">— 請選擇 —</option>
+                                    <option value="信用卡">💳 信用卡</option>
+                                    <option value="現金">💵 現金</option>
+                                    <option value="轉帳">🏦 銀行轉帳</option>
+                                    <option value="LinePay">📱 LINE Pay</option>
+                                    <option value="街口支付">📱 街口支付</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>訂單狀態</label>
+                                <select name="status">
+                                    <option value="PENDING">⏳ 待付款 (PENDING)</option>
+                                    <option value="PAID">✅ 已付款 (PAID)</option>
+                                    <option value="SHIPPED">🚚 已出貨 (SHIPPED)</option>
+                                    <option value="CANCELLED">❌ 已取消 (CANCELLED)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>管理員備註</label>
+                                <input type="text" name="note" placeholder="選填：管理人員補充說明">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── 商品明細 ── -->
+                    <div class="order-card-dark">
+                        <h2>📦 商品明細</h2>
+                        <div id="itemsContainer">
+                            <!-- 由 JS 動態產生 -->
+                        </div>
+                        <button type="button" class="add-btn" onclick="addItem()">＋ 新增商品列</button>
+                        <div class="total-bar">
+                            <span>訂單總金額：</span>
+                            <strong id="totalDisplay">$0</strong>
+                            <input type="hidden" name="totalAmount" id="totalAmount" value="0">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn" disabled>✅ 確認新增訂單</button>
+                </form>
             </div>
         </div>
-
-        <!-- ── 商品明細 ── -->
-        <div class="card">
-            <h2>📦 商品明細</h2>
-            <div id="itemsContainer">
-                <!-- 由 JS 動態產生 -->
-            </div>
-            <button type="button" class="add-btn" onclick="addItem()">＋ 新增商品列</button>
-            <div class="total-bar">
-                <span>訂單總金額：</span>
-                <strong id="totalDisplay">$0</strong>
-                <input type="hidden" name="totalAmount" id="totalAmount" value="0">
-            </div>
-        </div>
-
-        <button type="submit" class="submit-btn" id="submitBtn" disabled>✅ 確認新增訂單</button>
-    </form>
+    </div>
 </div>
 
 <script>

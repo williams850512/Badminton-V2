@@ -7,8 +7,8 @@
 <title>🏸 羽球活動報名名單</title>
 <jsp:include page="/WEB-INF/backendHead.jsp" />
 <style>
-    body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f8f9fa; padding: 30px; }
-    .container { max-width: 850px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+    /* 過廤全域樣式以避免碳撞 app-container 佈局 */
+    .signup-container { max-width: 850px; background: white; padding: 30px; border-radius: 15px; }
     h2 { text-align: center; color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
     
     /* 人數進度 */
@@ -57,10 +57,10 @@
             <h2 style="margin-bottom: 20px; color: #333;">🏸 報名名單管理</h2>
             
             <div class="card">
-                <div class="container" style="box-shadow: none; padding: 15px; margin: 0;">
+                <div class="signup-container" style="padding: 15px; margin: 0;">
 
-    <!-- 判斷是否為管理員 (假設 memberId=4 是管理員，或是從 session 取出特定屬性) -->
-    <c:set var="isAdmin" value="${sessionMemberId == 4}" />
+    <!-- 判斷是否為管理員（改用 session 中的 adminUser 屬性） -->
+    <c:set var="isAdmin" value="${not empty sessionScope.adminUser}" />
     <!-- 是主揪或管理員 -->
     <c:set var="isHostOrAdmin" value="${sessionMemberId == hostMemberId || isAdmin}" />
 
@@ -83,6 +83,19 @@
         <c:if test="${not empty msg}">
             <div class="alert-msg">🙏 ${msg}</div>
         </c:if>
+
+        <!-- 主揪資訊卡（管理員視圖） -->
+        <div class="host-info">
+            <span class="label">📞 主揪聯絡方式：</span><br>
+            <c:choose>
+                <c:when test="${not empty hostName}">
+                    <span>👤 ${hostName}</span> ─ <span class="phone">${hostPhone}</span>
+                </c:when>
+                <c:otherwise>
+                    <span style="color: #999;">無主揪資訊 (可能是新開的團，尚未有人報名)</span>
+                </c:otherwise>
+            </c:choose>
+        </div>
 
         <table>
             <thead>
@@ -126,15 +139,46 @@
 
         <!-- 管理員代客報名區塊 -->
         <c:if test="${isAdmin && gameStatus != 'cancelled'}">
-            <div style="margin-top: 25px; background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba; text-align: center;">
-                <h4 style="margin-top: 0; color: #856404;">🛠️ 代客報名 (管理員專用)</h4>
-                <form action="${pageContext.request.contextPath}/pickup?action=adminAddPlayer" method="post" style="margin-bottom: 0;">
+            <div style="margin-top: 25px; background: #fff3cd; padding: 20px; border-radius: 8px; border: 1px solid #ffeeba;">
+                <h4 style="margin-top: 0; color: #856404; text-align: center;">🛠️ 代客報名 (管理員專用)</h4>
+                
+                <!-- 搜尋會員 -->
+                <form action="${pageContext.request.contextPath}/pickup" method="get" style="display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 12px;">
+                    <input type="hidden" name="action" value="getSignupList">
                     <input type="hidden" name="gameId" value="${currentGameId}">
-                    <input type="number" name="targetMemberId" placeholder="輸入要加入的會員 ID" required style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; width: 180px;">
-                    <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                        ➕ 強制加入
-                    </button>
-                    <p style="font-size: 13px; color: #666; margin: 8px 0 0 0;">※ 輸入會員編號即可幫該會員報名本場次。如果已有時段衝突仍會阻擋。</p>
+                    <label style="font-weight: bold; margin: 0;">🔍 搜尋會員：</label>
+                    <input type="text" name="searchKeyword" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; width: 200px;" placeholder="輸入姓名 / 電話" value="${param.searchKeyword}" required>
+                    <button type="submit" style="background: #17a2b8; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">模糊搜尋</button>
+                </form>
+                
+                <c:if test="${not empty proxySearchMsg}">
+                    <div style="text-align: center; margin-bottom: 10px; padding: 6px; border-radius: 4px; font-size: 14px; ${proxySearchMsg.contains('不到') ? 'background-color: #f8d7da; color: #721c24;' : 'background-color: #d4edda; color: #155724;'}">
+                        ${proxySearchMsg}
+                    </div>
+                </c:if>
+                
+                <!-- 報名表單 -->
+                <form action="${pageContext.request.contextPath}/pickup?action=adminAddPlayer" method="post" style="text-align: center;">
+                    <input type="hidden" name="gameId" value="${currentGameId}">
+                    <c:choose>
+                        <c:when test="${not empty proxyFoundMembers}">
+                            <select name="targetMemberId" style="padding: 8px; border-radius: 4px; border: 1px solid #28a745; background-color: #d4edda; width: 280px; font-size: 14px;" required>
+                                <c:forEach var="m" items="${proxyFoundMembers}">
+                                    <option value="${m.memberId}">👤 ${m.fullName} (電話: ${m.phone})</option>
+                                </c:forEach>
+                            </select>
+                            <button type="submit" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 5px;">
+                                ➕ 強制加入
+                            </button>
+                        </c:when>
+                        <c:otherwise>
+                            <input type="text" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; width: 280px; background-color: #e9ecef; cursor: not-allowed;" placeholder="請先在上方搜尋會員..." readonly>
+                            <button type="submit" disabled style="background: #adb5bd; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: not-allowed; margin-left: 5px;">
+                                ➕ 強制加入
+                            </button>
+                        </c:otherwise>
+                    </c:choose>
+                    <p style="font-size: 13px; color: #666; margin: 8px 0 0 0;">※ 搜尋會員後，從下拉選單選擇要加入的會員。如果已有時段衝突仍會阻擋。</p>
                 </form>
             </div>
         </c:if>
