@@ -18,6 +18,7 @@ public class BookingsBean implements java.io.Serializable {
 	private BigDecimal totalAmount;
 	private String note;
 	private Timestamp createdAt;
+	private String memberName; // 為了關聯顯示會員姓名加上的屬性
 	
 	public BookingsBean() {	
 	}
@@ -32,6 +33,7 @@ public class BookingsBean implements java.io.Serializable {
 	public BigDecimal getTotalAmount() {return totalAmount;}
 	public String getNote() {return note;}
 	public Timestamp getCreatedAt() {return createdAt;}
+	public String getMemberName() {return memberName;}
 
 	public void setBookingId(Integer bookingId) {this.bookingId = bookingId;}
 	public void setMemberId(Integer memberId) {this.memberId = memberId;}
@@ -43,6 +45,7 @@ public class BookingsBean implements java.io.Serializable {
 	public void setTotalAmount(BigDecimal totalAmount) {this.totalAmount = totalAmount;}
 	public void setNote(String note) {this.note = note;}
 	public void setCreatedAt(Timestamp createdAt) {this.createdAt = createdAt;}
+	public void setMemberName(String memberName) {this.memberName = memberName;}
 
 	@Override
 	public String toString() {

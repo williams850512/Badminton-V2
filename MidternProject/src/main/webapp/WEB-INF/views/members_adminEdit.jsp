@@ -5,37 +5,10 @@
 <head>
     <meta charset="UTF-8">
     <title>羽球館 | 編輯會員資料</title>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <jsp:include page="/WEB-INF/backendHead.jsp" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     
     <style>
-        /* 全域設定 */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Noto Sans TC', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f7f6; color: #333; }
-        
-        /* 佈局容器 */
-        .app-container { display: flex; height: 100vh; overflow: hidden; }
-        
-        /* 左側選單 */
-        .sidebar { width: 15%; background-color: #2c3e50; color: #fff; display: flex; flex-direction: column; transition: all 0.3s; }
-        .sidebar-logo { padding: 20px; font-size: 22px; font-weight: bold; text-align: center; border-bottom: 1px solid #34495e; letter-spacing: 2px;}
-        .sidebar-menu { list-style: none; padding: 10px 0; margin: 0; }
-        .sidebar-menu li { padding: 15px 25px; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; }
-        .sidebar-menu li:hover { background-color: #34495e; border-left: 4px solid #3498db; }
-        .sidebar-menu li.active { background-color: #34495e; border-left: 4px solid #3498db; color: #3498db; font-weight: bold;}
-        .sidebar-menu a { text-decoration: none; color: inherit; display: block; }
-        
-        /* 右側主要區域 */
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* 上方導覽列 */
-        .top-header { height: 60px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 10; }
-        .header-title { font-size: 18px; font-weight: bold; color: #555; }
-        .user-info { font-size: 14px; color: #666; }
-        
-        /* 內容區域 */
-        .content-body { flex: 1; padding: 20px; overflow-y: auto; }
-        
         /* 卡片風格 */
         .card { background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 30px; max-width: 800px; margin: 0 auto; }
         
@@ -67,30 +40,14 @@
 <body>
 
 <div class="app-container">
-    <div class="sidebar">
-        <div class="sidebar-logo">Badminton</div>
-        <ul class="sidebar-menu">
-            <li class="active"><a href="${pageContext.request.contextPath}/MembersAdminServlet?action=dashboard">會員管理</a></li>
-            <li><a href="#">預約管理</a></li>
-            <li><a href="#">臨打管理</a></li>
-            <li><a href="#">商品管理</a></li>
-            <li><a href="#">訂單管理</a></li>
-            <li><a href="<%=request.getContextPath()%>/AnnouncementServlet?action=list">公告管理</a></li>
-        </ul>
-    </div>
+        <jsp:include page="/WEB-INF/backendSidebar.jsp" />
 
     <div class="main-content">
         <%
             String empName = (String) session.getAttribute("empName");
             if (empName == null || empName.isEmpty()) { empName = "測試管理員"; }
         %>
-        <div class="top-header">
-            <div class="header-title">羽球館管理系統</div>
-            <div class="user-info">
-                HI! <%= empName %> | 
-                <a href="${pageContext.request.contextPath}/MembersAdminServlet?action=logout" style="color: #e74c3c; text-decoration: none;">登出</a>
-            </div>
-        </div>
+        <jsp:include page="/WEB-INF/backendHeader.jsp" />
 
         <div class="content-body">
             <div class="card">

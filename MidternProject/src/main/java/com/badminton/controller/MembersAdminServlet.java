@@ -90,6 +90,10 @@ public class MembersAdminServlet extends HttpServlet {
             processAdminUpdate(request, response);
         } else if ("adminAdd".equals(action)) { 
             processAdminAdd(request, response);
+        } else if ("updateMemberNote".equals(action)) {
+            processUpdateMemberNote(request, response);
+        } else if ("updateAdminNote".equals(action)) {
+            processUpdateAdminNote(request, response);
         } else {
             doGet(request, response);
         }
@@ -157,6 +161,11 @@ public class MembersAdminServlet extends HttpServlet {
                     a.setEmail(request.getParameter("email"));
                     a.setGender(request.getParameter("gender"));
                     
+                    String bday = request.getParameter("birthday");
+                    if (bday != null && !bday.trim().isEmpty()) {
+                        a.setBirthday(Date.valueOf(bday.trim()));
+                    }
+
                     // ✨ 權限防禦：只有「主管」可以改 Role 與 Status
                     // 如果是一般職員，即便前端送來新值，後端也強制維持原狀
                     if ("manager".equals(currentLogin.getRole())) {
@@ -175,7 +184,12 @@ public class MembersAdminServlet extends HttpServlet {
                         request.getSession().setAttribute("adminUser", a);
                     }
 
-                    response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=update_ok");
+                    // 修改：儲存更新後若為主觀則返回 listAdmins 畫面，否則返回 dashboard
+                    if ("manager".equals(currentLogin.getRole())) {
+                        response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=update_ok");
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=update_ok");
+                    }
                 }
             }
         } catch (Exception e) {
@@ -197,6 +211,12 @@ public class MembersAdminServlet extends HttpServlet {
             a.setPassword(request.getParameter("password"));
             a.setFullName(request.getParameter("fullName"));
             a.setGender(request.getParameter("gender"));
+            
+            String bday = request.getParameter("birthday");
+            if (bday != null && !bday.trim().isEmpty()) {
+                a.setBirthday(Date.valueOf(bday.trim()));
+            }
+
             a.setRole(request.getParameter("role"));
             a.setPhone(request.getParameter("phone"));
             a.setEmail(request.getParameter("email"));
@@ -235,8 +255,12 @@ public class MembersAdminServlet extends HttpServlet {
             m.setPassword(request.getParameter("password"));
             m.setFullName(request.getParameter("fullName"));
             m.setGender(request.getParameter("gender"));
+            
             String bday = request.getParameter("birthday");
-            if (bday != null && !bday.isEmpty()) m.setBirthday(Date.valueOf(bday));
+            if (bday != null && !bday.trim().isEmpty()) {
+                m.setBirthday(Date.valueOf(bday.trim()));
+            }
+            
             m.setPhone(request.getParameter("phone"));
             m.setEmail(request.getParameter("email"));
             m.setMembershipLevel(request.getParameter("membershipLevel"));
@@ -272,8 +296,12 @@ public class MembersAdminServlet extends HttpServlet {
                 // 基本資料大家都能改
                 member.setFullName(request.getParameter("fullName"));
                 member.setGender(request.getParameter("gender"));
+                
                 String bday = request.getParameter("birthday");
-                if (bday != null && !bday.isEmpty()) member.setBirthday(Date.valueOf(bday));
+                if (bday != null && !bday.trim().isEmpty()) {
+                    member.setBirthday(Date.valueOf(bday.trim()));
+                }
+                
                 member.setPhone(request.getParameter("phone"));
                 member.setEmail(request.getParameter("email"));
 
@@ -332,5 +360,27 @@ public class MembersAdminServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         if (session != null) session.invalidate();
         response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=showLogin");
+    }
+
+    private void processUpdateMemberNote(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            int memberId = Integer.parseInt(request.getParameter("memberId"));
+            String note = request.getParameter("note");
+            memberService.updateNote(memberId, note);
+            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=update_ok");
+        } catch (Exception e) {
+            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=dashboard&msg=error");
+        }
+    }
+
+    private void processUpdateAdminNote(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            int adminId = Integer.parseInt(request.getParameter("id"));
+            String note = request.getParameter("note");
+            adminService.updateAdminNote(adminId, note);
+            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=update_ok");
+        } catch (Exception e) {
+            response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=listAdmins&msg=error");
+        }
     }
 }

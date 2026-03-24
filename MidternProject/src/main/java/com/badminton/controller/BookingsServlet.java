@@ -34,6 +34,22 @@ public class BookingsServlet extends HttpServlet {
 				request.setAttribute("AllVenues", vDao.getAll());
 				request.setAttribute("AllCourts", cDao.getAll());
 				request.setAttribute("AllTimeSlots", tDao.getAll());
+				
+				// ===== 關鍵字模糊查詢會員功能 =====
+				String searchKeyword = request.getParameter("searchKeyword");
+				if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+					com.badminton.service.MembersService memberService = new com.badminton.service.MembersService();
+					List<com.badminton.model.MembersBean> foundMembers = memberService.searchMembers(searchKeyword.trim());
+					
+					if (foundMembers != null && !foundMembers.isEmpty()) {
+						request.setAttribute("foundMembers", foundMembers);
+						request.setAttribute("msg", "搜尋成功：找到 " + foundMembers.size() + " 位符合的會員，請在下方確認並選取。");
+					} else {
+						request.setAttribute("msg", "找不到符合該關鍵字的會員！");
+					}
+				}
+				// ==================================
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -65,7 +81,7 @@ public class BookingsServlet extends HttpServlet {
 		if ("insert".equals(action)) {
 			try {
 				// 1. 取得表單參數
-				String memberPhone = request.getParameter("memberPhone");
+				String memberIdStr = request.getParameter("memberId");
 				String courtIdStr = request.getParameter("courtId");
 				String bookingDateStr = request.getParameter("bookingDate");
 				String startTimeStr = request.getParameter("startTime");
@@ -73,8 +89,13 @@ public class BookingsServlet extends HttpServlet {
 				String totalAmountStr = request.getParameter("totalAmount");
 				String note = request.getParameter("note");
 
-				// 2. 準備資料 (目前先寫死 memberId = 1，未來組員合併分支後可改用查手機查詢)
-				int memberId = 1;
+				if (memberIdStr == null || memberIdStr.trim().isEmpty()) {
+					response.sendRedirect(request.getContextPath() + "/BookingsServlet?action=addForm&message=missingMember");
+					return;
+				}
+
+				// 2. 準備資料 
+				int memberId = Integer.parseInt(memberIdStr.trim());
 				int courtId = Integer.parseInt(courtIdStr);
 				java.sql.Date bookingDate = java.sql.Date.valueOf(bookingDateStr);
 				

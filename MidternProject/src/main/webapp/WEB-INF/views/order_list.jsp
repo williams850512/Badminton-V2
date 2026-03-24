@@ -8,43 +8,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>羽球館管理系統/訂單管理</title>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<jsp:include page="/WEB-INF/backendHead.jsp" />
 
 <style>
     /* =========================================
-       1. 全域 UI 設定 (無印風)
+       1. 訂單模組額外覆蓋/新增的共用 CSS
        ========================================= */
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f4f7f6; color: #333; }
-    .app-container { display: flex; height: 100vh; overflow: hidden; }
-    
-    .sidebar { width: 15%; background-color: #2c3e50; color: #fff; display: flex; flex-direction: column; transition: all 0.3s; }
-    .sidebar-logo { padding: 20px; font-size: 22px; font-weight: bold; text-align: center; border-bottom: 1px solid #34495e; letter-spacing: 2px;}
-    .sidebar-menu { list-style: none; padding: 10px 0; margin: 0; }
-    .sidebar-menu li { padding: 15px 25px; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; }
-    .sidebar-menu li:hover, .sidebar-menu li.active { background-color: #34495e; border-left: 4px solid #3498db; }
-    .sidebar-menu li.active { color: #3498db; font-weight: bold;}
-    .sidebar-menu a { text-decoration: none; color: inherit; display: block; }
-    
-    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .top-header { height: 60px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 10; }
-    .header-title { font-size: 18px; font-weight: bold; color: #555; }
-    .user-info { font-size: 14px; color: #666; }
-    
-    .content-body { flex: 1; padding: 20px; overflow-y: auto; }
-    .card { background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 25px; margin-bottom: 20px;}
-    
-    .table-custom { width: 100%; border-collapse: collapse; margin-top: 5px; background: #fff; }
-    .table-custom th, .table-custom td { border-bottom: 1px solid #eee; padding: 12px 15px; text-align: left; vertical-align: middle; }
-    .table-custom th { background-color: #f8f9fa; color: #555; font-weight: bold; white-space: nowrap; }
+    .table-custom { margin-top: 5px; background: #fff; }
+    .table-custom th, .table-custom td { vertical-align: middle; }
+    .table-custom th { white-space: nowrap; }
     .table-custom tr.main-row:hover { background-color: #f1f4f8; cursor: pointer; }
     
-    .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; text-decoration: none; display: inline-block; transition: 0.2s; font-weight: bold;}
-    .btn-primary { background-color: #3498db; color: white; }
-    .btn-primary:hover { background-color: #2980b9; }
-    .btn-danger { background-color: #e74c3c; color: white; }
-    .btn-danger:hover { background-color: #c0392b; }
-    .btn-warning { background-color: #f1c40f; color: #333; }
+    .btn { font-weight: bold; }
     .btn-success { background-color: #28a745; color: white; }
     
     /* 正方形按鈕與等寬按鈕 */
@@ -54,8 +29,7 @@
     /* ✨ 黃金比例：按鈕寬度調成 120px 看起來最大器 */
     .btn-fixed { width: 120px; text-align: center; }
 
-    .form-control { padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; outline: none; transition: 0.2s; width: 100%;}
-    .form-control:focus { border-color: #3498db; box-shadow: 0 0 5px rgba(52, 152, 219, 0.3); }
+    .form-control { width: 100%; }
     .form-control[readonly] { background-color: #e9ecef; cursor: not-allowed; color: #666; font-weight: bold; }
 
     .input-xs { width: 70px; padding: 6px; }
@@ -125,32 +99,16 @@ if (orderList != null) {
 
 <div class="app-container">
 
-    <div class="sidebar">
-        <div class="sidebar-logo">Badminton</div>
-        <ul class="sidebar-menu">
-            <li><a href="#">會員管理</a></li>
-            <li><a href="#">預約管理</a></li>
-            <li><a href="#">臨打管理</a></li>
-            <li><a href="#">商品管理</a></li>
-            <li class="active"><a href="<%=request.getContextPath()%>/orderList">訂單管理</a></li>
-            <li><a href="<%=request.getContextPath()%>/AnnouncementServlet?action=list">公告管理</a></li>
-        </ul>
-    </div>
+        <jsp:include page="/WEB-INF/backendSidebar.jsp" />
 
     <div class="main-content">
         
-        <% String empName = session.getAttribute("empName") != null ? (String) session.getAttribute("empName") : "管理員"; %>
-        <div class="top-header">
-            <div class="header-title">羽球館管理系統 / 訂單管理</div>
-            <div class="user-info">
-                HI! <%= empName %> | <a href="<%=request.getContextPath()%>/LogoutServlet" style="color: #e74c3c; text-decoration: none;">登出</a>
-            </div>
-        </div>
+        <jsp:include page="/WEB-INF/backendHeader.jsp" />
 
         <div class="content-body">
             
             <div class="header-actions">
-                <h2>📋 訂單列表</h2>
+                <h2>訂單列表</h2>
                 <a href="<%=request.getContextPath()%>/admin_order_bulk.jsp" class="btn btn-warning" style="font-weight:bold;">⚡ 新增訂單 (支援批次)</a>
             </div>
 

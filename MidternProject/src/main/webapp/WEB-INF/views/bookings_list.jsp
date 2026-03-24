@@ -52,7 +52,7 @@
 	<table class="table-custom">
 		<tr>
 			<th>預約編號</th>
-			<th>會員編號</th>
+			<th>會員姓名</th>
 			<th>場館編號</th>
 			<th>預約日期</th>
 			<th>開始時間</th>
@@ -68,7 +68,7 @@
         <c:forEach var="b" items="${AllBookings}" >
         <tr>
         	<td>${b.bookingId}</td>
-        	<td>${b.memberId}</td>
+        	<td>${b.memberName}</td>
         	<td>${b.courtId}</td>
         	<td>${b.bookingDate}</td>
         	<td>${b.startTime}</td>

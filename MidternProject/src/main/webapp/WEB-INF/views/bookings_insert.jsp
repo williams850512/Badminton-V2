@@ -23,6 +23,27 @@
             <div class="content-body">
                 <h2 style="margin-bottom: 20px; color: #333;">新增預約</h2>
                 
+                <!-- 顯示搜尋訊息 -->
+                <c:if test="${not empty msg}">
+                    <div style="padding: 10px; margin-bottom: 15px; border-radius: 4px; ${msg.contains('不到') ? 'background-color: #f8d7da; color: #721c24;' : 'background-color: #d4edda; color: #155724;'}">
+                        ${msg}
+                    </div>
+                </c:if>
+                <c:if test="${param.message == 'missingMember'}">
+                    <div style="padding: 10px; margin-bottom: 15px; background-color: #f8d7da; color: #721c24; border-radius: 4px;">
+                        錯誤：無法新增，請先使用上方搜尋帶入會員編號！
+                    </div>
+                </c:if>
+
+                <div class="card" style="margin-bottom: 20px; padding: 20px; background-color: #f8f9fa; border-left: 5px solid #3498db;">
+                    <form action="${pageContext.request.contextPath}/BookingsServlet" method="get" style="display: flex; align-items: center; gap: 10px;">
+                        <input type="hidden" name="action" value="addForm">
+                        <label style="font-weight: bold; margin: 0;">🔍 查詢會員：</label>
+                        <input type="text" name="searchKeyword" class="form-control" style="width: 250px;" placeholder="輸入姓名 / 電話 / 會員編號" value="${param.searchKeyword}" required>
+                        <button type="submit" class="btn btn-info" style="background-color: #17a2b8; color: white;">模糊搜尋</button>
+                    </form>
+                </div>
+                
                 <div class="card">
                 
          <div class="form-container">
@@ -30,9 +51,24 @@
         <form action="${pageContext.request.contextPath}/BookingsServlet?action=insert" method="post">
         
             <div class="form-group" style="margin-bottom: 15px;">
-                <label style="display: inline-block; width: 120px;">會員手機號碼：</label>
-                <!-- 這裡的 name 屬性非常重要！Servlet 就是靠這個 name 來抓資料的 -->
-                <input type="text" name="memberPhone" class="form-control" style="width: 300px;" placeholder="請輸入會員手機號碼" required>
+                <label style="display: inline-block; width: 120px; font-weight: bold;">會員姓名：</label>
+                
+                <c:choose>
+                    <c:when test="${not empty foundMembers}">
+                        <select name="memberId" class="form-control" style="width: 250px; display: inline-block; background-color: #d4edda; border-color: #28a745;" required>
+                            <c:forEach var="m" items="${foundMembers}">
+                                <option value="${m.memberId}">👤 ${m.fullName} (電話: ${m.phone})</option>
+                            </c:forEach>
+                        </select>
+                        <span style="margin-left: 10px; color: #2ecc71; font-weight: bold; font-size: 14px;">已找到，請在選單中確認</span>
+                    </c:when>
+                    <c:otherwise>
+                        <input type="text" class="form-control" style="width: 250px; background-color: #e9ecef; cursor: not-allowed; display: inline-block;" value="" placeholder="等待搜尋..." readonly required>
+                        <!-- 防呆：沒有搜尋結果時送出空值給後端擋下 -->
+                        <input type="hidden" name="memberId" value="">
+                        <span style="margin-left: 10px; color: #e74c3c; font-size: 14px;">(請先在上方輸入關鍵字尋找會員)</span>
+                    </c:otherwise>
+                </c:choose>
             </div>
             
             <div class="form-group" style="margin-bottom: 15px;">

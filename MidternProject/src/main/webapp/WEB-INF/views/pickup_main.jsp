@@ -5,7 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <title>🏸 臨打管理</title>
-<%@ include file="/WEB-INF/backendHead.jsp" %>
+<jsp:include page="/WEB-INF/backendHead.jsp" />
 <style>
     /* 狀態標籤 */
     .status-tag {
@@ -32,13 +32,13 @@
 <body>
 <div class="app-container">
 
-    <%@ include file="/WEB-INF/backendSidebar.jsp" %>
+    <jsp:include page="/WEB-INF/backendSidebar.jsp" />
 
     <div class="main-content">
-        <%@ include file="/WEB-INF/backendHeader.jsp" %>
+        <jsp:include page="/WEB-INF/backendHeader.jsp" />
 
         <div class="content-body">
-            <h2 style="color:#333; margin-bottom:20px;">🏸 臨打管理列表</h2>
+            <h2 style="color:#333; margin-bottom:20px;">臨打管理列表</h2>
 
             <c:if test="${not empty msg}">
                 <script>

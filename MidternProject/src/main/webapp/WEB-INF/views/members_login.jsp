@@ -4,11 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>羽球館 | 會員登入</title>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <jsp:include page="/WEB-INF/backendHead.jsp" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* 全域設定，延續後台模板風格 */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Noto Sans TC', Tahoma, Geneva, Verdana, sans-serif; }
         
         body { 
             background-color: #2c3e50; /* 使用與 Sidebar 一致的深色 */

@@ -5,8 +5,8 @@
 <head>
 <meta charset="UTF-8">
 <title>結帳成功</title>
+<jsp:include page="/WEB-INF/backendHead.jsp" />
 <style>
-body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
         .box { background: white; border-radius: 12px; padding: 40px; max-width: 500px; margin: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         h1 { color: #27ae60; }
         .order-id { font-size: 2rem; font-weight: bold; color: #2c3e50; margin: 20px 0; }
@@ -14,13 +14,20 @@ body { font-family: Arial, sans-serif; text-align: center; padding: 50px; backgr
 </style>
 </head>
 <body>
-<div class="box">
-        <h1>✅ 結帳成功！</h1>
-        <p>感謝您的購買，您的訂單已成功建立。</p>
-        <div class="order-id">訂單編號：#${orderId}</div>
-        <p>我們將盡快為您處理訂單。</p>
-        <a href="${pageContext.request.contextPath}/index.jsp">返回首頁</a>
+<div class="app-container">
+    <jsp:include page="/WEB-INF/backendSidebar.jsp" />
+    <div class="main-content">
+        <jsp:include page="/WEB-INF/backendHeader.jsp" />
+        <div class="content-body" style="display: flex; justify-content: center; align-items: center; background: #f5f5f5;">
+            <div class="box">
+                    <h1>✅ 結帳成功！</h1>
+                    <p>感謝您的購買，您的訂單已成功建立。</p>
+                    <div class="order-id">訂單編號：#${orderId}</div>
+                    <p>我們將盡快為您處理訂單。</p>
+                    <a href="${pageContext.request.contextPath}/index.jsp">返回首頁</a>
+            </div>
+        </div>
+    </div>
 </div>
-
 </body>
 </html>

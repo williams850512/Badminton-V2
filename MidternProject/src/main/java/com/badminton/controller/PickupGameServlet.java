@@ -1,43 +1,80 @@
 package com.badminton.controller;
-
 import java.io.IOException;
 import java.util.List;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import com.badminton.model.CourtBean;
 import com.badminton.model.PickupGameBean;
 import com.badminton.model.PickupGameSignupBean;
+import com.badminton.model.MembersBean;
+import com.badminton.model.MembersAdminBean;
 import com.badminton.service.PickupGameSignupService;
 import com.badminton.service.PickupGameSignupServiceImpl;
-
 @WebServlet("/pickup")
 public class PickupGameServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-
     // 將 Service 統一宣告在這裡
     private PickupGameSignupService gameService = new PickupGameSignupServiceImpl();
-
+    // ================== 輔助與驗證方法 (移至最上方避免漏拷貝) ==================
+    /**
+     * 狀態排序權重：開放中(1) > 已額滿(2) > 其他(3) > 已取消(4)
+     * 加上 static 確保任何編譯器在 Lambda 中調用皆安全
+     */
+    private static int getStatusWeight(String status) {
+        if (status == null) return 3;
+        if ("open".equals(status)) return 1;
+        if ("full".equals(status)) return 2;
+        if ("cancelled".equals(status)) return 4;
+        return 3;
+    }
+    /**
+     * 獲取目前登入系統的操作者 ID (支援後台管理員 / 前台會員)
+     */
+    private static Integer getLoggedInMemberId(HttpSession session) {
+        // 第一順位：檢查是否為後台管理員登入 (MembersAdminBean)
+        MembersAdminBean admin = (MembersAdminBean) session.getAttribute("adminUser");
+        if (admin != null) {
+            return admin.getAdminId(); // 以管理員的身分 (ID) 來操作揪團/報名
+        }
+        
+        // 第二順位：萬一前台也共用這個 Servlet，檢查一般會員登入
+        MembersBean user = (MembersBean) session.getAttribute("user");
+        if (user != null) {
+            return user.getMemberId();
+        }
+        
+        // 保留測試期 fallback
+        return (Integer) session.getAttribute("memberId");
+    }
+    /**
+     * 驗證是否為系統管理員登入
+     */
+    private static boolean isAdminLoggedIn(HttpSession session) {
+        MembersAdminBean admin = (MembersAdminBean) session.getAttribute("adminUser");
+        // 如果想要嚴格限制只有經理(manager)才能代客報名，可改為 return admin != null && "manager".equals(admin.getRole());
+        return admin != null;
+    }
+    /**
+     * 【修正】未登入時，重導向至「後台管理員的登入頁面」
+     */
+    private void redirectForLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.sendRedirect(request.getContextPath() + "/MembersAdminServlet?action=showLogin");
+    }
+    // ================== Controller 主邏輯 ==================
     // doGet 與 doPost 互相呼叫，統一處理邏輯
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-
-        // 讓 doGet 也能處理 action 參數，並統一交給 doPost 處理
         doPost(request, response);
     }
-
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         // 1. 取得前端傳來的 action 參數，決定要做什麼事
         String action = request.getParameter("action");
-
         // 處理一次性訊息 (Flash Message)，並且在取出後立刻刪除
         HttpSession session = request.getSession();
         String sessionMsg = (String) session.getAttribute("msg");
@@ -45,9 +82,8 @@ public class PickupGameServlet extends HttpServlet {
             request.setAttribute("msg", sessionMsg);
             session.removeAttribute("msg");
         }
-
-        // 2. 如果沒有 action，預設導向首頁 (原本的 PickupMainServlet)
-        if (action == null || action.isEmpty()) {
+        // 2. 如果沒有 action，或是 action 為 list，預設導向首頁，顯示全部場次列表
+        if (action == null || action.isEmpty() || "list".equals(action)) {
             List<PickupGameBean> allGames = gameService.getAllGames();
             
             // 排序：開放中(open) > 已額滿(full) > 已取消(cancelled)，同狀態按建立時間較早的在前面
@@ -57,15 +93,13 @@ public class PickupGameServlet extends HttpServlet {
                 if (statusWeight1 != statusWeight2) {
                     return Integer.compare(statusWeight1, statusWeight2);
                 }
-                // 同狀態：建立時間越早越後面 (升冪排列 => 舊的在前面, ID越小越前面)
+                // 同狀態：建立時間越早越後面
                 return g1.getGameDate().compareTo(g2.getGameDate());
             });
-
             request.setAttribute("allGames", allGames);
             request.getRequestDispatcher("/WEB-INF/views/pickup_main.jsp").forward(request, response);
             return;
         }
-
         // 3. 根據 action 分發到對應的方法
         try {
             switch (action) {
@@ -98,39 +132,41 @@ public class PickupGameServlet extends HttpServlet {
                     break;
                 default:
                     // 找不到對應的動作，回首頁
-                    request.getRequestDispatcher("/WEB-INF/views/pickup_main.jsp").forward(request, response);
+                    response.sendRedirect(request.getContextPath() + "/pickup");
                     break;
             }
         } catch (Exception e) {
             e.printStackTrace();
-            // 可以統一處理例外狀況，導向一個錯誤頁面
             response.sendError(500, "系統發生錯誤：" + e.getMessage());
         }
     }
-
+    // ================== Action 處理方法 ==================
     private void goCreateGame(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("--- 進入發起揪團表單 ---");
+        HttpSession session = request.getSession();
+        Integer hostId = getLoggedInMemberId(session);
         
-        // 進入新表單前清除殘留訊息，防止「取消失敗」等文字出現
+        // 沒登入就踢回後台管理員登入畫面
+        if (hostId == null) {
+            redirectForLogin(request, response);
+            return;
+        }
         request.getSession().removeAttribute("msg");
         request.removeAttribute("msg");
-
-        // 從資料庫撈取所有球場與時段
         List<CourtBean> courts = gameService.getAllCourts();
         request.setAttribute("courts", courts);
         request.setAttribute("timeSlots", gameService.getAllTimeSlots());
         request.getRequestDispatcher("/WEB-INF/views/create_game.jsp").forward(request, response);
     }
-
     private void createGame(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        Integer hostId = (Integer) session.getAttribute("memberId");
+        Integer hostId = getLoggedInMemberId(session);
+        
         if (hostId == null) {
-            hostId = 4; // 預設為薩拉
+            redirectForLogin(request, response);
+            return;
         }
-
         try {
             int courtId = Integer.parseInt(request.getParameter("courtId"));
             String gameDate = request.getParameter("gameDate");
@@ -138,8 +174,6 @@ public class PickupGameServlet extends HttpServlet {
             String endTime = request.getParameter("endTime");
             int neededPlayers = Integer.parseInt(request.getParameter("neededPlayers"));
             int totalMaxPlayers = neededPlayers + 1;
-
-            // 確保「結束時間」必須晚於「開始時間」
             if (startTime.compareTo(endTime) >= 0) {
                 request.setAttribute("courts", gameService.getAllCourts());
                 request.setAttribute("timeSlots", gameService.getAllTimeSlots());
@@ -147,15 +181,12 @@ public class PickupGameServlet extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/views/create_game.jsp").forward(request, response);
                 return;
             }
-
+            // 使用從 session 動態抓取的 hostId 建立揪團
             boolean success = gameService.createAndJoin(hostId, courtId, gameDate, startTime, endTime, totalMaxPlayers);
-
             if (success) {
                 Integer latestGameId = gameService.getLatestGameId();
-                // 注意這裡的重定向網址也改為共用的 /pickup 並加上 action
                 response.sendRedirect(request.getContextPath() + "/pickup?action=getSignupList&gameId=" + latestGameId);
             } else {
-                // 發生錯誤退回表單時，必須重新將 courts 塞回去，否則下拉選單會空白
                 request.setAttribute("courts", gameService.getAllCourts());
                 request.setAttribute("timeSlots", gameService.getAllTimeSlots());
                 request.setAttribute("msg", "發起失敗，該場地同時段已被預約，或您在該時段也已有其他活動！");
@@ -167,26 +198,25 @@ public class PickupGameServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/create_game.jsp").forward(request, response);
         }
     }
-
     private void getAllGames(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("--- 進入：找球賽清單 ---");
         List<PickupGameBean> allGames = gameService.getAllOpenGames();
         request.setAttribute("allGames", allGames);
         request.getRequestDispatcher("/WEB-INF/views/game_list.jsp").forward(request, response);
     }
-
     private void addSignup(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String gameIdStr = request.getParameter("gameId");
         HttpSession session = request.getSession();
-        Integer sessionMemberId = (Integer) session.getAttribute("memberId");
-        Integer memberId = (sessionMemberId != null) ? sessionMemberId : 4; // 統一預設為 4
-
+        Integer memberId = getLoggedInMemberId(session);
+        
+        if (memberId == null) {
+            session.setAttribute("msg", "請先登入後台後再進行操作！");
+            redirectForLogin(request, response);
+            return;
+        }String gameIdStr = request.getParameter("gameId");
         if (gameIdStr != null) {
             try {
                 Integer gameId = Integer.parseInt(gameIdStr);
-                System.out.println("準備報名：Game=" + gameId + ", Member=" + memberId);
                 String resultMsg = gameService.registerString(gameId, memberId);
                 request.setAttribute("msg", resultMsg);
             } catch (NumberFormatException e) {
@@ -197,12 +227,10 @@ public class PickupGameServlet extends HttpServlet {
         }
         getSignupList(request, response);
     }
-
     private void getSignupList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String gameIdStr = request.getParameter("gameId");
         Integer gameId = null;
-
         if (gameIdStr != null && !gameIdStr.isEmpty()) {
             gameId = Integer.parseInt(gameIdStr);
         } else {
@@ -210,9 +238,7 @@ public class PickupGameServlet extends HttpServlet {
         }
         
         final Integer finalGameId = gameId;
-
         if (gameId != null) {
-            // 撈出現前該場次的詳細資訊以取得狀態給 JSP 判斷
             PickupGameBean game = gameService.getAllGames().stream()
                     .filter(g -> g.getGameId().equals(finalGameId))
                     .findFirst().orElse(null);
@@ -225,8 +251,6 @@ public class PickupGameServlet extends HttpServlet {
             request.setAttribute("signupList", list);
             request.setAttribute("currentGameId", gameId);
             request.setAttribute("playerCount", list.size());
-
-            // 找出主揪資訊，傳給 JSP
             for (PickupGameSignupBean s : list) {
                 if ("host".equals(s.getStatus())) {
                     request.setAttribute("hostMemberId", s.getMemberId());
@@ -238,25 +262,23 @@ public class PickupGameServlet extends HttpServlet {
         } else {
             request.setAttribute("msg", "目前系統中尚無任何球賽活動。");
         }
-
-        // 目前登入的會員 ID
+        // 把當前登入者的 memberId 傳回 JSP
         HttpSession session = request.getSession();
-        Integer sessionMemberId = (Integer) session.getAttribute("memberId");
-        request.setAttribute("sessionMemberId", sessionMemberId != null ? sessionMemberId : 4);
-
+        request.setAttribute("sessionMemberId", getLoggedInMemberId(session));
         request.getRequestDispatcher("/WEB-INF/views/signup_list.jsp").forward(request, response);
     }
-
     // 主揪踢人
     private void kickMember(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Integer hostId = getLoggedInMemberId(session);
+        
+        if (hostId == null) {
+            redirectForLogin(request, response);
+            return;
+        }
         String gameIdStr = request.getParameter("gameId");
         String targetIdStr = request.getParameter("targetMemberId");
-        HttpSession session = request.getSession();
-        Integer hostId = (Integer) session.getAttribute("memberId");
-        if (hostId == null)
-            hostId = 4;
-
         if (gameIdStr != null && targetIdStr != null) {
             int gameId = Integer.parseInt(gameIdStr);
             int targetMemberId = Integer.parseInt(targetIdStr);
@@ -265,75 +287,65 @@ public class PickupGameServlet extends HttpServlet {
         }
         getSignupList(request, response);
     }
-
     // 管理員代為報名
     private void adminAddPlayer(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        
+        // ✨ 使用專屬驗證方法判斷是不是管理員！
+        boolean isAdmin = isAdminLoggedIn(session);
         String gameIdStr = request.getParameter("gameId");
         String targetMemberIdStr = request.getParameter("targetMemberId");
-        HttpSession session = request.getSession();
-        Integer adminId = (Integer) session.getAttribute("memberId");
-        
-        // 確保是管理員權限才執行
-        if (adminId == null) adminId = 4;
-
-        if (adminId == 4 && gameIdStr != null && targetMemberIdStr != null && !targetMemberIdStr.isEmpty()) {
+        if (isAdmin && gameIdStr != null && targetMemberIdStr != null && !targetMemberIdStr.isEmpty()) {
             try {
                 int gameId = Integer.parseInt(gameIdStr);
                 int targetMemberId = Integer.parseInt(targetMemberIdStr);
-                // 呼叫原本寫好的報名邏輯 (此邏輯內部會檢查重複報名與時段衝突)
                 String resultMsg = gameService.registerString(gameId, targetMemberId);
                 request.setAttribute("msg", "代報結果: " + resultMsg);
             } catch (NumberFormatException e) {
                 request.setAttribute("msg", "會員 ID 格式錯誤，請輸入數字。");
             }
         } else {
-            request.setAttribute("msg", "權限不足或缺少會員資訊。");
+            request.setAttribute("msg", "登入狀態失效、權限不足或缺少會員資訊。");
         }
         
         getSignupList(request, response);
     }
-
     // 主揪取消開團
     private void cancelGame(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String gameIdStr = request.getParameter("gameId");
         HttpSession session = request.getSession();
-        Integer hostId = (Integer) session.getAttribute("memberId");
-        if (hostId == null)
-            hostId = 4;
-
+        Integer hostId = getLoggedInMemberId(session);
+        
+        if (hostId == null) {
+            redirectForLogin(request, response);
+            return;
+        }
+        String gameIdStr = request.getParameter("gameId");
         if (gameIdStr != null) {
             int gameId = Integer.parseInt(gameIdStr);
+            // 使用真實的主揪 ID 去取消
             String resultMsg = gameService.cancelGame(gameId, hostId);
-            session.setAttribute("msg", resultMsg); // 使用 session 存訊息，因為要 redirect
+            session.setAttribute("msg", resultMsg); 
         }
-        // 取消後重定向回列表頁面，確保有重新撈出所有資料
         response.sendRedirect(request.getContextPath() + "/pickup");
     }
-
-    // 成員退出
+    // 成員退出活動
     private void withdrawSignup(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String gameIdStr = request.getParameter("gameId");
         HttpSession session = request.getSession();
-        Integer memberId = (Integer) session.getAttribute("memberId");
-        if (memberId == null)
-            memberId = 4;
-
+        Integer memberId = getLoggedInMemberId(session);
+        
+        if (memberId == null) {
+            redirectForLogin(request, response);
+            return;
+        }
+        String gameIdStr = request.getParameter("gameId");
         if (gameIdStr != null) {
             int gameId = Integer.parseInt(gameIdStr);
             String resultMsg = gameService.withdrawFromGame(gameId, memberId);
             request.setAttribute("msg", resultMsg);
         }
         getSignupList(request, response);
-    }
-
-    // 狀態排序權重：開放中(1) > 已額滿(2) > 其他(3) > 已取消(4)
-    private int getStatusWeight(String status) {
-        if ("open".equals(status)) return 1;
-        if ("full".equals(status)) return 2;
-        if ("cancelled".equals(status)) return 4;
-        return 3;
     }
 }

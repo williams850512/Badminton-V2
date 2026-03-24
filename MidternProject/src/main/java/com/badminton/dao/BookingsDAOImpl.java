@@ -101,7 +101,7 @@ public class BookingsDAOImpl implements BookingsDAO {
 	@Override
 	public List<BookingsBean> findByMemberId(int memberId) {
 		List<BookingsBean> list = new ArrayList<>();
-		String sql = "SELECT * FROM Bookings WHERE member_id = ?";
+		String sql = "SELECT b.*, m.full_name AS member_name FROM Bookings b JOIN Members m ON b.member_id = m.member_id WHERE b.member_id = ?";
 		
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -130,6 +130,7 @@ public class BookingsDAOImpl implements BookingsDAO {
 				booking.setTotalAmount(rs.getBigDecimal("total_amount"));
 				booking.setNote(rs.getString("note"));
 				booking.setCreatedAt(rs.getTimestamp("created_at"));
+				booking.setMemberName(rs.getString("member_name"));
 				
 				list.add(booking);
 				
@@ -166,7 +167,7 @@ public class BookingsDAOImpl implements BookingsDAO {
 	public List<BookingsBean> findByCourtIdAndDate(int courtId, Date bookingDate) {
 		List<BookingsBean> list = new ArrayList<>();
 		// 找出該場地、該日期並且狀態不是「已取消」的所有預約紀錄
-		String sql = "SELECT * FROM Bookings WHERE court_id = ? AND booking_date = ? AND status != '已取消'";
+		String sql = "SELECT b.*, m.full_name AS member_name FROM Bookings b JOIN Members m ON b.member_id = m.member_id WHERE b.court_id = ? AND b.booking_date = ? AND b.status != '已取消'";
 		
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -196,6 +197,7 @@ public class BookingsDAOImpl implements BookingsDAO {
 				booking.setTotalAmount(rs.getBigDecimal("total_amount"));
 				booking.setNote(rs.getString("note"));
 				booking.setCreatedAt(rs.getTimestamp("created_at"));
+				booking.setMemberName(rs.getString("member_name"));
 				
 				list.add(booking);
 			}
@@ -221,7 +223,7 @@ public class BookingsDAOImpl implements BookingsDAO {
 	public List<BookingsBean> getAll() {
 		
 		List<BookingsBean> list = new ArrayList<>();
-		String sql = "SELECT * FROM Bookings";
+		String sql = "SELECT b.*, m.full_name AS member_name FROM Bookings b JOIN Members m ON b.member_id = m.member_id ORDER BY b.booking_id DESC";
 		
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -247,6 +249,7 @@ public class BookingsDAOImpl implements BookingsDAO {
 				booking.setTotalAmount(rs.getBigDecimal("total_amount"));
 				booking.setNote(rs.getString("note"));
 				booking.setCreatedAt(rs.getTimestamp("created_at"));
+				booking.setMemberName(rs.getString("member_name"));
 				
 				list.add(booking);
 			}
