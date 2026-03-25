@@ -316,9 +316,9 @@ public class OrderDAO {
 			} else if (isHashOrder) {
 				sql.append("AND o.order_id = ? ");
 			} else if (isNumeric) {
-				sql.append("AND (o.order_id = ? OR o.member_id = ? OR o.note LIKE ? OR o.payment_type LIKE ? OR o.status LIKE ? OR p.product_name LIKE ?) ");
+				sql.append("AND (o.order_id = ? OR m.full_name LIKE ? OR o.note LIKE ? OR o.payment_type LIKE ? OR o.status LIKE ? OR p.product_name LIKE ?) ");
 			} else {
-				sql.append("AND (o.note LIKE ? OR o.payment_type LIKE ? OR o.status LIKE ? OR p.product_name LIKE ?) ");
+				sql.append("AND (m.full_name LIKE ? OR o.note LIKE ? OR o.payment_type LIKE ? OR o.status LIKE ? OR p.product_name LIKE ?) ");
 			}
 		}
 		
@@ -342,18 +342,19 @@ public class OrderDAO {
 				} else if (isNumeric) {
 					int numKw = Integer.parseInt(kw);
 					String likeKw = "%" + kw + "%";
-					ps.setInt(paramIndex++, numKw);
-					ps.setInt(paramIndex++, numKw);
-					ps.setString(paramIndex++, likeKw);
-					ps.setString(paramIndex++, likeKw);
-					ps.setString(paramIndex++, likeKw);
-					ps.setString(paramIndex++, likeKw);
+					ps.setInt(paramIndex++, numKw);       // o.order_id = ?
+					ps.setString(paramIndex++, likeKw);   // m.full_name LIKE ?
+					ps.setString(paramIndex++, likeKw);   // o.note LIKE ?
+					ps.setString(paramIndex++, likeKw);   // o.payment_type LIKE ?
+					ps.setString(paramIndex++, likeKw);   // o.status LIKE ?
+					ps.setString(paramIndex++, likeKw);   // p.product_name LIKE ?
 				} else {
 					String likeKw = "%" + kw + "%";
-					ps.setString(paramIndex++, likeKw);
-					ps.setString(paramIndex++, likeKw);
-					ps.setString(paramIndex++, likeKw);
-					ps.setString(paramIndex++, likeKw);
+					ps.setString(paramIndex++, likeKw);   // m.full_name LIKE ?
+					ps.setString(paramIndex++, likeKw);   // o.note LIKE ?
+					ps.setString(paramIndex++, likeKw);   // o.payment_type LIKE ?
+					ps.setString(paramIndex++, likeKw);   // o.status LIKE ?
+					ps.setString(paramIndex++, likeKw);   // p.product_name LIKE ?
 				}
 			}
 			if (minPrice != null) ps.setInt(paramIndex++, minPrice);

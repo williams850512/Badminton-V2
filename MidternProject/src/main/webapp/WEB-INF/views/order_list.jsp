@@ -113,19 +113,19 @@ if (orderList != null) {
             </div>
 
             <div class="stats">
-                <div class="stat-card"><div class="num"><%=total%></div><div class="label">篩選結果</div></div>
-                <div class="stat-card"><div class="num" style="color:#f1c40f"><%=pending%></div><div class="label">⏳ 待處理</div></div>
-                <div class="stat-card"><div class="num" style="color:#17a2b8"><%=processing%></div><div class="label">📦 理貨中</div></div>
-                <div class="stat-card"><div class="num" style="color:#007bff"><%=ready%></div><div class="label">🏪 待取貨</div></div>
-                <div class="stat-card"><div class="num" style="color:#28a745"><%=completed%></div><div class="label">✅ 已完成</div></div>
-                <div class="stat-card"><div class="num">$<%=String.format("%,d",revenue)%></div><div class="label">有效總金額</div></div>
+                <div class="stat-card"><div class="num" id="stat-total"><%=total%></div><div class="label">篩選結果</div></div>
+                <div class="stat-card"><div class="num" id="stat-PENDING" style="color:#f1c40f"><%=pending%></div><div class="label">⏳ 待處理</div></div>
+                <div class="stat-card"><div class="num" id="stat-PROCESSING" style="color:#17a2b8"><%=processing%></div><div class="label">📦 理貨中</div></div>
+                <div class="stat-card"><div class="num" id="stat-READY" style="color:#007bff"><%=ready%></div><div class="label">🏪 待取貨</div></div>
+                <div class="stat-card"><div class="num" id="stat-COMPLETED" style="color:#28a745"><%=completed%></div><div class="label">✅ 已完成</div></div>
+                <div class="stat-card"><div class="num" id="stat-revenue">$<%=String.format("%,d",revenue)%></div><div class="label">有效總金額</div></div>
             </div>
 
             <div class="card" style="padding: 15px 25px;">
                 <form action="<%=request.getContextPath()%>/orderList" method="get" id="searchForm" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <input type="hidden" name="status" value="<%=curStatus%>">
                     <label style="font-weight:bold; color:#555;">全能搜尋：</label>
-                    <input type="text" name="keyword" class="form-control" style="flex:1; min-width:200px;" placeholder="輸入訂單ID、會員ID或商品名稱..." value="<%=curKeyword%>">
+                    <input type="text" name="keyword" class="form-control" style="flex:1; min-width:200px;" placeholder="輸入訂單ID、會員名稱或商品名稱..." value="<%=curKeyword%>">
                     <button type="submit" class="btn btn-primary">🔍 搜尋</button>
                     <% if (!curKeyword.isEmpty() || !curStatus.isEmpty()) { %>
                         <a href="<%=request.getContextPath()%>/orderList" class="btn" style="background:#eee; color:#555;">清除</a>
@@ -368,6 +368,11 @@ function updateOrder(orderId) {
     const paymentType = document.getElementById('sel-pay-' + orderId)?.value; 
     const noteEl = document.getElementById('inp-note-' + orderId);
     const note = noteEl?.value;
+
+    // 🔑 記住舊狀態，用來更新統計
+    const badgeEl = document.getElementById('badge-' + orderId);
+    const oldStatusMap = {'待處理':'PENDING','理貨中':'PROCESSING','待取貨':'READY','已完成':'COMPLETED','已取消':'CANCELLED'};
+    const oldStatus = badgeEl ? oldStatusMap[badgeEl.textContent.trim()] : null;
     
     const fd = new FormData();
     fd.append('action', 'updateOrder'); 
@@ -383,7 +388,6 @@ function updateOrder(orderId) {
             'PENDING': {cls: 'bg-P', txt: '待處理'}, 'PROCESSING': {cls: 'bg-PR', txt: '理貨中'},
             'READY': {cls: 'bg-R', txt: '待取貨'}, 'COMPLETED': {cls: 'bg-CPL', txt: '已完成'}, 'CANCELLED': {cls: 'bg-C', txt: '已取消'}
         };
-        const badgeEl = document.getElementById('badge-' + orderId);
         if (badgeEl && badgeMap[status]) {
             badgeEl.className = 'badge ' + badgeMap[status].cls; badgeEl.textContent = badgeMap[status].txt;
         }
@@ -391,10 +395,24 @@ function updateOrder(orderId) {
         const payTd = document.getElementById('td-pay-' + orderId);
         if (payTd) payTd.textContent = paymentType;
 
-        // 即時更新總金額
+        // 即時更新該列總金額
+        const orderAmount = data.totalAmount !== undefined ? data.totalAmount : 0;
         if (data.totalAmount !== undefined) {
             const totalTd = document.getElementById('td-total-' + orderId);
-            if (totalTd) totalTd.textContent = '$' + data.totalAmount.toLocaleString('en-US');
+            if (totalTd) totalTd.textContent = '$' + orderAmount.toLocaleString('en-US');
+        }
+
+        // ✨ 即時更新頂部統計卡片
+        if (oldStatus && oldStatus !== status) {
+            updateStatCard(oldStatus, -1);
+            updateStatCard(status, 1);
+            // 更新有效總金額 (CANCELLED 不計入)
+            const amt = parseInt(document.getElementById('td-total-' + orderId)?.textContent.replace(/[$,]/g, '')) || 0;
+            if (oldStatus === 'CANCELLED' && status !== 'CANCELLED') {
+                updateRevenue(amt);
+            } else if (oldStatus !== 'CANCELLED' && status === 'CANCELLED') {
+                updateRevenue(-amt);
+            }
         }
 
         if (noteEl) {
@@ -410,13 +428,44 @@ function updateOrder(orderId) {
 function deleteOrder(orderId, event) {
     event.stopPropagation();
     if (!confirm('❗ 確定刪除訂單 #' + orderId + '？\n此操作不可復原！')) return;
+
+    // 🔑 刪除前先記住狀態和金額，用來更新統計
+    const badgeEl = document.getElementById('badge-' + orderId);
+    const oldStatusMap = {'待處理':'PENDING','理貨中':'PROCESSING','待取貨':'READY','已完成':'COMPLETED','已取消':'CANCELLED'};
+    const oldStatus = badgeEl ? oldStatusMap[badgeEl.textContent.trim()] : null;
+    const amt = parseInt(document.getElementById('td-total-' + orderId)?.textContent.replace(/[$,]/g, '')) || 0;
+
     const fd = new FormData(); fd.append('action', 'delete'); fd.append('orderId', orderId);
     fetch('<%=request.getContextPath()%>/orderAction', { method:'POST', body:fd })
     .then(() => {
         const mainRow = document.getElementById('row-' + orderId); const detailRow = document.getElementById('d' + orderId);
         if (mainRow) mainRow.remove(); if (detailRow) detailRow.remove();
+
+        // ✨ 即時更新頂部統計卡片
+        updateStatCard('total', -1);
+        if (oldStatus) updateStatCard(oldStatus, -1);
+        if (oldStatus !== 'CANCELLED') updateRevenue(-amt);
+
         showToast('🗑 訂單 #' + orderId + ' 已徹底刪除', 'success');
     });
+}
+
+// ✨ 通用統計卡片更新工具函式
+function updateStatCard(statusKey, delta) {
+    const el = document.getElementById('stat-' + statusKey);
+    if (el) {
+        const current = parseInt(el.textContent) || 0;
+        el.textContent = current + delta;
+    }
+}
+
+function updateRevenue(delta) {
+    const el = document.getElementById('stat-revenue');
+    if (el) {
+        const current = parseInt(el.textContent.replace(/[$,]/g, '')) || 0;
+        const newVal = current + delta;
+        el.textContent = '$' + newVal.toLocaleString('en-US');
+    }
 }
 
 function calculateSubtotalList(element, itemId) {
