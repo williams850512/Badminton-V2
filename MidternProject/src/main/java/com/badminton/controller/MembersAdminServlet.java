@@ -271,7 +271,7 @@ public class MembersAdminServlet extends HttpServlet {
             m.setPassword(request.getParameter("password"));
             m.setFullName(request.getParameter("fullName"));
             m.setGender(request.getParameter("gender"));
-            
+            m.setNote(request.getParameter("note"));
             String bday = request.getParameter("birthday");
             if (bday != null && !bday.trim().isEmpty()) {
                 m.setBirthday(Date.valueOf(bday.trim()));
@@ -320,6 +320,7 @@ public class MembersAdminServlet extends HttpServlet {
                 
                 member.setPhone(request.getParameter("phone"));
                 member.setEmail(request.getParameter("email"));
+                member.setNote(request.getParameter("note"));
 
                 // ✨ 權限防禦：修改一般會員時，只有主管能改 Level 與 Status
                 if ("manager".equals(currentLogin.getRole())) {
